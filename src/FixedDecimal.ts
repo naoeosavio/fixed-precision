@@ -10,7 +10,7 @@ export default class FixedDecimal {
    * By default, `places` (decimal places) is 8.
    */
   public static format = {
-    places: 8n,
+    places: 8,
   };
 
   constructor(val: FixedDecimal.Value) {
@@ -29,24 +29,73 @@ export default class FixedDecimal {
 
   // Converts a string (with up to 8 decimal places) to bigint
   static fromString(value: string): bigint {
-    return BigInt(
-      (Number(value) *  (10 ** Number(FixedDecimal.format.places))).toFixed()
-    );
-  }
+    const dotIndex = value.indexOf(".");
 
+    if (dotIndex === -1) {
+      // No decimal part: multiply by 10^8
+      return BigInt(value + "00000000");
+    }
+
+    // If there is more than one dot, throw an error
+    if (value.indexOf(".", dotIndex + 1) !== -1) {
+      throw new Error("Invalid decimal format");
+    }
+
+    // The integer part can be empty (e.g., ".123" → "0")
+    const integerPart = value.slice(0, dotIndex) || "0";
+    let decimalPart = value.slice(dotIndex + 1);
+    const len = decimalPart.length;
+
+    if (len < 8) {
+      // Pad with trailing zeros if digits are missing
+      decimalPart += "00000000".slice(len);
+    } else if (len > 8) {
+      // If there are more than 8 digits, truncate the excess
+      decimalPart = decimalPart.slice(0, 8);
+    }
+    // Convert the parts to BigInt and perform the operation:
+    return BigInt(integerPart + decimalPart);
+  }
   // Converts a number to bigint
   static fromNumber(value: number): bigint {
-    return BigInt((value *  (10 ** Number(FixedDecimal.format.places))).toFixed());
+    return BigInt((value * 10 ** FixedDecimal.format.places).toFixed());
   }
 
   // Converts a bigint to number (restoring the fractional part)
   static toNumber(value: bigint): number {
-    return Number(value) /  (10 ** Number(FixedDecimal.format.places));
+    return Number(value) / 10 ** FixedDecimal.format.places;
   }
 
   // Converts a bigint to string (decimal format)
   static toString(value: bigint): string {
-    return FixedDecimal.toNumber(value).toString();
+    if (!value) {
+      return "0";
+    }
+    const intPart = value / 10n ** BigInt(FixedDecimal.format.places);
+    const fracPart = value % 10n ** BigInt(FixedDecimal.format.places);
+    if (fracPart) {
+      if (intPart > 9007199254740991n) {
+        return (
+          intPart +
+          "." +
+          Math.abs(Number(fracPart))
+            .toString()
+            .padStart(FixedDecimal.format.places, "0")
+        );
+      }
+
+      return (
+        Number(intPart) +
+        "." +
+        Math.abs(Number(fracPart))
+          .toString()
+          .padStart(FixedDecimal.format.places, "0")
+      );
+    }
+    if (intPart > 9007199254740990n) {
+      return intPart + ".00000000";
+    }
+    return Number(intPart) + ".00000000";
   }
 
   // Instance methods for conversion
@@ -69,7 +118,7 @@ export default class FixedDecimal {
 
   public mul(other: FixedDecimal): FixedDecimal {
     return new FixedDecimal(
-      (this.value * other.value) / (10n ** FixedDecimal.format.places)
+      (this.value * other.value) / 10n ** BigInt(FixedDecimal.format.places)
     );
   }
 
@@ -78,7 +127,7 @@ export default class FixedDecimal {
       throw new Error("Division by zero");
     }
     return new FixedDecimal(
-      (this.value * (10n ** FixedDecimal.format.places)) / other.value
+      (this.value * 10n ** BigInt(FixedDecimal.format.places)) / other.value
     );
   }
 
@@ -87,7 +136,7 @@ export default class FixedDecimal {
       throw new Error("Division by zero in modulus");
     }
     return new FixedDecimal(
-      (this.value * (10n ** FixedDecimal.format.places)) % other.value
+      (this.value * 10n ** BigInt(FixedDecimal.format.places)) % other.value
     );
   }
 
@@ -106,8 +155,10 @@ export default class FixedDecimal {
     if (other.value === 0n) {
       throw new Error("Division by zero in divMod");
     }
-    const quotient = (this.value * (10n ** FixedDecimal.format.places)) / other.value;
-    const remainder = (this.value * (10n ** FixedDecimal.format.places)) % other.value;
+    const quotient =
+      (this.value * 10n ** BigInt(FixedDecimal.format.places)) / other.value;
+    const remainder =
+      (this.value * 10n ** BigInt(FixedDecimal.format.places)) % other.value;
     return {
       div: new FixedDecimal(quotient),
       mod: new FixedDecimal(remainder),
