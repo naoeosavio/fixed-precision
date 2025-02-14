@@ -1,0 +1,31 @@
+{
+  "name": "fixed-decimal",
+  "version": "1.0.0",
+  "description": "Precise fixed-scale decimal arithmetic (8 decimal places) for financial and exact calculations.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "lint": "eslint . --ext .ts",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "decimal",
+    "fixed-point",
+    "precision",
+    "financial",
+    "bigint"
+  ],
+  "author": "it is not savio",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@typescript-eslint/eslint-plugin": "^8.24.0",
+    "@typescript-eslint/parser": "^8.24.0",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.1",
+    "ts-jest": "^29.2.5"
+  }
+}
