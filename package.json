@@ -8,7 +8,9 @@
     "build": "tsc",
     "test": "jest",
     "lint": "eslint . --ext .ts",
-    "prepublish": "npm run build"
+    "prepublish": "npm run build",
+    "test:watch": "jest --watch"
+
   },
   "keywords": [
     "decimal",
