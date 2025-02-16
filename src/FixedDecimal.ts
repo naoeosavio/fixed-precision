@@ -16,7 +16,8 @@ export default class FixedDecimal {
     places: 8,
   };
   // Pre-calculate the scale factor
-   private static readonly SCALE: bigint = 10n ** BigInt(FixedDecimal.format.places);
+  private static readonly SCALE: bigint =
+    10n ** BigInt(FixedDecimal.format.places);
 
   constructor(val: FixedDecimal.Value) {
     if (val instanceof FixedDecimal) {
@@ -51,24 +52,28 @@ export default class FixedDecimal {
 
   // Converts a string (with up to 8 decimal places) to bigint.
   static fromString(value: string): bigint {
-    const dotIndex = value.indexOf(".");
-    if (dotIndex === -1) {
+    const dotIndex = value.split(".");
+    const integerPart = dotIndex[0] || "0";
+    if (dotIndex.length < 2) {
       // No decimal part: multiply by 10^places.
-      return BigInt(value + "0".repeat(FixedDecimal.format.places));
+      if (integerPart.length < 8) {
+        return BigInt(Number(integerPart) * Number(FixedDecimal.SCALE));
+      }
+      return BigInt(integerPart) * FixedDecimal.SCALE;
     }
-    if (value.indexOf(".", dotIndex + 1) !== -1) {
+    if (dotIndex.length > 2) {
       throw new Error("Invalid decimal format");
     }
-    const integerPart = value.slice(0, dotIndex) || "0";
-    let decimalPart = value.slice(dotIndex + 1);
-    const len = decimalPart.length;
-    if (len < FixedDecimal.format.places) {
-      decimalPart += "0".repeat(FixedDecimal.format.places - len);
-    } else if (len > FixedDecimal.format.places) {
-      // If there are more than 8 digits, we simply truncate the excess.
-      decimalPart = decimalPart.slice(0, FixedDecimal.format.places);
+    let decimalPart = dotIndex[1].slice(0, 8);
+    if (integerPart.length < 8) {
+      const decimal = Number(decimalPart);
+      return BigInt(Number(integerPart) * Number(FixedDecimal.SCALE) + decimal);
     }
-    return BigInt(integerPart + decimalPart);
+    const len = decimalPart.length;
+    if (len < 8) {
+      decimalPart += "0".repeat(8 - len);
+    }
+    return BigInt(integerPart) * 100000000n + BigInt(decimalPart);
   }
 
   // Converts a number to bigint.
@@ -83,16 +88,27 @@ export default class FixedDecimal {
 
   // Converts a raw bigint to string (in normal decimal notation).
   static toString(value: bigint): string {
-    if (value === 0n) {
+    if (!value) {
       return "0";
     }
-    const scale = FixedDecimal.SCALE;
-    const intPart = value / scale;
-    let fracPart = (value % scale).toString().padStart(FixedDecimal.format.places, "0");
-    // Optionally remove trailing zeros for display:
-    fracPart = fracPart.replace(/0+$/, "");
-    return fracPart ? `${intPart.toString()}.${fracPart}` : intPart.toString();
+    const intPart = value / FixedDecimal.SCALE;
+    const fracPart = value % FixedDecimal.SCALE;
+    if (fracPart) {
+      if (intPart > 9007199254740990n) {
+        return intPart + "." + Number(fracPart).toString().padStart(8, "0");
+      }
+
+      return (
+        Number(intPart) + "." + Number(fracPart).toString().padStart(8, "0")
+      );
+    }
+    if (intPart > 9007199254740990n) {
+      return intPart.toString();
+    }
+    return Number(intPart).toString();
   }
+
+  
 
   // Instance conversion methods
   public toNumber(): number {
@@ -196,9 +212,7 @@ export default class FixedDecimal {
     if (other.value === 0n) {
       throw new Error("Division by zero");
     }
-    return FixedDecimal.fromRaw(
-      (this.value) / other.value
-    );
+    return FixedDecimal.fromRaw(this.value / other.value);
   }
 
   /** Returns a FixedDecimal representing the integer remainder of dividing this by n. */
@@ -206,7 +220,9 @@ export default class FixedDecimal {
     if (other.value === 0n) {
       throw new Error("Division by zero in modulus");
     }
-    return FixedDecimal.fromRaw((this.value * FixedDecimal.SCALE) % other.value);
+    return FixedDecimal.fromRaw(
+      (this.value * FixedDecimal.SCALE) % other.value
+    );
   }
   public leftover(other: FixedDecimal): FixedDecimal {
     if (other.value === 0n) {
@@ -259,7 +275,10 @@ export default class FixedDecimal {
    * to a maximum of dp decimal places.
    * (The rounding mode rm is not explicitly implemented here.)
    */
-  public round(dp: number = FixedDecimal.format.places, rm: RoundingMode = 1): FixedDecimal {
+  public round(
+    dp: number = FixedDecimal.format.places,
+    rm: RoundingMode = 1
+  ): FixedDecimal {
     const roundedStr = this.toFixed(dp);
     return new FixedDecimal(roundedStr);
   }
@@ -279,7 +298,7 @@ export default class FixedDecimal {
     const initialGuess = this.div(new FixedDecimal("2.0"));
     return this.sqrtGo(initialGuess, 10);
   }
-  
+
   /**
    * Newton–Raphson iteration for square root.
    * @param guess Current approximation.
@@ -297,7 +316,6 @@ export default class FixedDecimal {
     }
     return this.sqrtGo(next, iter - 1);
   }
-  
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Formatting methods
@@ -341,7 +359,9 @@ export default class FixedDecimal {
    */
   public scale(newScale: number): FixedDecimal {
     if (newScale < 0 || newScale > FixedDecimal.format.places) {
-      throw new Error(`newScale must be between 0 and ${FixedDecimal.format.places}`);
+      throw new Error(
+        `newScale must be between 0 and ${FixedDecimal.format.places}`
+      );
     }
     const diff = FixedDecimal.format.places - newScale;
     const factor = 10n ** BigInt(diff);
@@ -355,9 +375,12 @@ export default class FixedDecimal {
    * to a fixed number of decimal places.
    */
   public toFixed(places?: number): string {
-    const decPlaces = places !== undefined ? places : FixedDecimal.format.places;
+    const decPlaces =
+      places !== undefined ? places : FixedDecimal.format.places;
     if (decPlaces < 0 || decPlaces > FixedDecimal.format.places) {
-      throw new Error(`places must be between 0 and ${FixedDecimal.format.places}`);
+      throw new Error(
+        `places must be between 0 and ${FixedDecimal.format.places}`
+      );
     }
     const diff = FixedDecimal.format.places - decPlaces;
     const roundingFactor = 10n ** BigInt(diff);
@@ -365,6 +388,8 @@ export default class FixedDecimal {
     const divisor = 10n ** BigInt(decPlaces);
     const intPart = scaled / divisor;
     const fracPart = (scaled % divisor).toString().padStart(decPlaces, "0");
-    return decPlaces > 0 ? `${intPart.toString()}.${fracPart}` : intPart.toString();
+    return decPlaces > 0
+      ? `${intPart.toString()}.${fracPart}`
+      : intPart.toString();
   }
 }
