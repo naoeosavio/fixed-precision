@@ -18,6 +18,8 @@ export default class FixedDecimal {
   // Pre-calculate the scale factor
   private static readonly SCALE: bigint =
     10n ** BigInt(FixedDecimal.format.places);
+  private static readonly SCALENUMBER: number =
+    10 ** FixedDecimal.format.places;
 
   constructor(val: FixedDecimal.Value) {
     if (val instanceof FixedDecimal) {
@@ -53,43 +55,63 @@ export default class FixedDecimal {
   // Converts a string (with up to 8 decimal places) to bigint.
   static fromString(value: string): bigint {
     const dotIndex = value.split(".");
-    const integerPart = dotIndex[0] || "0";
-    if (dotIndex.length < 2) {
-      // No decimal part: multiply by 10^places.
-      if (integerPart.length < 8) {
-        return BigInt(Number(integerPart) * Number(FixedDecimal.SCALE));
-      }
-      return BigInt(integerPart) * FixedDecimal.SCALE;
-    }
     if (dotIndex.length > 2) {
       throw new Error("Invalid decimal format");
     }
+    const integerPart = dotIndex[0] || "0";
+    if (dotIndex.length < 2) {
+      // No decimal part: multiply by 10^places.
+      if (integerPart.length + FixedDecimal.format.places < 16) {
+        return BigInt(Number(integerPart) * FixedDecimal.SCALENUMBER);
+      }
+      return BigInt(integerPart) * FixedDecimal.SCALE;
+    }
     let decimalPart = dotIndex[1];
     let len = decimalPart.length;
-    if (len > 8) {
-      decimalPart = decimalPart.slice(0, 8);
-      len = decimalPart.length;
+    if (len > FixedDecimal.format.places) {
+      decimalPart = decimalPart.slice(0, FixedDecimal.format.places);
+      len = FixedDecimal.format.places;
     }
-    if (integerPart.length < 8) {
+    if (integerPart.length + FixedDecimal.format.places < 16) {
       const decimal =
-        len === 8 ? Number(decimalPart) : Number(decimalPart) * 10 ** (8 - len);
-      return BigInt(Number(integerPart) * Number(FixedDecimal.SCALE) + decimal);
+        len === FixedDecimal.format.places
+          ? Number(decimalPart)
+          : Number(decimalPart) * 10 ** (FixedDecimal.format.places - len);
+      return BigInt(
+        Number(integerPart) * FixedDecimal.SCALENUMBER + decimal
+      );
     }
     const decimal =
-      len === 8
+      len === FixedDecimal.format.places
         ? BigInt(decimalPart)
-        : BigInt(decimalPart) * BigInt(10 ** (8 - len));
+        : BigInt(decimalPart) *
+          BigInt(10 ** (FixedDecimal.format.places - len));
     return BigInt(integerPart) * FixedDecimal.SCALE + decimal;
   }
 
   // Converts a number to bigint.
   static fromNumber(value: number): bigint {
-    return BigInt((value * Number(FixedDecimal.SCALE)).toFixed());
+    // Verify that the input is a finite number
+    if (typeof value !== "number" || isNaN(value) || !isFinite(value)) {
+      throw new Error("Invalid number: value must be a finite number.");
+    }
+
+    const scaled = value * FixedDecimal.SCALENUMBER;
+
+    // Check if the scaled value is within JavaScript's safe integer range
+    if (scaled > Number.MAX_SAFE_INTEGER || scaled < Number.MIN_SAFE_INTEGER) {
+      throw new Error(
+        `Number out of safe range after scaling. Scaled value: ${scaled}`
+      );
+    }
+
+    // Convert the scaled number to a string (with no decimals) and then to BigInt
+    return BigInt(scaled.toFixed(0));
   }
 
-  // Converts a raw bigint (with internal scaling) to a number.
+  // Converts an internal scaled BigInt to a number.
   static toNumber(value: bigint): number {
-    return Number(value) / Number(FixedDecimal.SCALE);
+    return Number(value) / FixedDecimal.SCALENUMBER;
   }
 
   // Converts a raw bigint to string (in normal decimal notation).
