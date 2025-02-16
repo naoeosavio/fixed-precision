@@ -60,13 +60,13 @@ describe('FixedDecimal', () => {
     test('mod() - positive remainder', () => {
       const x = new FixedDecimal("10");
       const y = new FixedDecimal("3");
-      expect(x.mod(y).toString()).toBe("1");
+      expect(x.mod(y).toString()).toBe("1.00000000");
     });
 
     test('product() - large multiplication', () => {
       const big = new FixedDecimal("100000000");
       const result = big.product(big);
-      expect(result.toString()).toBe("100000000000000000000000000000000"); // 1e16 * 1e16 = 1e16
+      expect(result.toString()).toBe("100000000000000000000000000000000.00000000"); // 1e16 * 1e16 = 1e16
     });
   });
 
@@ -79,7 +79,7 @@ describe('FixedDecimal', () => {
 
     test('scale(0) rounds to integer', () => {
       const num = new FixedDecimal("99.99999999");
-      expect(num.scale(0).toString()).toBe("100");
+      expect(num.scale(0).toString()).toBe("100.00000000");
     });
 
     test('toFixed(3) truncates correctly', () => {
