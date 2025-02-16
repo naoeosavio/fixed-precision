@@ -119,7 +119,7 @@ export default class FixedDecimal {
     let abs = value < 0n ? 0 : 1;
     const s = value.toString();
     const intPart = abs ? s.slice(0, -FixedDecimal.format.places) || "0" : s.slice(1, -FixedDecimal.format.places) || "0";
-    let fracPart = s.slice(-8);
+    let fracPart = s.slice(-FixedDecimal.format.places) //.replace(/0+$/, "");
     if (fracPart.length < FixedDecimal.format.places) {
       fracPart.padStart(FixedDecimal.format.places, "0");
     }
