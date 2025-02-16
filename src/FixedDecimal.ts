@@ -1,3 +1,6 @@
+export type RoundingMode = 0 | 1 | 2 | 3;
+export type Comparison = -1 | 0 | 1;
+
 export namespace FixedDecimal {
   export type Value = string | number | bigint | FixedDecimal;
 }
@@ -12,12 +15,16 @@ export default class FixedDecimal {
   public static format = {
     places: 8,
   };
+  // Pre-calculate the scale factor
+   private static readonly SCALE: bigint = 10n ** BigInt(FixedDecimal.format.places);
 
   constructor(val: FixedDecimal.Value) {
     if (val instanceof FixedDecimal) {
       this.value = val.value;
     } else if (typeof val === "bigint") {
-      this.value = val;
+      // When a bigint is passed in, we assume it is an unscaled integer
+      // so we multiply by 10^places.
+      this.value = val * FixedDecimal.SCALE;
     } else if (typeof val === "string") {
       this.value = FixedDecimal.fromString(val);
     } else if (typeof val === "number") {
@@ -27,78 +34,67 @@ export default class FixedDecimal {
     }
   }
 
-  // Converts a string (with up to 8 decimal places) to bigint
+  /**
+   * Create an instance from a raw (already scaled) bigint.
+   * This helper is used by arithmetic methods so that we don’t apply
+   * the 10^places scaling again.
+   */
+  private static fromRaw(rawValue: bigint): FixedDecimal {
+    const instance = new FixedDecimal(0n);
+    instance.value = rawValue;
+    return instance;
+  }
+
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+  // Conversion helpers
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+  // Converts a string (with up to 8 decimal places) to bigint.
   static fromString(value: string): bigint {
     const dotIndex = value.indexOf(".");
-
     if (dotIndex === -1) {
-      // No decimal part: multiply by 10^8
-      return BigInt(value + "00000000");
+      // No decimal part: multiply by 10^places.
+      return BigInt(value + "0".repeat(FixedDecimal.format.places));
     }
-
-    // If there is more than one dot, throw an error
     if (value.indexOf(".", dotIndex + 1) !== -1) {
       throw new Error("Invalid decimal format");
     }
-
-    // The integer part can be empty (e.g., ".123" → "0")
     const integerPart = value.slice(0, dotIndex) || "0";
     let decimalPart = value.slice(dotIndex + 1);
     const len = decimalPart.length;
-
-    if (len < 8) {
-      // Pad with trailing zeros if digits are missing
-      decimalPart += "00000000".slice(len);
-    } else if (len > 8) {
-      // If there are more than 8 digits, truncate the excess
-      decimalPart = decimalPart.slice(0, 8);
+    if (len < FixedDecimal.format.places) {
+      decimalPart += "0".repeat(FixedDecimal.format.places - len);
+    } else if (len > FixedDecimal.format.places) {
+      // If there are more than 8 digits, we simply truncate the excess.
+      decimalPart = decimalPart.slice(0, FixedDecimal.format.places);
     }
-    // Convert the parts to BigInt and perform the operation:
     return BigInt(integerPart + decimalPart);
   }
-  // Converts a number to bigint
+
+  // Converts a number to bigint.
   static fromNumber(value: number): bigint {
-    return BigInt((value * 10 ** FixedDecimal.format.places).toFixed());
+    return BigInt((value * Number(FixedDecimal.SCALE)).toFixed());
   }
 
-  // Converts a bigint to number (restoring the fractional part)
+  // Converts a raw bigint (with internal scaling) to a number.
   static toNumber(value: bigint): number {
-    return Number(value) / 10 ** FixedDecimal.format.places;
+    return Number(value) / Number(FixedDecimal.SCALE);
   }
 
-  // Converts a bigint to string (decimal format)
+  // Converts a raw bigint to string (in normal decimal notation).
   static toString(value: bigint): string {
-    if (!value) {
+    if (value === 0n) {
       return "0";
     }
-    const intPart = value / 10n ** BigInt(FixedDecimal.format.places);
-    const fracPart = value % 10n ** BigInt(FixedDecimal.format.places);
-    if (fracPart) {
-      if (intPart > 9007199254740991n) {
-        return (
-          intPart +
-          "." +
-          Math.abs(Number(fracPart))
-            .toString()
-            .padStart(FixedDecimal.format.places, "0")
-        );
-      }
-
-      return (
-        Number(intPart) +
-        "." +
-        Math.abs(Number(fracPart))
-          .toString()
-          .padStart(FixedDecimal.format.places, "0")
-      );
-    }
-    if (intPart > 9007199254740990n) {
-      return intPart + ".00000000";
-    }
-    return Number(intPart) + ".00000000";
+    const scale = FixedDecimal.SCALE;
+    const intPart = value / scale;
+    let fracPart = (value % scale).toString().padStart(FixedDecimal.format.places, "0");
+    // Optionally remove trailing zeros for display:
+    fracPart = fracPart.replace(/0+$/, "");
+    return fracPart ? `${intPart.toString()}.${fracPart}` : intPart.toString();
   }
 
-  // Instance methods for conversion
+  // Instance conversion methods
   public toNumber(): number {
     return FixedDecimal.toNumber(this.value);
   }
@@ -107,67 +103,222 @@ export default class FixedDecimal {
     return FixedDecimal.toString(this.value);
   }
 
-  // Arithmetic operations (return new instances)
+  public valueOf(): string {
+    return this.toString();
+  }
+
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+  // Arithmetic methods
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+  /** Returns a FixedDecimal whose value is the absolute value of this FixedDecimal. */
+  public abs(): FixedDecimal {
+    return FixedDecimal.fromRaw(this.value < 0n ? -this.value : this.value);
+  }
+
+  /** Returns a FixedDecimal whose value is this FixedDecimal plus n. */
   public add(other: FixedDecimal): FixedDecimal {
-    return new FixedDecimal(this.value + other.value);
+    return FixedDecimal.fromRaw(this.value + other.value);
   }
 
+  /** Alias for add. */
+  public plus(other: FixedDecimal): FixedDecimal {
+    return this.add(other);
+  }
+
+  /** Compares the values.
+   *  Returns -1 if this < other, 0 if equal, and 1 if this > other.
+   */
+  public cmp(other: FixedDecimal): Comparison {
+    if (this.value < other.value) return -1;
+    if (this.value > other.value) return 1;
+    return 0;
+  }
+
+  /** Returns true if this FixedDecimal equals other. */
+  public eq(other: FixedDecimal): boolean {
+    return this.value === other.value;
+  }
+
+  /** Returns true if this FixedDecimal is greater than other. */
+  public gt(other: FixedDecimal): boolean {
+    return this.value > other.value;
+  }
+
+  /** Returns true if this FixedDecimal is greater than or equal to other. */
+  public gte(other: FixedDecimal): boolean {
+    return this.value >= other.value;
+  }
+
+  /** Returns true if this FixedDecimal is less than other. */
+  public lt(other: FixedDecimal): boolean {
+    return this.value < other.value;
+  }
+
+  /** Returns true if this FixedDecimal is less than or equal to other. */
+  public lte(other: FixedDecimal): boolean {
+    return this.value <= other.value;
+  }
+
+  /** Returns a FixedDecimal whose value is this FixedDecimal minus n. */
   public sub(other: FixedDecimal): FixedDecimal {
-    return new FixedDecimal(this.value - other.value);
+    return FixedDecimal.fromRaw(this.value - other.value);
   }
 
+  /** Alias for sub. */
+  public minus(other: FixedDecimal): FixedDecimal {
+    return this.sub(other);
+  }
+
+  /** Returns a FixedDecimal whose value is this FixedDecimal times n. */
   public mul(other: FixedDecimal): FixedDecimal {
-    return new FixedDecimal(
-      (this.value * other.value) / 10n ** BigInt(FixedDecimal.format.places)
+    return FixedDecimal.fromRaw(
+      (this.value * other.value) / FixedDecimal.SCALE
     );
   }
 
+  /** Alias for mul. */
+  public product(other: FixedDecimal): FixedDecimal {
+    return new FixedDecimal(this.value * other.value);
+  }
+
+  /** Returns a FixedDecimal whose value is this FixedDecimal divided by n. */
   public div(other: FixedDecimal): FixedDecimal {
     if (other.value === 0n) {
       throw new Error("Division by zero");
     }
-    return new FixedDecimal(
-      (this.value * 10n ** BigInt(FixedDecimal.format.places)) / other.value
+    return FixedDecimal.fromRaw(
+      (this.value * FixedDecimal.SCALE) / other.value
     );
   }
 
+  public fraction(other: FixedDecimal): FixedDecimal {
+    if (other.value === 0n) {
+      throw new Error("Division by zero");
+    }
+    return FixedDecimal.fromRaw(
+      (this.value) / other.value
+    );
+  }
+
+  /** Returns a FixedDecimal representing the integer remainder of dividing this by n. */
   public mod(other: FixedDecimal): FixedDecimal {
     if (other.value === 0n) {
       throw new Error("Division by zero in modulus");
     }
-    return new FixedDecimal(
-      (this.value * 10n ** BigInt(FixedDecimal.format.places)) % other.value
-    );
+    return FixedDecimal.fromRaw((this.value * FixedDecimal.SCALE) % other.value);
   }
-
-  public times(other: FixedDecimal): FixedDecimal {
-    return new FixedDecimal(this.value * other.value);
-  }
-
-  public ratio(other: FixedDecimal): FixedDecimal {
+  public leftover(other: FixedDecimal): FixedDecimal {
     if (other.value === 0n) {
-      throw new Error("Division by zero");
+      throw new Error("Division by zero in modulus");
     }
-    return new FixedDecimal(this.value / other.value);
+    return FixedDecimal.fromRaw(this.value % other.value);
   }
 
-  public divMod(other: FixedDecimal): { div: FixedDecimal; mod: FixedDecimal } {
-    if (other.value === 0n) {
-      throw new Error("Division by zero in divMod");
-    }
-    const quotient =
-      (this.value * 10n ** BigInt(FixedDecimal.format.places)) / other.value;
-    const remainder =
-      (this.value * 10n ** BigInt(FixedDecimal.format.places)) % other.value;
-    return {
-      div: new FixedDecimal(quotient),
-      mod: new FixedDecimal(remainder),
-    };
+  /** Returns a FixedDecimal whose value is the negation of this FixedDecimal. */
+  public neg(): FixedDecimal {
+    return FixedDecimal.fromRaw(-this.value);
   }
 
-  ////////////////////////////////////////////////////////////////////////////
-  // Formatting and scale adjustment methods
-  ////////////////////////////////////////////////////////////////////////////
+  /**
+   * Returns a FixedDecimal whose value is this FixedDecimal raised to the power exp.
+   * (Only integer exponents are supported.)
+   */
+  public pow(exp: number): FixedDecimal {
+    if (!Number.isInteger(exp)) {
+      throw new Error("Exponent must be an integer");
+    }
+    let result = new FixedDecimal("1");
+    let base: FixedDecimal = this;
+    let exponent = Math.abs(exp);
+    while (exponent > 0) {
+      if (exponent % 2 === 1) {
+        result = result.mul(base);
+      }
+      base = base.mul(base);
+      exponent = Math.floor(exponent / 2);
+    }
+    return exp < 0 ? new FixedDecimal("1").div(result) : result;
+  }
+
+  /**
+   * Returns a new FixedDecimal whose value is this FixedDecimal rounded
+   * to a maximum of sd significant digits.
+   * (This simple implementation uses JavaScript’s number-toPrecision.)
+   */
+  public prec(sd: number, rm: RoundingMode = 1): FixedDecimal {
+    if (sd < 1) {
+      throw new Error("Significant digits must be at least 1");
+    }
+    const precStr = this.toNumber().toPrecision(sd);
+    return new FixedDecimal(precStr);
+  }
+
+  /**
+   * Returns a new FixedDecimal whose value is this FixedDecimal rounded
+   * to a maximum of dp decimal places.
+   * (The rounding mode rm is not explicitly implemented here.)
+   */
+  public round(dp: number = FixedDecimal.format.places, rm: RoundingMode = 1): FixedDecimal {
+    const roundedStr = this.toFixed(dp);
+    return new FixedDecimal(roundedStr);
+  }
+
+  /**
+   * Returns a FixedDecimal whose value is the square root of this FixedDecimal.
+   * (For simplicity, we use Math.sqrt on the number value.)
+   */
+  public sqrt(): FixedDecimal {
+    if (this.lt(new FixedDecimal("0"))) {
+      throw new Error("Square root of negative number");
+    }
+    if (this.eq(new FixedDecimal("0"))) {
+      return new FixedDecimal("0");
+    }
+    // Initial guess: x / 2.0
+    const initialGuess = this.div(new FixedDecimal("2.0"));
+    return this.sqrtGo(initialGuess, 10);
+  }
+  
+  /**
+   * Newton–Raphson iteration for square root.
+   * @param guess Current approximation.
+   * @param iter  Remaining iterations.
+   * @returns Improved square root approximation.
+   */
+  private sqrtGo(guess: FixedDecimal, iter: number): FixedDecimal {
+    if (iter === 0) {
+      return guess;
+    }
+    // next = (guess + (x / guess)) / 2.0
+    const next = guess.add(this.div(guess)).div(new FixedDecimal("2.0"));
+    if (guess.eq(next)) {
+      return next;
+    }
+    return this.sqrtGo(next, iter - 1);
+  }
+  
+
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+  // Formatting methods
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+  /**
+   * Returns a string representing the FixedDecimal in exponential notation,
+   * rounded to dp decimal places.
+   */
+  public toExponential(dp?: number, rm: RoundingMode = 1): string {
+    const num = this.toNumber();
+    return dp !== undefined ? num.toExponential(dp) : num.toExponential();
+  }
+
+  /**
+   * Returns a string representing the FixedDecimal to sd significant digits.
+   */
+  public toPrecision(sd?: number, rm: RoundingMode = 1): string {
+    const num = this.toNumber();
+    return sd !== undefined ? num.toPrecision(sd) : num.toPrecision();
+  }
 
   /**
    * Helper to perform symmetric rounding.
@@ -184,47 +335,36 @@ export default class FixedDecimal {
   /**
    * Adjusts the number scale, rounding to the new number of decimal places.
    * Returns a new FixedDecimal with the adjusted value.
-   * The parameter newScale must be between 0 and 8.
    *
    * Example:
    *    new FixedDecimal("1.23456789").scale(2)  // represents 1.23
    */
   public scale(newScale: number): FixedDecimal {
-    if (newScale < 0 || newScale > 8) {
-      throw new Error("newScale must be between 0 and 8");
+    if (newScale < 0 || newScale > FixedDecimal.format.places) {
+      throw new Error(`newScale must be between 0 and ${FixedDecimal.format.places}`);
     }
-    const diff = 8 - newScale;
+    const diff = FixedDecimal.format.places - newScale;
     const factor = 10n ** BigInt(diff);
-    // Round the value so that digits below newScale are discarded
     const rounded = this.roundToScale(factor);
-    // Multiply back to maintain internal representation with FACTOR = 1e8,
-    // but with lower digits zeroed out.
     const newValue = rounded * factor;
-    return new FixedDecimal(newValue);
+    return FixedDecimal.fromRaw(newValue);
   }
 
   /**
-   * Returns a string with the number formatted with fixed decimal places.
-   * If the parameter places is not provided, it uses BigInt(FixedDecimal.format.places).
-   *
-   * Example:
-   *    new FixedDecimal("1234.56789").toFixed(2)  // "1234.57"
+   * Returns a string representing the FixedDecimal in normal notation
+   * to a fixed number of decimal places.
    */
   public toFixed(places?: number): string {
-    const decPlaces =
-      places !== undefined ? places : Number(FixedDecimal.format.places);
-    if (decPlaces < 0 || decPlaces > 8) {
-      throw new Error("places must be between 0 and 8");
+    const decPlaces = places !== undefined ? places : FixedDecimal.format.places;
+    if (decPlaces < 0 || decPlaces > FixedDecimal.format.places) {
+      throw new Error(`places must be between 0 and ${FixedDecimal.format.places}`);
     }
-    const diff = 8 - decPlaces;
+    const diff = FixedDecimal.format.places - decPlaces;
     const roundingFactor = 10n ** BigInt(diff);
-    // Get the rounded value at the new scale (as an integer representing value * 10^(places))
     const scaled = this.roundToScale(roundingFactor);
     const divisor = 10n ** BigInt(decPlaces);
     const intPart = scaled / divisor;
     const fracPart = (scaled % divisor).toString().padStart(decPlaces, "0");
-    return decPlaces > 0
-      ? `${intPart.toString()}.${fracPart}`
-      : intPart.toString();
+    return decPlaces > 0 ? `${intPart.toString()}.${fracPart}` : intPart.toString();
   }
 }

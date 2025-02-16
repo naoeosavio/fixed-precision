@@ -63,9 +63,9 @@ describe('FixedDecimal', () => {
       expect(x.mod(y).toString()).toBe("1.00000000");
     });
 
-    test('times() - large multiplication', () => {
+    test('product() - large multiplication', () => {
       const big = new FixedDecimal("100000000");
-      const result = big.times(big);
+      const result = big.product(big);
       expect(result.toString()).toBe("1000000000000000000000000.00000000"); // 1e16 * 1e8 = 1e16
     });
   });
