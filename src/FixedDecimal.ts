@@ -64,16 +64,22 @@ export default class FixedDecimal {
     if (dotIndex.length > 2) {
       throw new Error("Invalid decimal format");
     }
-    let decimalPart = dotIndex[1].slice(0, 8);
+    let decimalPart = dotIndex[1];
+    let len = decimalPart.length;
+    if (len > 8) {
+      decimalPart = decimalPart.slice(0, 8);
+      len = decimalPart.length;
+    }
     if (integerPart.length < 8) {
-      const decimal = Number(decimalPart);
+      const decimal =
+        len === 8 ? Number(decimalPart) : Number(decimalPart) * 10 ** (8 - len);
       return BigInt(Number(integerPart) * Number(FixedDecimal.SCALE) + decimal);
     }
-    const len = decimalPart.length;
-    if (len < 8) {
-      decimalPart += "0".repeat(8 - len);
-    }
-    return BigInt(integerPart) * 100000000n + BigInt(decimalPart);
+    const decimal =
+      len === 8
+        ? BigInt(decimalPart)
+        : BigInt(decimalPart) * BigInt(10 ** (8 - len));
+    return BigInt(integerPart) * FixedDecimal.SCALE + decimal;
   }
 
   // Converts a number to bigint.
@@ -94,12 +100,13 @@ export default class FixedDecimal {
     const intPart = value / FixedDecimal.SCALE;
     const fracPart = value % FixedDecimal.SCALE;
     if (fracPart) {
+      let absfracPart = fracPart < 0n ? -fracPart : fracPart;
       if (intPart > 9007199254740990n) {
-        return intPart + "." + Number(fracPart).toString().padStart(8, "0");
+        return intPart + "." + Number(absfracPart).toString().padStart(8, "0");
       }
 
       return (
-        Number(intPart) + "." + Number(fracPart).toString().padStart(8, "0")
+        Number(intPart) + "." + Number(absfracPart).toString().padStart(8, "0")
       );
     }
     if (intPart > 9007199254740990n) {
@@ -107,8 +114,6 @@ export default class FixedDecimal {
     }
     return Number(intPart).toString();
   }
-
-  
 
   // Instance conversion methods
   public toNumber(): number {
@@ -134,6 +139,8 @@ export default class FixedDecimal {
 
   /** Returns a FixedDecimal whose value is this FixedDecimal plus n. */
   public add(other: FixedDecimal): FixedDecimal {
+    console.log(this.value + other.value);
+
     return FixedDecimal.fromRaw(this.value + other.value);
   }
 
