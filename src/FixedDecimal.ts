@@ -116,25 +116,20 @@ export default class FixedDecimal {
 
   // Converts a raw bigint to string (in normal decimal notation).
   static toString(value: bigint): string {
-    if (!value) {
-      return "0";
+    let abs = value < 0n ? 0 : 1;
+    const s = value.toString();
+    const intPart = abs ? s.slice(0, -FixedDecimal.format.places) || "0" : s.slice(1, -FixedDecimal.format.places) || "0";
+    let fracPart = s.slice(-8);
+    if (fracPart.length < FixedDecimal.format.places) {
+      fracPart.padStart(FixedDecimal.format.places, "0");
     }
-    const intPart = value / FixedDecimal.SCALE;
-    const fracPart = value % FixedDecimal.SCALE;
-    if (fracPart) {
-      let absfracPart = fracPart < 0n ? -fracPart : fracPart;
-      if (intPart > 9007199254740990n) {
-        return intPart + "." + Number(absfracPart).toString().padStart(8, "0");
-      }
-
-      return (
-        Number(intPart) + "." + Number(absfracPart).toString().padStart(8, "0")
-      );
-    }
-    if (intPart > 9007199254740990n) {
-      return intPart.toString();
-    }
-    return Number(intPart).toString();
+    return abs
+      ? fracPart
+        ? `${intPart}.${fracPart}`
+        : intPart
+      : fracPart
+        ? `-${intPart}.${fracPart}`
+        : `-${intPart}`;
   }
 
   // Instance conversion methods
