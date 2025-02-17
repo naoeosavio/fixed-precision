@@ -30,20 +30,19 @@ export default class FixedDecimal {
 
   /**
    * Formatting settings.
-   * By default, `places` (decimal places) is 8.
-   * By default, `roundingMode` (symmetric) is 1.
+   * By default, uses 8 decimal places and symmetric rounding (1).
    */
   public static format = {
     places: 8,
-    roundingMode: 1,
+    roundingMode: 1 as RoundingMode,
   };
   // Pre-calculate the scale factor
   private static SCALE: bigint = 10n ** BigInt(FixedDecimal.format.places);
   private static SCALENUMBER: number = 10 ** FixedDecimal.format.places;
 
   /**
-   * Allows you to configure a library before using it.
-   * Example: FixedDecimal.configure({ places: 4 });
+   * Configures the FixedDecimal library.
+   * @param config - FixedDecimal configuration
    */
   public static configure(config: FixedDecimalConfig): void {
     // Validate decimal places
@@ -87,9 +86,9 @@ export default class FixedDecimal {
   }
 
   /**
-   * Create an instance from a raw (already scaled) bigint.
-   * This helper is used by arithmetic methods so that we don’t apply
-   * the 10^places scaling again.
+   * Helper method to create a FixedDecimal instance from a raw, already scaled bigint.
+   * @param rawValue - The raw bigint value.
+   * @returns A new FixedDecimal instance with the internal value set to rawValue.
    */
   private static fromRaw(rawValue: bigint): FixedDecimal {
     const instance = new FixedDecimal(0n);
@@ -321,26 +320,14 @@ export default class FixedDecimal {
     return exp < 0 ? new FixedDecimal(1n).div(result) : result;
   }
 
-  /**
-   * Returns a new FixedDecimal whose value is this FixedDecimal rounded
-   * to a maximum of dp decimal places.
-   * (The rounding mode rm is not explicitly implemented here.)
-   */
-  public round(
-    dp: number = FixedDecimal.format.places,
-    rm: RoundingMode = 1
-  ): FixedDecimal {
-    const roundedStr = this.toFixed(dp);
-    return new FixedDecimal(roundedStr);
-  }
-
+  
   /**
    * Returns a FixedDecimal whose value is the square root of this FixedDecimal.
    * (For simplicity, we use Math.sqrt on the number value.)
-   */
-  public sqrt(): FixedDecimal {
-    if (this.lt(new FixedDecimal(0n))) {
-      throw new Error("Square root of negative number");
+  */
+ public sqrt(): FixedDecimal {
+   if (this.lt(new FixedDecimal(0n))) {
+     throw new Error("Square root of negative number");
     }
     if (this.eq(new FixedDecimal(0n))) {
       return new FixedDecimal(0n);
@@ -349,16 +336,16 @@ export default class FixedDecimal {
     const initialGuess = this.div(new FixedDecimal(2n));
     return this.sqrtGo(initialGuess, 10);
   }
-
+  
   /**
    * Newton–Raphson iteration for square root.
    * @param guess Current approximation.
    * @param iter  Remaining iterations.
    * @returns Improved square root approximation.
-   */
-  private sqrtGo(guess: FixedDecimal, iter: number): FixedDecimal {
-    if (iter === 0) {
-      return guess;
+  */
+ private sqrtGo(guess: FixedDecimal, iter: number): FixedDecimal {
+   if (iter === 0) {
+     return guess;
     }
     // next = (guess + (x / guess)) / 2.0
     const next = guess.add(this.div(guess)).div(new FixedDecimal(2n));
@@ -368,20 +355,74 @@ export default class FixedDecimal {
     return this.sqrtGo(next, iter - 1);
   }
 
+  /**
+   * Returns a new FixedDecimal with the value rounded to the specified number of decimal places.
+   *
+   * @param dp - Desired number of decimal places (default: FixedDecimal.format.places)
+   * @param rm - Rounding mode (default: FixedDecimal.format.roundingMode)
+   * @returns A new FixedDecimal instance with the rounded value.
+   */
+  public round(
+    dp: number = FixedDecimal.format.places,
+    rm: RoundingMode = FixedDecimal.format.roundingMode
+  ): FixedDecimal {
+    if (dp < 0 || dp > FixedDecimal.format.places) {
+      throw new Error(
+        `Decimal places (dp) must be between 0 and ${FixedDecimal.format.places}`
+      );
+    }
+    const diff = FixedDecimal.format.places - dp;
+    const factor = 10n ** BigInt(diff);
+    const rounded = this.roundToScale(factor, rm);
+    const newValue = rounded * factor;
+    return FixedDecimal.fromRaw(newValue);
+  }
+  
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Formatting methods
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   /**
-   * Helper to perform symmetric rounding.
-   * Receives a rounding factor equivalent to 10^(8 - desired decimal places).
-   */
-  private roundToScale(roundingFactor: bigint): bigint {
-    if (this.value >= 0n) {
-      return (this.value + roundingFactor / 2n) / roundingFactor;
-    } else {
-      return (this.value - roundingFactor / 2n) / roundingFactor;
-    }
+   * Rounds the internal value according to the given scaling factor and rounding mode.
+  *
+  * @param roundingFactor - Factor to round by (equivalent to 10^(number of discarded digits))
+  * @param rm - Rounding mode to use
+  * @returns The quotient after rounding (without the discarded digits)
+  */
+ private roundToScale(roundingFactor: bigint, rm: RoundingMode): bigint {
+   switch (rm) {
+     case 0: // Round down (floor)
+     if (this.value >= 0n) {
+        return this.value / roundingFactor;
+      } else {
+        let q = this.value / roundingFactor;
+        if (this.value % roundingFactor !== 0n) {
+          q = q - 1n;
+        }
+        return q;
+      }
+    case 1: // Round to nearest (half away from zero)
+      if (this.value >= 0n) {
+        return (this.value + roundingFactor / 2n) / roundingFactor;
+      } else {
+        return (this.value - roundingFactor / 2n) / roundingFactor;
+      }
+    case 2: // Round up (ceil)
+      if (this.value >= 0n) {
+        let q = this.value / roundingFactor;
+        if (this.value % roundingFactor !== 0n) {
+          q = q + 1n;
+        }
+        return q;
+      } else {
+        return this.value / roundingFactor;
+      }
+    case 3: // Round towards zero (truncate)
+      return this.value / roundingFactor;
+    default:
+      throw new Error(`Rounding mode ${rm} is not supported.`);
   }
+}
+
 
   /**
    * Adjusts the number scale, rounding to the new number of decimal places.
@@ -398,7 +439,7 @@ export default class FixedDecimal {
     }
     const diff = FixedDecimal.format.places - newScale;
     const factor = 10n ** BigInt(diff);
-    const rounded = this.roundToScale(factor);
+    const rounded = this.roundToScale(factor, FixedDecimal.format.roundingMode);
     const newValue = rounded * factor;
     return FixedDecimal.fromRaw(newValue);
   }
@@ -407,7 +448,7 @@ export default class FixedDecimal {
    * Returns a string representing the FixedDecimal in normal notation
    * to a fixed number of decimal places.
    */
-  public toFixed(places?: number): string {
+  public toFixed(places: number = 0, rm: RoundingMode = FixedDecimal.format.roundingMode): string {
     const decPlaces =
       places !== undefined ? places : FixedDecimal.format.places;
     if (decPlaces < 0 || decPlaces > FixedDecimal.format.places) {
@@ -417,7 +458,7 @@ export default class FixedDecimal {
     }
     const diff = FixedDecimal.format.places - decPlaces;
     const roundingFactor = 10n ** BigInt(diff);
-    const scaled = this.roundToScale(roundingFactor);
+    const scaled = this.roundToScale(roundingFactor, rm);
     const divisor = 10n ** BigInt(decPlaces);
     const intPart = scaled / divisor;
     const fracPart = (scaled % divisor).toString().padStart(decPlaces, "0");
