@@ -4,6 +4,26 @@ export type Comparison = -1 | 0 | 1;
 export namespace FixedDecimal {
   export type Value = string | number | bigint | FixedDecimal;
 }
+/**
+ *  FixedDecimal Configuration System
+ */
+export interface FixedDecimalConfig {
+  /**
+   * Number of decimal places to use (1-20)
+   * @default 8
+   */
+  places: number;
+
+  /**
+   * Default rounding mode for decimal operations
+   * 0: Round down (floor)
+   * 1: Round to nearest (symmetric)
+   * 2: Round up (ceil)
+   * 3: Round towards zero (truncate)
+   * @default 1
+   */
+  roundingMode?: RoundingMode;
+}
 
 export default class FixedDecimal {
   private value: bigint;
@@ -11,15 +31,44 @@ export default class FixedDecimal {
   /**
    * Formatting settings.
    * By default, `places` (decimal places) is 8.
+   * By default, `roundingMode` (symmetric) is 1.
    */
   public static format = {
     places: 8,
+    roundingMode: 1,
   };
   // Pre-calculate the scale factor
-  private static readonly SCALE: bigint =
-    10n ** BigInt(FixedDecimal.format.places);
-  private static readonly SCALENUMBER: number =
-    10 ** FixedDecimal.format.places;
+  private static SCALE: bigint = 10n ** BigInt(FixedDecimal.format.places);
+  private static SCALENUMBER: number = 10 ** FixedDecimal.format.places;
+
+  /**
+   * Allows you to configure a library before using it.
+   * Example: FixedDecimal.configure({ places: 4 });
+   */
+  public static configure(config: FixedDecimalConfig): void {
+    // Validate decimal places
+    if (config.places !== undefined) {
+      if (
+        !Number.isInteger(config.places) ||
+        config.places < 1 ||
+        config.places > 20
+      ) {
+        throw new Error("Decimal places must be an integer between 1 and 20");
+      }
+
+      FixedDecimal.format.places = config.places;
+      // Update the scale factors when places change
+      FixedDecimal.SCALE = 10n ** BigInt(config.places);
+      FixedDecimal.SCALENUMBER = 10 ** config.places;
+    }
+    // Validate rounding mode
+    if (config.roundingMode !== undefined) {
+      if (![0, 1, 2, 3].includes(config.roundingMode)) {
+        throw new Error("Invalid rounding mode. Must be 0, 1, 2, or 3");
+      }
+      FixedDecimal.format.round = config.roundingMode;
+    }
+  }
 
   constructor(val: FixedDecimal.Value) {
     if (val instanceof FixedDecimal) {
@@ -377,3 +426,14 @@ export default class FixedDecimal {
       : intPart.toString();
   }
 }
+
+/**
+ * Setup helper
+ * Usage example:
+ * 
+ *   import FixedDecimal, { fixedconfig } from './FixedDecimal';
+ *   fixedconfig.configure({ places: 4 });
+ */
+export const fixedconfig = {
+  configure: FixedDecimal.configure.bind(FixedDecimal),
+};
