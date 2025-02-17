@@ -83,7 +83,7 @@ export default class FixedDecimal {
       len === FixedDecimal.format.places
         ? BigInt(decimalPart)
         : BigInt(decimalPart) *
-        BigInt(10 ** (FixedDecimal.format.places - len));
+          BigInt(10 ** (FixedDecimal.format.places - len));
     return BigInt(integerPart) * FixedDecimal.SCALE + decimal;
   }
 
@@ -268,10 +268,9 @@ export default class FixedDecimal {
     if (!Number.isInteger(exp)) {
       throw new Error("Exponent must be an integer");
     }
-    let result = FixedDecimal.fromRaw(this.value ** BigInt(exp))
+    let result = FixedDecimal.fromRaw(this.value ** BigInt(exp));
     return exp < 0 ? new FixedDecimal(1n).div(result) : result;
   }
-
 
   /**
    * Returns a new FixedDecimal whose value is this FixedDecimal rounded
@@ -323,24 +322,6 @@ export default class FixedDecimal {
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Formatting methods
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-
-  /**
-   * Returns a string representing the FixedDecimal in exponential notation,
-   * rounded to dp decimal places.
-   */
-  public toExponential(dp?: number, rm: RoundingMode = 1): string {
-    const num = this.toNumber();
-    return dp !== undefined ? num.toExponential(dp) : num.toExponential();
-  }
-
-  /**
-   * Returns a string representing the FixedDecimal to sd significant digits.
-   */
-  public toPrecision(sd?: number, rm: RoundingMode = 1): string {
-    const num = this.toNumber();
-    return sd !== undefined ? num.toPrecision(sd) : num.toPrecision();
-  }
-
   /**
    * Helper to perform symmetric rounding.
    * Receives a rounding factor equivalent to 10^(8 - desired decimal places).
