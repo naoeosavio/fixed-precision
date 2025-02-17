@@ -77,15 +77,13 @@ export default class FixedDecimal {
         len === FixedDecimal.format.places
           ? Number(decimalPart)
           : Number(decimalPart) * 10 ** (FixedDecimal.format.places - len);
-      return BigInt(
-        Number(integerPart) * FixedDecimal.SCALENUMBER + decimal
-      );
+      return BigInt(Number(integerPart) * FixedDecimal.SCALENUMBER + decimal);
     }
     const decimal =
       len === FixedDecimal.format.places
         ? BigInt(decimalPart)
         : BigInt(decimalPart) *
-          BigInt(10 ** (FixedDecimal.format.places - len));
+        BigInt(10 ** (FixedDecimal.format.places - len));
     return BigInt(integerPart) * FixedDecimal.SCALE + decimal;
   }
 
@@ -118,8 +116,10 @@ export default class FixedDecimal {
   static toString(value: bigint): string {
     let abs = value < 0n ? 0 : 1;
     const s = value.toString();
-    const intPart = abs ? s.slice(0, -FixedDecimal.format.places) || "0" : s.slice(1, -FixedDecimal.format.places) || "0";
-    let fracPart = s.slice(-FixedDecimal.format.places) //.replace(/0+$/, "");
+    const intPart = abs
+      ? s.slice(0, -FixedDecimal.format.places) || "0"
+      : s.slice(1, -FixedDecimal.format.places) || "0";
+    let fracPart = s.slice(-FixedDecimal.format.places); //.replace(/0+$/, "");
     if (fracPart.length < FixedDecimal.format.places) {
       fracPart.padStart(FixedDecimal.format.places, "0");
     }
@@ -268,31 +268,10 @@ export default class FixedDecimal {
     if (!Number.isInteger(exp)) {
       throw new Error("Exponent must be an integer");
     }
-    let result = new FixedDecimal("1");
-    let base: FixedDecimal = this;
-    let exponent = Math.abs(exp);
-    while (exponent > 0) {
-      if (exponent % 2 === 1) {
-        result = result.mul(base);
-      }
-      base = base.mul(base);
-      exponent = Math.floor(exponent / 2);
-    }
-    return exp < 0 ? new FixedDecimal("1").div(result) : result;
+    let result = FixedDecimal.fromRaw(this.value ** BigInt(exp))
+    return exp < 0 ? new FixedDecimal(1n).div(result) : result;
   }
 
-  /**
-   * Returns a new FixedDecimal whose value is this FixedDecimal rounded
-   * to a maximum of sd significant digits.
-   * (This simple implementation uses JavaScript’s number-toPrecision.)
-   */
-  public prec(sd: number, rm: RoundingMode = 1): FixedDecimal {
-    if (sd < 1) {
-      throw new Error("Significant digits must be at least 1");
-    }
-    const precStr = this.toNumber().toPrecision(sd);
-    return new FixedDecimal(precStr);
-  }
 
   /**
    * Returns a new FixedDecimal whose value is this FixedDecimal rounded
@@ -312,14 +291,14 @@ export default class FixedDecimal {
    * (For simplicity, we use Math.sqrt on the number value.)
    */
   public sqrt(): FixedDecimal {
-    if (this.lt(new FixedDecimal("0"))) {
+    if (this.lt(new FixedDecimal(0n))) {
       throw new Error("Square root of negative number");
     }
-    if (this.eq(new FixedDecimal("0"))) {
-      return new FixedDecimal("0");
+    if (this.eq(new FixedDecimal(0n))) {
+      return new FixedDecimal(0n);
     }
     // Initial guess: x / 2.0
-    const initialGuess = this.div(new FixedDecimal("2.0"));
+    const initialGuess = this.div(new FixedDecimal(2n));
     return this.sqrtGo(initialGuess, 10);
   }
 
@@ -334,7 +313,7 @@ export default class FixedDecimal {
       return guess;
     }
     // next = (guess + (x / guess)) / 2.0
-    const next = guess.add(this.div(guess)).div(new FixedDecimal("2.0"));
+    const next = guess.add(this.div(guess)).div(new FixedDecimal(2n));
     if (guess.eq(next)) {
       return next;
     }
