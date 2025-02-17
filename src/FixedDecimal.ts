@@ -66,7 +66,7 @@ export default class FixedDecimal {
       if (![0, 1, 2, 3].includes(config.roundingMode)) {
         throw new Error("Invalid rounding mode. Must be 0, 1, 2, or 3");
       }
-      FixedDecimal.format.round = config.roundingMode;
+      FixedDecimal.format.roundingMode = config.roundingMode;
     }
   }
 
