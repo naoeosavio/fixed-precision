@@ -103,11 +103,11 @@ describe('FixedDecimal', () => {
 
   // Casos Extremos
   describe('Edge Cases', () => {
-    // test('handles zero correctly', () => {
-    //   const zero = new FixedDecimal(0);
-    //   expect(zero.add(zero).toEqual(zero);
-    //   expect(zero.mul(zero)).toEqual(zero);
-    // });
+    test('handles zero correctly', () => {
+      const zero = new FixedDecimal(0);
+      expect(zero.add(zero).eq(zero));
+      expect(zero.mul(zero).eq(zero));
+    });
 
     test('max precision (8 decimals)', () => {
       const max = new FixedDecimal("0.99999999");
