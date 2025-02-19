@@ -115,6 +115,7 @@ export default class FixedDecimal {
       return BigInt(integerPart) * FixedDecimal.SCALE;
     }
     let decimalPart = dotIndex[1];
+
     let len = decimalPart.length;
     if (len > FixedDecimal.format.places) {
       decimalPart = decimalPart.slice(0, FixedDecimal.format.places);
@@ -125,14 +126,24 @@ export default class FixedDecimal {
         len === FixedDecimal.format.places
           ? Number(decimalPart)
           : Number(decimalPart) * 10 ** (FixedDecimal.format.places - len);
-      return BigInt(Number(integerPart) * FixedDecimal.SCALENUMBER + decimal);
+      let abs = 1;
+      if (integerPart[0] === "-") {
+        abs = -1;
+      }
+      return BigInt(
+        Number(integerPart) * FixedDecimal.SCALENUMBER + abs * decimal
+      );
+    }
+    let abs = 1n;
+    if (integerPart[0] === "-") {
+      abs = -1n;
     }
     const decimal =
       len === FixedDecimal.format.places
         ? BigInt(decimalPart)
         : BigInt(decimalPart) *
           BigInt(10 ** (FixedDecimal.format.places - len));
-    return BigInt(integerPart) * FixedDecimal.SCALE + decimal;
+    return BigInt(integerPart) * FixedDecimal.SCALE + abs * decimal;
   }
 
   // Converts a number to bigint.
@@ -169,7 +180,7 @@ export default class FixedDecimal {
       : s.slice(1, -FixedDecimal.format.places) || "0";
     let fracPart = s.slice(-FixedDecimal.format.places); //.replace(/0+$/, "");
     if (fracPart.length < FixedDecimal.format.places) {
-      fracPart.padStart(FixedDecimal.format.places, "0");
+      fracPart = fracPart.padStart(FixedDecimal.format.places, "0");
     }
     return abs
       ? fracPart
@@ -466,15 +477,16 @@ export default class FixedDecimal {
       throw new Error("Invalid precision");
     }
 
-    const str = this.abs().toString().replace(".", "");
-    const len = str.replace(/^0+/, "").length;
-    if (len > sd) {
-      return this.toExponential(sd - 1, rm);
-    }
+    // const str = this.abs().toString().replace(".", "");
+    // const len = str.replace(/0+$/, "").length;
+    // if (len > sd) {
+    //   return this.toExponential(sd - 1, rm);
+    // }
+
     return this.round(
       sd - (Math.floor(Math.log10(this.toNumber())) + 1),
       rm
-    ).toString();
+    ).toString().replace(/0+$/, "");
   }
 
   /**

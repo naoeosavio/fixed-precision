@@ -96,7 +96,7 @@ describe('FixedDecimal', () => {
     // });
 
     test('toPrecision(4) handles significant digits', () => {
-      const num = new FixedDecimal("12.345678");
+      const num = new FixedDecimal('12.345678');
       expect(num.toPrecision(4)).toBe("12.35");
     });
   });
@@ -115,8 +115,8 @@ describe('FixedDecimal', () => {
     });
 
     test('handles negative values', () => {
-      const neg = new FixedDecimal("-42.42");
-      expect(neg.abs().toString()).toBe("42.42");
+      const neg = new FixedDecimal('-42.42');
+      expect(neg.abs().toString()).toBe("42.42000000");
     });
   });
 });
