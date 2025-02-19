@@ -282,7 +282,6 @@ export default class FixedDecimal {
     );
   }
 
-  /** Alias for mul. */
   public product(other: FixedDecimal): FixedDecimal {
     return new FixedDecimal(this.value * other.value);
   }
