@@ -189,10 +189,6 @@ export default class FixedDecimal {
     return FixedDecimal.toString(this.value);
   }
 
-  public valueOf(): string {
-    return this.toString();
-  }
-
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Arithmetic methods
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -253,7 +249,7 @@ export default class FixedDecimal {
   public isPositive(): boolean {
     return this.value > 0n;
   }
-  
+
   public isNegative(): boolean {
     return this.value < 0n;
   }
@@ -452,6 +448,35 @@ export default class FixedDecimal {
     return FixedDecimal.fromRaw(newValue);
   }
 
+  toExponential(dp: number = 8, rm?: RoundingMode): string {
+    const rounded = this.round(dp, rm);
+    const [int, frac] = rounded.toString().split(".");
+    const exp =
+      int.length > 1
+        ? int.length - 1
+        : int === "0"
+          ? -frac?.search(/[1-9]/) - 1
+          : 0;
+    const shifted = rounded.div(new FixedDecimal(10n ** BigInt(exp)));
+    return `${shifted.toFixed(dp)}e${exp}`;
+  }
+
+  toPrecision(sd: number, rm?: RoundingMode): string {
+    if (sd >= 1e6) {
+      throw new Error("Invalid precision");
+    }
+
+    const str = this.abs().toString().replace(".", "");
+    const len = str.replace(/^0+/, "").length;
+    if (len > sd) {
+      return this.toExponential(sd - 1, rm);
+    }
+    return this.round(
+      sd - (Math.floor(Math.log10(this.toNumber())) + 1),
+      rm
+    ).toString();
+  }
+
   /**
    * Returns a string representing the FixedDecimal in normal notation
    * to a fixed number of decimal places.
@@ -476,6 +501,10 @@ export default class FixedDecimal {
     return decPlaces > 0
       ? `${intPart.toString()}.${fracPart}`
       : intPart.toString();
+  }
+
+  valueOf(): string {
+    return this.toString();
   }
 }
 
