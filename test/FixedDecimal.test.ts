@@ -1,5 +1,4 @@
-import FixedDecimal from "../src/FixedDecimal";
-
+import FixedDecimal from '../src/FixedDecimal';
 
 describe('FixedDecimal', () => {
   // Testes do Construtor
@@ -66,7 +65,7 @@ describe('FixedDecimal', () => {
     test('product() - large multiplication', () => {
       const big = new FixedDecimal("100000000");
       const result = big.product(big);
-      expect(result.toString()).toBe("100000000000000000000000000000000.00000000"); // 1e16 * 1e16 = 1e16
+      expect(result.toString()).toBe("100000000000000000000000000000000.00000000"); // 1e16 * 1e16 = 1e32
     });
   });
 

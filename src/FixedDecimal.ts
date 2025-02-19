@@ -173,7 +173,7 @@ export default class FixedDecimal {
 
   // Converts a raw bigint to string (in normal decimal notation).
   static toString(value: bigint): string {
-    let abs = value < 0n ? 0 : 1;
+    const abs = value < 0n ? 0 : 1;
     const s = value.toString();
     const intPart = abs
       ? s.slice(0, -FixedDecimal.format.places) || "0"
@@ -333,7 +333,7 @@ export default class FixedDecimal {
     if (!Number.isInteger(exp)) {
       throw new Error("Exponent must be an integer");
     }
-    let result = FixedDecimal.fromRaw(this.value ** BigInt(exp));
+    const result = FixedDecimal.fromRaw(this.value ** BigInt(exp));
     return exp < 0 ? new FixedDecimal(1n).div(result) : result;
   }
 
