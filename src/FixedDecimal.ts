@@ -246,6 +246,18 @@ export default class FixedDecimal {
     return this.value <= other.value;
   }
 
+  public isZero(): boolean {
+    return this.value === 0n;
+  }
+
+  public isPositive(): boolean {
+    return this.value > 0n;
+  }
+  
+  public isNegative(): boolean {
+    return this.value < 0n;
+  }
+
   /** Returns a FixedDecimal whose value is this FixedDecimal minus n. */
   public sub(other: FixedDecimal): FixedDecimal {
     return FixedDecimal.fromRaw(this.value - other.value);
