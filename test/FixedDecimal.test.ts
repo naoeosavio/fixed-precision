@@ -95,10 +95,10 @@ describe('FixedDecimal', () => {
     //   expect(num.toFormatString(2)).toBe("1,234,567.89");
     // });
 
-    // test('toPrecision(4) handles significant digits', () => {
-    //   const num = new FixedDecimal("12.345678");
-    //   expect(num.toPrecision(4)).toBe("12.35");
-    // });
+    test('toPrecision(4) handles significant digits', () => {
+      const num = new FixedDecimal("12.345678");
+      expect(num.toPrecision(4)).toBe("12.35");
+    });
   });
 
   // Casos Extremos
@@ -114,9 +114,9 @@ describe('FixedDecimal', () => {
       expect(max.add(max).toString()).toBe("1.99999998");
     });
 
-    // test('handles negative values', () => {
-    //   const neg = new FixedDecimal("-42.42");
-    //   expect(neg.abs().toString()).toBe("42.42");
-    // });
+    test('handles negative values', () => {
+      const neg = new FixedDecimal("-42.42");
+      expect(neg.abs().toString()).toBe("42.42");
+    });
   });
 });
