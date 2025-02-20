@@ -514,7 +514,7 @@ export default class FixedDecimal {
     return FixedDecimal.fromRaw(newValue);
   }
 
-  toExponential(dp: number = 8, rm?: RoundingMode): string {
+  toExponential(dp: number = FixedDecimal.format.places, rm?: RoundingMode): string {
     const rounded = this.round(dp, rm);
     const [int, frac] = rounded.toString().split(".");
     const exp =
