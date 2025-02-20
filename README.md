@@ -16,7 +16,7 @@ FixedPrecision is a library for handling fixed-precision decimal numbers in Java
 Install the package via npm:
 
 ```bash
-npm install fixed-decimal
+npm install fixed-precision
 ```
 
 ## Basic Usage
@@ -24,7 +24,7 @@ npm install fixed-decimal
 Below is an example of how to get started with FixedPrecision:
 
 ```ts
-import FixedPrecision, { fixedconfig } from 'fixed-decimal';
+import FixedPrecision, { fixedconfig } from 'fixed-precision';
 
 // Optional: Configure the library globally
 // Set 8 decimal places and use ROUND_HALF_UP (4) as the default rounding mode
