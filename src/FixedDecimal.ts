@@ -1,9 +1,8 @@
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
 
-export namespace FixedDecimal {
-  export type Value = string | number | bigint | FixedDecimal;
-}
+export type FixedDecimalValue = string | number | bigint | FixedDecimal;
+
 /**
  *  FixedDecimal Configuration System
  */
@@ -74,7 +73,7 @@ export default class FixedDecimal {
     }
   }
 
-  constructor(val: FixedDecimal.Value) {
+  constructor(val: FixedDecimalValue) {
     if (val instanceof FixedDecimal) {
       this.value = val.value;
     } else if (typeof val === "bigint") {
