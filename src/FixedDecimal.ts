@@ -16,15 +16,15 @@ export interface FixedDecimalConfig {
 
   /**
    * Default rounding mode for decimal operations:
-   * 0: ROUND_UP (round away from zero)
-   * 1: ROUND_DOWN (round towards zero)
-   * 2: ROUND_CEIL (round towards +Infinity)
-   * 3: ROUND_FLOOR (round towards -Infinity)
-   * 4: ROUND_HALF_UP (round to nearest; if equidistant, round up)
-   * 5: ROUND_HALF_DOWN (round to nearest; if equidistant, round down)
-   * 6: ROUND_HALF_EVEN (round to nearest; if equidistant, round to even)
-   * 7: ROUND_HALF_CEIL (round to nearest; if equidistant, round towards +Infinity)
-   * 8: ROUND_HALF_FLOOR (round to nearest; if equidistant, round towards -Infinity)
+   * 0: ROUND_UP
+   * 1: ROUND_DOWN
+   * 2: ROUND_CEIL
+   * 3: ROUND_FLOOR
+   * 4: ROUND_HALF_UP
+   * 5: ROUND_HALF_DOWN
+   * 6: ROUND_HALF_EVEN
+   * 7: ROUND_HALF_CEIL
+   * 8: ROUND_HALF_FLOOR
    * @default 4
    */
   roundingMode?: RoundingMode;
@@ -154,21 +154,14 @@ export default class FixedDecimal {
   // Converts a number to bigint.
   static fromNumber(value: number): bigint {
     // Verify that the input is a finite number
-    if (typeof value !== "number" || isNaN(value) || !isFinite(value)) {
+    if (isNaN(value) || !isFinite(value)) {
       throw new Error("Invalid number: value must be a finite number.");
     }
-
     const scaled = value * FixedDecimal.SCALENUMBER;
-
-    // Check if the scaled value is within JavaScript's safe integer range
     if (scaled > Number.MAX_SAFE_INTEGER || scaled < Number.MIN_SAFE_INTEGER) {
-      throw new Error(
-        `Number out of safe range after scaling. Scaled value: ${scaled}`
-      );
+      throw new Error("Number out of safe range after scaling");
     }
-
-    // Convert the scaled number to a string (with no decimals) and then to BigInt
-    return BigInt(scaled.toFixed(0));
+    return BigInt(Math.floor(scaled));
   }
 
   // Converts an internal scaled BigInt to a number.
