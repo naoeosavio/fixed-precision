@@ -369,6 +369,13 @@ export default class FixedDecimal {
     }
     return this.sqrtGo(next, iter - 1);
   }
+  
+  /**
+   * Returns a JSON representation of this FixedDecimal (its string value).
+   */
+  public toJSON(): string {
+    return this.toString();
+  }
 
   /**
    * Returns a new FixedDecimal with the value rounded to the specified number of decimal places.
