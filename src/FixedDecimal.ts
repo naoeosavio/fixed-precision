@@ -1,4 +1,4 @@
-export type RoundingMode = 0 | 1 | 2 | 3;
+export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
 
 export namespace FixedDecimal {
@@ -15,12 +15,17 @@ export interface FixedDecimalConfig {
   places: number;
 
   /**
-   * Default rounding mode for decimal operations
-   * 0: Round down (floor)
-   * 1: Round to nearest (symmetric)
-   * 2: Round up (ceil)
-   * 3: Round towards zero (truncate)
-   * @default 1
+   * Default rounding mode for decimal operations:
+   * 0: ROUND_UP (round away from zero)
+   * 1: ROUND_DOWN (round towards zero)
+   * 2: ROUND_CEIL (round towards +Infinity)
+   * 3: ROUND_FLOOR (round towards -Infinity)
+   * 4: ROUND_HALF_UP (round to nearest; if equidistant, round up)
+   * 5: ROUND_HALF_DOWN (round to nearest; if equidistant, round down)
+   * 6: ROUND_HALF_EVEN (round to nearest; if equidistant, round to even)
+   * 7: ROUND_HALF_CEIL (round to nearest; if equidistant, round towards +Infinity)
+   * 8: ROUND_HALF_FLOOR (round to nearest; if equidistant, round towards -Infinity)
+   * @default 4
    */
   roundingMode?: RoundingMode;
 }
@@ -377,31 +382,31 @@ export default class FixedDecimal {
     return this.toString();
   }
 
-    /**
+  /**
    * Returns a new FixedDecimal representing the ceiling of this value.
    * For positive numbers, rounds up; for negatives, rounds toward zero.
    */
-    public ceil(): FixedDecimal {
-      // Using ROUND_CEIL (2)
-      return this.round(0, 2);
-    }
-  
-    /**
-     * Returns a new FixedDecimal representing the floor of this value.
-     * For positive numbers, rounds down; for negatives, rounds away from zero.
-     */
-    public floor(): FixedDecimal {
-      // Using ROUND_FLOOR (3)
-      return this.round(0, 3);
-    }
-  
-    /**
-     * Returns a new FixedDecimal representing the value truncated toward zero.
-     */
-    public trunc(): FixedDecimal {
-      // Using ROUND_DOWN (1)
-      return this.round(0, 1);
-    }
+  public ceil(): FixedDecimal {
+    // Using ROUND_CEIL (2)
+    return this.round(0, 2);
+  }
+
+  /**
+   * Returns a new FixedDecimal representing the floor of this value.
+   * For positive numbers, rounds down; for negatives, rounds away from zero.
+   */
+  public floor(): FixedDecimal {
+    // Using ROUND_FLOOR (3)
+    return this.round(0, 3);
+  }
+
+  /**
+   * Returns a new FixedDecimal representing the value truncated toward zero.
+   */
+  public trunc(): FixedDecimal {
+    // Using ROUND_DOWN (1)
+    return this.round(0, 1);
+  }
 
   /**
    * Returns a new FixedDecimal with the value rounded to the specified number of decimal places.
@@ -426,7 +431,7 @@ export default class FixedDecimal {
     return FixedDecimal.fromRaw(newValue);
   }
 
-   /**
+  /**
    * Returns a new FixedDecimal with its value shifted by n decimal places.
    * A positive n shifts to the left (multiplication), negative to the right (division).
    *
@@ -435,7 +440,7 @@ export default class FixedDecimal {
    * @param n - The number of places to shift.
    * @returns A new FixedDecimal instance with the shifted value.
    */
-   public shiftedBy(n: number): FixedDecimal {
+  public shiftedBy(n: number): FixedDecimal {
     const shiftFactor = 10n ** BigInt(Math.abs(n));
     let newRaw: bigint;
     if (n >= 0) {
@@ -449,21 +454,22 @@ export default class FixedDecimal {
     return FixedDecimal.fromRaw(newRaw);
   }
 
-    /**
+  /**
    * Returns a new FixedDecimal with a pseudo-random value ≥ 0 and < 1.
    * The result will have the specified number of decimal places.
    *
    * @param decimalPlaces - Number of decimal places (default: FixedDecimal.format.places).
    * @returns A new FixedDecimal representing a random value.
    */
-    public static random(decimalPlaces: number = FixedDecimal.format.places): FixedDecimal {
-      const max = 10 ** decimalPlaces;
-      const randInt = Math.floor(Math.random() * max);
-      const fracStr = randInt.toString().padStart(decimalPlaces, "0");
-      const valueStr = "0." + fracStr;
-      return new FixedDecimal(valueStr);
-    }
-  
+  public static random(
+    decimalPlaces: number = FixedDecimal.format.places
+  ): FixedDecimal {
+    const max = 10 ** decimalPlaces;
+    const randInt = Math.floor(Math.random() * max);
+    const fracStr = randInt.toString().padStart(decimalPlaces, "0");
+    const valueStr = "0." + fracStr;
+    return new FixedDecimal(valueStr);
+  }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Formatting methods
@@ -471,40 +477,71 @@ export default class FixedDecimal {
   /**
    * Rounds the internal value according to the given scaling factor and rounding mode.
    *
-   * @param roundingFactor - Factor to round by (equivalent to 10^(number of discarded digits))
+   * @param roundingFactor - The rounding factor (power of 10).
    * @param rm - Rounding mode to use
    * @returns The quotient after rounding (without the discarded digits)
    */
   private roundToScale(roundingFactor: bigint, rm: RoundingMode): bigint {
+    const quotient = this.value / roundingFactor;
+    const remainder = this.value % roundingFactor;
+    // Use absolute remainder for comparisons.
+    const absRem = remainder < 0n ? -remainder : remainder;
     switch (rm) {
-      case 0: // Round down (floor)
-        if (this.value >= 0n) {
-          return this.value / roundingFactor;
-        } else {
-          let q = this.value / roundingFactor;
-          if (this.value % roundingFactor !== 0n) {
-            q = q - 1n;
-          }
-          return q;
+      case 0: // ROUND_UP: round away from zero
+        return remainder === 0n
+          ? quotient
+          : this.value > 0n
+            ? quotient + 1n
+            : quotient - 1n;
+      case 1: // ROUND_DOWN: round towards zero (truncate)
+        return quotient;
+      case 2: // ROUND_CEIL: round towards +Infinity
+        return this.value > 0n && remainder !== 0n ? quotient + 1n : quotient;
+      case 3: // ROUND_FLOOR: round towards -Infinity
+        return this.value < 0n && remainder !== 0n ? quotient - 1n : quotient;
+      case 4: // ROUND_HALF_UP: if exactly half, round away from zero
+        return 2n * absRem >= roundingFactor
+          ? this.value > 0n
+            ? quotient + 1n
+            : quotient - 1n
+          : quotient;
+      case 5: // ROUND_HALF_DOWN: if exactly half, round towards zero
+        return 2n * absRem > roundingFactor
+          ? this.value > 0n
+            ? quotient + 1n
+            : quotient - 1n
+          : quotient;
+      case 6: // ROUND_HALF_EVEN: if exactly half, round to even
+        if (2n * absRem === roundingFactor) {
+          return quotient % 2n === 0n
+            ? quotient
+            : this.value > 0n
+              ? quotient + 1n
+              : quotient - 1n;
         }
-      case 1: // Round to nearest (half away from zero)
-        if (this.value >= 0n) {
-          return (this.value + roundingFactor / 2n) / roundingFactor;
-        } else {
-          return (this.value - roundingFactor / 2n) / roundingFactor;
+        return 2n * absRem > roundingFactor
+          ? this.value > 0n
+            ? quotient + 1n
+            : quotient - 1n
+          : quotient;
+      case 7: // ROUND_HALF_CEIL: if exactly half, round towards +Infinity
+        if (2n * absRem === roundingFactor) {
+          return this.value > 0n ? quotient + 1n : quotient;
         }
-      case 2: // Round up (ceil)
-        if (this.value >= 0n) {
-          let q = this.value / roundingFactor;
-          if (this.value % roundingFactor !== 0n) {
-            q = q + 1n;
-          }
-          return q;
-        } else {
-          return this.value / roundingFactor;
+        return 2n * absRem > roundingFactor
+          ? this.value > 0n
+            ? quotient + 1n
+            : quotient
+          : quotient;
+      case 8: // ROUND_HALF_FLOOR: if exactly half, round towards -Infinity
+        if (2n * absRem === roundingFactor) {
+          return this.value < 0n ? quotient - 1n : quotient;
         }
-      case 3: // Round towards zero (truncate)
-        return this.value / roundingFactor;
+        return 2n * absRem > roundingFactor
+          ? this.value > 0n
+            ? quotient + 1n
+            : quotient - 1n
+          : quotient;
       default:
         throw new Error(`Rounding mode ${rm} is not supported.`);
     }
@@ -530,7 +567,10 @@ export default class FixedDecimal {
     return FixedDecimal.fromRaw(newValue);
   }
 
-  toExponential(dp: number = FixedDecimal.format.places, rm?: RoundingMode): string {
+  toExponential(
+    dp: number = FixedDecimal.format.places,
+    rm?: RoundingMode
+  ): string {
     const rounded = this.round(dp, rm);
     const [int, frac] = rounded.toString().split(".");
     const exp =
@@ -554,10 +594,9 @@ export default class FixedDecimal {
     //   return this.toExponential(sd - 1, rm);
     // }
 
-    return this.round(
-      sd - (Math.floor(Math.log10(this.toNumber())) + 1),
-      rm
-    ).toString().replace(/0+$/, "");
+    return this.round(sd - (Math.floor(Math.log10(this.toNumber())) + 1), rm)
+      .toString()
+      .replace(/0+$/, "");
   }
 
   /**
