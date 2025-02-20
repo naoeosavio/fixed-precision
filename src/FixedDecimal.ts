@@ -425,6 +425,29 @@ export default class FixedDecimal {
     const newValue = rounded * factor;
     return FixedDecimal.fromRaw(newValue);
   }
+  
+   /**
+   * Returns a new FixedDecimal with its value shifted by n decimal places.
+   * A positive n shifts to the left (multiplication), negative to the right (division).
+   *
+   * The operation is exact; if a negative shift does not divide evenly, an error is thrown.
+   *
+   * @param n - The number of places to shift.
+   * @returns A new FixedDecimal instance with the shifted value.
+   */
+   public shiftedBy(n: number): FixedDecimal {
+    const shiftFactor = 10n ** BigInt(Math.abs(n));
+    let newRaw: bigint;
+    if (n >= 0) {
+      newRaw = this.value * shiftFactor;
+    } else {
+      if (this.value % shiftFactor !== 0n) {
+        throw new Error("Inexact shift");
+      }
+      newRaw = this.value / shiftFactor;
+    }
+    return FixedDecimal.fromRaw(newRaw);
+  }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Formatting methods
@@ -469,29 +492,6 @@ export default class FixedDecimal {
       default:
         throw new Error(`Rounding mode ${rm} is not supported.`);
     }
-  }
-
-   /**
-   * Returns a new FixedDecimal with its value shifted by n decimal places.
-   * A positive n shifts to the left (multiplication), negative to the right (division).
-   *
-   * The operation is exact; if a negative shift does not divide evenly, an error is thrown.
-   *
-   * @param n - The number of places to shift.
-   * @returns A new FixedDecimal instance with the shifted value.
-   */
-   public shiftedBy(n: number): FixedDecimal {
-    const shiftFactor = 10n ** BigInt(Math.abs(n));
-    let newRaw: bigint;
-    if (n >= 0) {
-      newRaw = this.value * shiftFactor;
-    } else {
-      if (this.value % shiftFactor !== 0n) {
-        throw new Error("Inexact shift");
-      }
-      newRaw = this.value / shiftFactor;
-    }
-    return FixedDecimal.fromRaw(newRaw);
   }
 
   /**
