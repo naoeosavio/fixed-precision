@@ -1,13 +1,13 @@
-# FixedDecimal
+# FixedPrecision
 
-FixedDecimal is a library for handling fixed-precision decimal numbers in JavaScript/TypeScript. By leveraging `BigInt` to store scaled values internally, this library enables precise arithmetic operations, detailed control over decimal places, and various rounding modes. This approach is especially useful for avoiding the imprecision inherent to floating-point representations.
+FixedPrecision is a library for handling fixed-precision decimal numbers in JavaScript/TypeScript. By leveraging `BigInt` to store scaled values internally, this library enables precise arithmetic operations, detailed control over decimal places, and various rounding modes. This approach is especially useful for avoiding the imprecision inherent to floating-point representations.
 
 ## Features
 
 - **Configurable Precision:** Set the number of decimal places from 1 to 20 for your calculations.
 - **Multiple Rounding Modes:** Support for modes such as ROUND_UP, ROUND_DOWN, ROUND_CEIL, ROUND_FLOOR, ROUND_HALF_UP, and more.
 - **Comprehensive Arithmetic Operations:** Perform addition, subtraction, multiplication, division, exponentiation, modulo, and even square root calculations.
-- **Flexible Conversions:** Convert between `string`, `number`, `bigint`, and FixedDecimal instances seamlessly.
+- **Flexible Conversions:** Convert between `string`, `number`, `bigint`, and FixedPrecision instances seamlessly.
 - **Formatting Utilities:** Retrieve representations in fixed, exponential, or custom precision notation.
 - **Random Number Generation:** Create random numbers with a specified number of decimal places.
 
@@ -21,18 +21,18 @@ npm install fixed-decimal
 
 ## Basic Usage
 
-Below is an example of how to get started with FixedDecimal:
+Below is an example of how to get started with FixedPrecision:
 
 ```ts
-import FixedDecimal, { fixedconfig } from 'fixed-decimal';
+import FixedPrecision, { fixedconfig } from 'fixed-decimal';
 
 // Optional: Configure the library globally
 // Set 8 decimal places and use ROUND_HALF_UP (4) as the default rounding mode
 fixedconfig.configure({ places: 8, roundingMode: 4 });
 
-// Create FixedDecimal instances from various input types
-const a = new FixedDecimal("1.2345");
-const b = new FixedDecimal(2.3456);
+// Create FixedPrecision instances from various input types
+const a = new FixedPrecision("1.2345");
+const b = new FixedPrecision(2.3456);
 
 // Arithmetic operations
 const sum = a.add(b);
@@ -54,11 +54,11 @@ console.log("Rounded:", rounded.toString());
 
 ### Constructor
 
-Creates a new FixedDecimal instance from one of the following types:  
-`string | number | bigint | FixedDecimal`
+Creates a new FixedPrecision instance from one of the following types:  
+`string | number | bigint | FixedPrecision`
 
 ```ts
-new FixedDecimal(value);
+new FixedPrecision(value);
 ```
 
 ### Conversion Methods
@@ -69,55 +69,55 @@ new FixedDecimal(value);
 
 ### Arithmetic Operations
 
-- **`add(other: FixedDecimal): FixedDecimal`**: Adds the given FixedDecimal to the current value.
-- **`sub(other: FixedDecimal): FixedDecimal`**: Subtracts the given FixedDecimal from the current value.
-- **`mul(other: FixedDecimal): FixedDecimal`**: Multiplies the current value by another FixedDecimal.
-- **`div(other: FixedDecimal): FixedDecimal`**: Divides the current value by another FixedDecimal (throws an error on division by zero).
-- **`mod(other: FixedDecimal): FixedDecimal`**: Returns the remainder of the division (modulus operation).
-- **`pow(exp: number): FixedDecimal`**: Raises the value to an integer exponent.
-- **`sqrt(): FixedDecimal`**: Computes the square root of the current value (throws an error for negative numbers).
+- **`add(other: FixedPrecision): FixedPrecision`**: Adds the given FixedPrecision to the current value.
+- **`sub(other: FixedPrecision): FixedPrecision`**: Subtracts the given FixedPrecision from the current value.
+- **`mul(other: FixedPrecision): FixedPrecision`**: Multiplies the current value by another FixedPrecision.
+- **`div(other: FixedPrecision): FixedPrecision`**: Divides the current value by another FixedPrecision (throws an error on division by zero).
+- **`mod(other: FixedPrecision): FixedPrecision`**: Returns the remainder of the division (modulus operation).
+- **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
+- **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
 
 ### Comparison Methods
 
-- **`cmp(other: FixedDecimal): -1 | 0 | 1`**: Compares two FixedDecimals, returning -1 if less than, 0 if equal, and 1 if greater than.
-- **`eq(other: FixedDecimal): boolean`**: Checks if two FixedDecimals are equal.
-- **`gt(other: FixedDecimal): boolean`**: Returns `true` if the current value is greater than the given value.
-- **`gte(other: FixedDecimal): boolean`**: Returns `true` if the current value is greater than or equal to the given value.
-- **`lt(other: FixedDecimal): boolean`**: Returns `true` if the current value is less than the given value.
-- **`lte(other: FixedDecimal): boolean`**: Returns `true` if the current value is less than or equal to the given value.
+- **`cmp(other: FixedPrecision): -1 | 0 | 1`**: Compares two FixedPrecisions, returning -1 if less than, 0 if equal, and 1 if greater than.
+- **`eq(other: FixedPrecision): boolean`**: Checks if two FixedPrecisions are equal.
+- **`gt(other: FixedPrecision): boolean`**: Returns `true` if the current value is greater than the given value.
+- **`gte(other: FixedPrecision): boolean`**: Returns `true` if the current value is greater than or equal to the given value.
+- **`lt(other: FixedPrecision): boolean`**: Returns `true` if the current value is less than the given value.
+- **`lte(other: FixedPrecision): boolean`**: Returns `true` if the current value is less than or equal to the given value.
 
 ### Rounding and Scaling
 
-- **`round(dp?: number, rm?: RoundingMode): FixedDecimal`**  
+- **`round(dp?: number, rm?: RoundingMode): FixedPrecision`**  
   Rounds the value to the specified number of decimal places (`dp`) using the rounding mode (`rm`).  
   _Example:_ `value.round(2)` rounds the value to 2 decimal places.
 
-- **`ceil(): FixedDecimal`**  
+- **`ceil(): FixedPrecision`**  
   Returns the ceiling of the value (rounds upward for positive numbers).
 
-- **`floor(): FixedDecimal`**  
+- **`floor(): FixedPrecision`**  
   Returns the floor of the value (rounds downward for positive numbers).
 
-- **`trunc(): FixedDecimal`**  
+- **`trunc(): FixedPrecision`**  
   Truncates the value, effectively removing the fractional part (rounds toward zero).
 
-- **`scale(newScale: number): FixedDecimal`**  
+- **`scale(newScale: number): FixedPrecision`**  
   Adjusts the value to a new number of decimal places by scaling and rounding as necessary.
 
-- **`shiftedBy(n: number): FixedDecimal`**  
+- **`shiftedBy(n: number): FixedPrecision`**  
   Shifts the value by `n` decimal places. A positive `n` multiplies the value by 10ⁿ; a negative `n` divides it (throws an error if the division is inexact).
 
 ### Random Number Generation
 
-- **`FixedDecimal.random(decimalPlaces?: number): FixedDecimal`**  
-  Generates a random FixedDecimal value between 0 (inclusive) and 1 (exclusive) with the specified number of decimal places (default is the value defined in `FixedDecimal.format.places`).
+- **`FixedPrecision.random(decimalPlaces?: number): FixedPrecision`**  
+  Generates a random FixedPrecision value between 0 (inclusive) and 1 (exclusive) with the specified number of decimal places (default is the value defined in `FixedPrecision.format.places`).
 
 ### Global Configuration
 
 Configure global settings such as the default number of decimal places and rounding mode using:
 
 ```ts
-FixedDecimal.configure({
+FixedPrecision.configure({
   places: 8,         // Number of decimal places (between 1 and 20)
   roundingMode: 4,   // Default rounding mode
 });
