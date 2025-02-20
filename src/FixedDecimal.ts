@@ -425,7 +425,7 @@ export default class FixedDecimal {
     const newValue = rounded * factor;
     return FixedDecimal.fromRaw(newValue);
   }
-  
+
    /**
    * Returns a new FixedDecimal with its value shifted by n decimal places.
    * A positive n shifts to the left (multiplication), negative to the right (division).
@@ -448,6 +448,22 @@ export default class FixedDecimal {
     }
     return FixedDecimal.fromRaw(newRaw);
   }
+
+    /**
+   * Returns a new FixedDecimal with a pseudo-random value ≥ 0 and < 1.
+   * The result will have the specified number of decimal places.
+   *
+   * @param decimalPlaces - Number of decimal places (default: FixedDecimal.format.places).
+   * @returns A new FixedDecimal representing a random value.
+   */
+    public static random(decimalPlaces: number = FixedDecimal.format.places): FixedDecimal {
+      const max = 10 ** decimalPlaces;
+      const randInt = Math.floor(Math.random() * max);
+      const fracStr = randInt.toString().padStart(decimalPlaces, "0");
+      const valueStr = "0." + fracStr;
+      return new FixedDecimal(valueStr);
+    }
+  
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Formatting methods
