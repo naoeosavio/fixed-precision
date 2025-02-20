@@ -369,13 +369,39 @@ export default class FixedDecimal {
     }
     return this.sqrtGo(next, iter - 1);
   }
-  
+
   /**
    * Returns a JSON representation of this FixedDecimal (its string value).
    */
   public toJSON(): string {
     return this.toString();
   }
+
+    /**
+   * Returns a new FixedDecimal representing the ceiling of this value.
+   * For positive numbers, rounds up; for negatives, rounds toward zero.
+   */
+    public ceil(): FixedDecimal {
+      // Using ROUND_CEIL (2)
+      return this.round(0, 2);
+    }
+  
+    /**
+     * Returns a new FixedDecimal representing the floor of this value.
+     * For positive numbers, rounds down; for negatives, rounds away from zero.
+     */
+    public floor(): FixedDecimal {
+      // Using ROUND_FLOOR (3)
+      return this.round(0, 3);
+    }
+  
+    /**
+     * Returns a new FixedDecimal representing the value truncated toward zero.
+     */
+    public trunc(): FixedDecimal {
+      // Using ROUND_DOWN (1)
+      return this.round(0, 1);
+    }
 
   /**
    * Returns a new FixedDecimal with the value rounded to the specified number of decimal places.
