@@ -329,7 +329,7 @@ export default class FixedDecimal {
     if (!Number.isInteger(exp)) {
       throw new Error("Exponent must be an integer");
     }
-    const result = FixedDecimal.fromRaw(this.value ** BigInt(exp));
+    const result = FixedDecimal.fromRaw(this.value ** BigInt(Math.abs(exp))).div(FixedDecimal.fromRaw(FixedDecimal.SCALE ** BigInt(Math.abs(exp))));
     return exp < 0 ? new FixedDecimal(1n).div(result) : result;
   }
 
@@ -398,29 +398,6 @@ export default class FixedDecimal {
   public trunc(): FixedDecimal {
     // Using ROUND_DOWN (1)
     return this.round(0, 1);
-  }
-
-  /**
-   * Returns a new FixedDecimal with the value rounded to the specified number of decimal places.
-   *
-   * @param dp - Desired number of decimal places (default: FixedDecimal.format.places)
-   * @param rm - Rounding mode (default: FixedDecimal.format.roundingMode)
-   * @returns A new FixedDecimal instance with the rounded value.
-   */
-  public round(
-    dp: number = FixedDecimal.format.places,
-    rm: RoundingMode = FixedDecimal.format.roundingMode
-  ): FixedDecimal {
-    if (dp < 0 || dp > FixedDecimal.format.places) {
-      throw new Error(
-        `Decimal places (dp) must be between 0 and ${FixedDecimal.format.places}`
-      );
-    }
-    const diff = FixedDecimal.format.places - dp;
-    const factor = 10n ** BigInt(diff);
-    const rounded = this.roundToScale(factor, rm);
-    const newValue = rounded * factor;
-    return FixedDecimal.fromRaw(newValue);
   }
 
   /**
@@ -540,13 +517,39 @@ export default class FixedDecimal {
   }
 
   /**
+   * Returns a new FixedDecimal with the value rounded to the specified number of decimal places.
+   *
+   * @param dp - Desired number of decimal places (default: FixedDecimal.format.places)
+   * @param rm - Rounding mode (default: FixedDecimal.format.roundingMode)
+   * @returns A new FixedDecimal instance with the rounded value.
+   */
+  public round(
+    dp: number = FixedDecimal.format.places,
+    rm: RoundingMode = FixedDecimal.format.roundingMode
+  ): FixedDecimal {
+    if (dp < 0 || dp > FixedDecimal.format.places) {
+      throw new Error(
+        `Decimal places (dp) must be between 0 and ${FixedDecimal.format.places}`
+      );
+    }
+    const diff = FixedDecimal.format.places - dp;
+    const factor = 10n ** BigInt(diff);
+    const rounded = this.roundToScale(factor, rm);
+    const newValue = rounded * factor;
+    return FixedDecimal.fromRaw(newValue);
+  }
+
+  /**
    * Adjusts the number scale, rounding to the new number of decimal places.
    * Returns a new FixedDecimal with the adjusted value.
    *
    * Example:
    *    new FixedDecimal("1.23456789").scale(2)  // represents 1.23
    */
-  public scale(newScale: number): FixedDecimal {
+  public scale(
+    newScale: number,
+    rm: RoundingMode = FixedDecimal.format.roundingMode
+  ): FixedDecimal {
     if (newScale < 0 || newScale > FixedDecimal.format.places) {
       throw new Error(
         `newScale must be between 0 and ${FixedDecimal.format.places}`
@@ -554,7 +557,7 @@ export default class FixedDecimal {
     }
     const diff = FixedDecimal.format.places - newScale;
     const factor = 10n ** BigInt(diff);
-    const rounded = this.roundToScale(factor, FixedDecimal.format.roundingMode);
+    const rounded = this.roundToScale(factor, rm);
     const newValue = rounded * factor;
     return FixedDecimal.fromRaw(newValue);
   }
@@ -571,7 +574,7 @@ export default class FixedDecimal {
         : int === "0"
           ? -frac?.search(/[1-9]/) - 1
           : 0;
-    const shifted = rounded.div(new FixedDecimal(10n ** BigInt(exp)));
+    const shifted = rounded.div(new FixedDecimal(10n ** BigInt(Math.abs(exp))));
     return `${shifted.toFixed(dp)}e${exp}`;
   }
 
@@ -579,13 +582,6 @@ export default class FixedDecimal {
     if (sd >= 1e6) {
       throw new Error("Invalid precision");
     }
-
-    // const str = this.abs().toString().replace(".", "");
-    // const len = str.replace(/0+$/, "").length;
-    // if (len > sd) {
-    //   return this.toExponential(sd - 1, rm);
-    // }
-
     return this.round(sd - (Math.floor(Math.log10(this.toNumber())) + 1), rm)
       .toString()
       .replace(/0+$/, "");
