@@ -136,7 +136,7 @@ export default class FixedDecimal {
         abs = -1;
       }
       return BigInt(
-        Number(integerPart) * FixedDecimal.SCALENUMBER + abs * decimal
+        (Number(integerPart) * FixedDecimal.SCALENUMBER) + (abs * decimal)
       );
     }
     let abs = 1n;
@@ -148,7 +148,7 @@ export default class FixedDecimal {
         ? BigInt(decimalPart)
         : BigInt(decimalPart) *
           BigInt(10 ** (FixedDecimal.format.places - len));
-    return BigInt(integerPart) * FixedDecimal.SCALE + abs * decimal;
+    return (BigInt(integerPart) * FixedDecimal.SCALE) +( abs * decimal);
   }
 
   // Converts a number to bigint.
@@ -628,7 +628,7 @@ export default class FixedDecimal {
  * Usage example:
  *
  *   import FixedDecimal, { fixedconfig } from './FixedDecimal';
- *   fixedconfig.configure({ places: 4, roundingMode: 1 });
+ *   fixedconfig.configure({ places: 8, roundingMode: 4 });
  */
 export const fixedconfig = {
   configure: FixedDecimal.configure.bind(FixedDecimal),
