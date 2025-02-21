@@ -4,7 +4,7 @@ FixedPrecision is a library for handling fixed-precision decimal numbers in Java
 
 ## Features
 
-- **Configurable Precision:** Set the number of decimal places from 1 to 20 for your calculations.
+- **Configurable Precision:** Set the number of decimal places from 0 to 20 for your calculations.
 - **Multiple Rounding Modes:** Support for modes such as ROUND_UP, ROUND_DOWN, ROUND_CEIL, ROUND_FLOOR, ROUND_HALF_UP, and more.
 - **Comprehensive Arithmetic Operations:** Perform addition, subtraction, multiplication, division, exponentiation, modulo, and even square root calculations.
 - **Flexible Conversions:** Convert between `string`, `number`, `bigint`, and FixedPrecision instances seamlessly.
@@ -118,7 +118,7 @@ Configure global settings such as the default number of decimal places and round
 
 ```ts
 FixedPrecision.configure({
-  places: 8,         // Number of decimal places (between 1 and 20)
+  places: 8,         // Number of decimal places (between 0 and 20)
   roundingMode: 4,   // Default rounding mode
 });
 ```

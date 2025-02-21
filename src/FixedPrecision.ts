@@ -8,7 +8,7 @@ export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
  */
 export interface FixedPrecisionConfig {
   /**
-   * Number of decimal places to use (1-20)
+   * Number of decimal places to use (0-20)
    * @default 8
    */
   places: number;
