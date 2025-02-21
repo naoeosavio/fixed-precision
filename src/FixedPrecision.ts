@@ -34,11 +34,11 @@ export default class FixedPrecision {
 
   /**
    * Formatting settings.
-   * By default, uses 8 decimal places and symmetric rounding (1).
+   * By default, uses 8 decimal places and ROUND_HALF_UP rounding (4).
    */
   public static format = {
     places: 8,
-    roundingMode: 1 as RoundingMode,
+    roundingMode: 4 as RoundingMode,
   };
   // Pre-calculate the scale factor
   private static SCALE: bigint = 10n ** BigInt(FixedPrecision.format.places);
@@ -66,8 +66,8 @@ export default class FixedPrecision {
     }
     // Validate rounding mode
     if (config.roundingMode !== undefined) {
-      if (![0, 1, 2, 3].includes(config.roundingMode)) {
-        throw new Error("Invalid rounding mode. Must be 0, 1, 2, or 3");
+      if (![0, 1, 2, 3, 4, 5, 6, 7, 8].includes(config.roundingMode)) {
+        throw new Error("Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8");
       }
       FixedPrecision.format.roundingMode = config.roundingMode;
     }
