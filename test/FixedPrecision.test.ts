@@ -272,12 +272,12 @@ describe("FixedPrecision", () => {
     describe("round()", () => {
       test("round() rounds to specified decimal places with default mode", () => {
         const a = new FixedPrecision("1.23456789");
-        expect(a.round(4).toString()).toBe("1.23450000");
+        expect(a.round(4).toString()).toBe("1.23460000");
       });
       test("round() rounds with explicit rounding mode", () => {
-        // Using ROUND_HALF_UP (4) explicitly
+        // Using ROUND_DOWN (4) explicitly
         const a = new FixedPrecision("1.23456789");
-        expect(a.round(4, 4).toString()).toBe("1.23460000");
+        expect(a.round(4, 1).toString()).toBe("1.23450000");
       });
     });
   });
@@ -347,7 +347,7 @@ describe("FixedPrecision", () => {
       });
       test("toFixed() produces correct output with multiple places", () => {
         const a = new FixedPrecision("123.456789");
-        expect(a.toFixed(3)).toBe("123.456");
+        expect(a.toFixed(3)).toBe("123.457");
       });
     });
   });
@@ -355,7 +355,7 @@ describe("FixedPrecision", () => {
   describe("scale() method", () => {
     test("scale() rounds correctly to 4 decimals", () => {
       const a = new FixedPrecision("123.456789");
-      expect(a.scale(4).toString()).toBe("123.45670000");
+      expect(a.scale(4).toString()).toBe("123.45680000");
     });
     test("scale() rounds correctly to 0 decimals", () => {
       const a = new FixedPrecision("99.99999999");
@@ -388,7 +388,7 @@ describe("FixedPrecision", () => {
     test("configure() throws error for invalid decimal places", () => {
       const config: FixedPrecisionConfig = { places: 25 };
       expect(() => fixedconfig.configure(config)).toThrow(
-        "Decimal places must be an integer between 1 and 20"
+        "Decimal places must be an integer between 0 and 20"
       );
     });
     test("configure() sets valid rounding mode", () => {
@@ -400,10 +400,10 @@ describe("FixedPrecision", () => {
     test("configure() throws error for invalid rounding mode", () => {
       const config: FixedPrecisionConfig = {
         places: 8,
-        roundingMode: 5 as RoundingMode,
+        roundingMode: 9 as RoundingMode,
       };
       expect(() => fixedconfig.configure(config)).toThrow(
-        "Invalid rounding mode. Must be 0, 1, 2, or 3"
+        "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8"
       );
     });
   });

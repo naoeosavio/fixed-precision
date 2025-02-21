@@ -53,10 +53,10 @@ export default class FixedPrecision {
     if (config.places !== undefined) {
       if (
         !Number.isInteger(config.places) ||
-        config.places < 1 ||
+        config.places < 0 ||
         config.places > 20
       ) {
-        throw new Error("Decimal places must be an integer between 1 and 20");
+        throw new Error("Decimal places must be an integer between 0 and 20");
       }
 
       FixedPrecision.format.places = config.places;
