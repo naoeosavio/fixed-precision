@@ -76,16 +76,21 @@ export default class FixedPrecision {
   constructor(val: FixedPrecisionValue) {
     if (val instanceof FixedPrecision) {
       this.value = val.value;
-    } else if (typeof val === "bigint") {
-      // When a bigint is passed in, we assume it is an unscaled integer
-      // so we multiply by 10^places.
-      this.value = val * FixedPrecision.SCALE;
-    } else if (typeof val === "string") {
-      this.value = FixedPrecision.fromString(val);
-    } else if (typeof val === "number") {
-      this.value = FixedPrecision.fromNumber(val);
     } else {
-      throw new Error("Invalid type for FixedPrecision");
+      switch (typeof val) {
+        case "bigint":
+          this.value = val * FixedPrecision.SCALE;
+          break;
+        case "number": {
+          this.value = FixedPrecision.fromNumber(val);
+          break;
+        }
+        case "string":
+          this.value = FixedPrecision.fromString(val);
+          break;
+        default:
+          throw new Error("Tipo inválido para FixedPrecision");
+      }
     }
   }
 
