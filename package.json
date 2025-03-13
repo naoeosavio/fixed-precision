@@ -5,6 +5,9 @@
   "main": "dist/FixedPrecision",
   "module": "dist/FixedPrecision.mjs",
   "browser": "dist/FixedPrecision.js",
+  "bugs": {
+    "url": "https://github.com/naoeosavio/fixed-precision/issues"
+  },
   "exports": {
     ".": {
       "types": "./dist/FixedPrecision.d.ts",
