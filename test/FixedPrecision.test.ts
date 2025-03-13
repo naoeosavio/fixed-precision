@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import FixedPrecision, {
   fixedconfig,
-  FixedPrecisionConfig,
-  RoundingMode,
+  type FixedPrecisionConfig,
+  type RoundingMode,
 } from '../src/FixedPrecision.js';
 
 describe('FixedPrecision', () => {
@@ -311,7 +311,8 @@ describe('FixedPrecision', () => {
     test('random() produces a value with correct number of decimals', () => {
       const rnd = FixedPrecision.random(8);
       const parts = rnd.toString().split('.');
-      expect(parts[1].length).toBe(8);
+      expect(parts[1]).toBeDefined();
+      expect(parts[1]!.length).toBe(8);
     });
   });
 
