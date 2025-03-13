@@ -31,23 +31,23 @@ import FixedPrecision, { fixedconfig } from 'fixed-precision';
 fixedconfig.configure({ places: 8, roundingMode: 4 });
 
 // Create FixedPrecision instances from various input types
-const a = new FixedPrecision("1.2345");
+const a = new FixedPrecision('1.2345');
 const b = new FixedPrecision(2.3456);
 
 // Arithmetic operations
 const sum = a.add(b);
-console.log("Sum:", sum.toString());
+console.log('Sum:', sum.toString());
 
 const product = a.mul(b);
-console.log("Product:", product.toString());
+console.log('Product:', product.toString());
 
 // Conversions
-console.log("As a number:", sum.toNumber());
-console.log("As a string:", sum.toString());
+console.log('As a number:', sum.toNumber());
+console.log('As a string:', sum.toString());
 
 // Rounding
 const rounded = sum.round(2); // Round to 2 decimal places
-console.log("Rounded:", rounded.toString());
+console.log('Rounded:', rounded.toString());
 ```
 
 ## API Overview
@@ -118,8 +118,8 @@ Configure global settings such as the default number of decimal places and round
 
 ```ts
 FixedPrecision.configure({
-  places: 8,         // Number of decimal places (between 0 and 20)
-  roundingMode: 4,   // Default rounding mode
+  places: 8, // Number of decimal places (between 0 and 20)
+  roundingMode: 4, // Default rounding mode
 });
 ```
 
