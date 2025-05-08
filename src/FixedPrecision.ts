@@ -41,8 +41,8 @@ export default class FixedPrecision {
     roundingMode: 4 as RoundingMode,
   };
   // Pre-calculate the scale factor
-  private static SCALE: bigint = 10n ** BigInt(FixedPrecision.format.places);
   private static SCALENUMBER: number = 10 ** FixedPrecision.format.places;
+  private static SCALE: bigint = BigInt(10 ** FixedPrecision.format.places);
 
   /**
    * Configures the FixedPrecision library.
@@ -61,7 +61,7 @@ export default class FixedPrecision {
 
       FixedPrecision.format.places = config.places;
       // Update the scale factors when places change
-      FixedPrecision.SCALE = 10n ** BigInt(config.places);
+      FixedPrecision.SCALE = BigInt(10 ** config.places);
       FixedPrecision.SCALENUMBER = 10 ** config.places;
     }
     // Validate rounding mode
@@ -76,23 +76,19 @@ export default class FixedPrecision {
   }
 
   constructor(val: FixedPrecisionValue) {
-    if (val instanceof FixedPrecision) {
-      this.value = val.value;
-    } else {
-      switch (typeof val) {
-        case 'bigint':
-          this.value = val * FixedPrecision.SCALE;
-          break;
-        case 'number': {
-          this.value = FixedPrecision.fromNumber(val);
-          break;
-        }
-        case 'string':
-          this.value = FixedPrecision.fromString(val);
-          break;
-        default:
-          throw new Error('Tipo inválido para FixedPrecision');
+    switch (typeof val) {
+      case 'bigint':
+        this.value = val * FixedPrecision.SCALE;
+        break;
+      case 'number': {
+        this.value = FixedPrecision.fromNumber(val);
+        break;
       }
+      case 'string':
+        this.value = FixedPrecision.fromString(val);
+        break;
+      default:
+        this.value = val.value;
     }
   }
 
@@ -213,16 +209,6 @@ export default class FixedPrecision {
     return FixedPrecision.fromRaw(this.value < 0n ? -this.value : this.value);
   }
 
-  /** Returns a FixedPrecision whose value is this FixedPrecision plus n. */
-  public add(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(this.value + other.value);
-  }
-
-  /** Alias for add. */
-  public plus(other: FixedPrecision): FixedPrecision {
-    return this.add(other);
-  }
-
   /** Compares the values.
    *  Returns -1 if this < other, 0 if equal, and 1 if this > other.
    */
@@ -269,6 +255,16 @@ export default class FixedPrecision {
     return this.value < 0n;
   }
 
+  /** Returns a FixedPrecision whose value is this FixedPrecision plus n. */
+  public add(other: FixedPrecision): FixedPrecision {
+    return FixedPrecision.fromRaw(this.value + other.value);
+  }
+
+  /** Alias for add. */
+  public plus(other: FixedPrecision): FixedPrecision {
+    return this.add(other);
+  }
+
   /** Returns a FixedPrecision whose value is this FixedPrecision minus n. */
   public sub(other: FixedPrecision): FixedPrecision {
     return FixedPrecision.fromRaw(this.value - other.value);
@@ -292,34 +288,22 @@ export default class FixedPrecision {
 
   /** Returns a FixedPrecision whose value is this FixedPrecision divided by n. */
   public div(other: FixedPrecision): FixedPrecision {
-    if (other.value === 0n) {
-      throw new Error('Division by zero');
-    }
     return FixedPrecision.fromRaw(
       (this.value * FixedPrecision.SCALE) / other.value,
     );
   }
 
   public fraction(other: FixedPrecision): FixedPrecision {
-    if (other.value === 0n) {
-      throw new Error('Division by zero');
-    }
     return FixedPrecision.fromRaw(this.value / other.value);
   }
 
   /** Returns a FixedPrecision representing the integer remainder of dividing this by n. */
   public mod(other: FixedPrecision): FixedPrecision {
-    if (other.value === 0n) {
-      throw new Error('Division by zero in modulus');
-    }
     return FixedPrecision.fromRaw(
       (this.value * FixedPrecision.SCALE) % other.value,
     );
   }
   public leftover(other: FixedPrecision): FixedPrecision {
-    if (other.value === 0n) {
-      throw new Error('Division by zero in modulus');
-    }
     return FixedPrecision.fromRaw(this.value % other.value);
   }
 
@@ -333,15 +317,44 @@ export default class FixedPrecision {
    * (Only integer exponents are supported.)
    */
   public pow(exp: number): FixedPrecision {
-    if (!Number.isInteger(exp)) {
-      throw new Error('Exponent must be an integer');
-    }
     const result = FixedPrecision.fromRaw(
-      this.value ** BigInt(Math.abs(exp)),
+      this.value ** FixedPrecision.fromNumber(exp),
     ).div(
-      FixedPrecision.fromRaw(FixedPrecision.SCALE ** BigInt(Math.abs(exp))),
+      FixedPrecision.fromRaw(
+        FixedPrecision.SCALE ** FixedPrecision.fromNumber(exp),
+      ),
     );
     return exp < 0 ? new FixedPrecision(1n).div(result) : result;
+  }
+
+  /**
+   * Returns a FixedPrecision representing π (pi) with the current precision
+   */
+  public static PI(): FixedPrecision {
+    return new FixedPrecision(Math.PI);
+  }
+
+  /**
+   * Returns a FixedPrecision representing e (Euler's number) with current precision
+   */
+  public static e(): FixedPrecision {
+    return new FixedPrecision(Math.E);
+  }
+
+  /**
+   * Returns a FixedPrecision representing φ (golden ratio) with current precision
+   */
+  public static phi(): FixedPrecision {
+    const phiValue = (1 + Math.sqrt(5)) / 2;
+    return new FixedPrecision(phiValue);
+  }
+
+  /**
+   * Returns a FixedPrecision representing √2 with current precision
+   */
+  public static sqrt2(): FixedPrecision {
+    const sqrt2Value = Math.sqrt(2);
+    return new FixedPrecision(sqrt2Value);
   }
 
   /**
@@ -626,8 +639,15 @@ export default class FixedPrecision {
       : intPart.toString();
   }
 
-  valueOf(): string {
+  public valueOf(): string {
     return this.toString();
+  }
+
+  /**
+   * Returns the type of this object as a string ('FixedPrecision')
+   */
+  public typeof(): 'FixedPrecision' {
+    return 'FixedPrecision';
   }
 }
 
