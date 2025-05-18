@@ -92,6 +92,16 @@ export default class FixedPrecision {
     }
   }
 
+  static readonly POW10: readonly bigint[] = Array.from(
+    { length: 21 },
+    (_, i) => 10n ** BigInt(i),
+  );
+
+  static pow10Big = (n: number): bigint =>
+    n >= 0 && n < FixedPrecision.POW10.length
+      ? FixedPrecision.POW10[n]!
+      : 10n ** BigInt(n);
+
   /**
    * Helper method to create a FixedPrecision instance from a raw, already scaled bigint.
    * @param rawValue - The raw bigint value.
@@ -108,49 +118,142 @@ export default class FixedPrecision {
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
   // Converts a string (with up to 8 decimal places) to bigint.
-  static fromString(value: string): bigint {
-    const dotIndex = value.split('.');
-    if (dotIndex.length > 2) {
-      throw new Error('Invalid decimal format');
-    }
-    const integerPart = dotIndex[0] || '0';
-    if (dotIndex.length < 2) {
-      // No decimal part: multiply by 10^places.
-      if (integerPart.length + FixedPrecision.format.places < 16) {
-        return BigInt(Number(integerPart) * FixedPrecision.SCALENUMBER);
+  static fromString(str: string): bigint {
+    const nStr = str;
+    const dotIndex = str.indexOf('.', 1);
+    const P = Number(FixedPrecision.format.places);
+    const lens = str.length;
+    if (dotIndex === -1) {
+      if (P <= 16) {
+        if (lens + P < 16) {
+          const num = Number(str);
+          if (!num) {
+            return 0n;
+          }
+          const scale = FixedPrecision.SCALENUMBER;
+          return BigInt(num * scale);
+        }
+        if (lens < 16) {
+          const num = Number(str);
+          if (!num) {
+            return 0n;
+          }
+          if (Number.isFinite(num)) {
+            const scale = FixedPrecision.SCALENUMBER;
+            if (Math.abs(num) <= Number.MAX_SAFE_INTEGER / scale) {
+              return BigInt(num * scale);
+            }
+            const nP = 16 - lens;
+            if (nP >= P) {
+              return BigInt(num * scale);
+            }
+            return (
+              BigInt(num * Math.pow(10, nP)) * FixedPrecision.pow10Big(P - nP)
+            );
+          }
+        }
+        const num = BigInt(str);
+        if (!num) {
+          return 0n;
+        }
+        const scale = FixedPrecision.SCALE;
+        return num * scale;
       }
-      return BigInt(integerPart) * FixedPrecision.SCALE;
-    }
-    let decimalPart = dotIndex[1] || '0';
+      const scale = FixedPrecision.SCALE;
 
-    let len = decimalPart.length;
-    if (len > FixedPrecision.format.places) {
-      decimalPart = decimalPart.slice(0, FixedPrecision.format.places);
-      len = FixedPrecision.format.places;
-    }
-    if (integerPart.length + FixedPrecision.format.places < 16) {
-      const decimal =
-        len === FixedPrecision.format.places
-          ? Number(decimalPart)
-          : Number(decimalPart) * 10 ** (FixedPrecision.format.places - len);
-      let abs = 1;
-      if (integerPart[0] === '-') {
-        abs = -1;
+      if (lens < 16) {
+        const num = Number(str);
+        if (!num) {
+          return 0n;
+        }
+        return BigInt(num) * scale;
       }
-      return BigInt(
-        Number(integerPart) * FixedPrecision.SCALENUMBER + abs * decimal,
-      );
+      const num = BigInt(str);
+      if (!num) {
+        return 0n;
+      }
+      return num * scale;
     }
-    let abs = 1n;
-    if (integerPart[0] === '-') {
-      abs = -1n;
+    if (dotIndex + P <= 16) {
+      const num = Number(nStr);
+      const scale = FixedPrecision.SCALENUMBER;
+      if (Math.abs(num) <= Number.MAX_SAFE_INTEGER / scale) {
+        return BigInt(Math.trunc(num * scale));
+      }
+      const nP = 16 - dotIndex;
+      if (nP >= P) {
+        return BigInt(Math.trunc(num * scale));
+      }
+      const Num = num * Math.pow(10, nP);
+      const newNum = Math.trunc(Num);
+      const NewFrac = Math.trunc(newNum - Num);
+      if (!NewFrac) {
+        return BigInt(newNum) * FixedPrecision.pow10Big(P - nP);
+      }
+      return BigInt(newNum) * FixedPrecision.pow10Big(P - nP) + BigInt(NewFrac);
     }
-    const decimal =
-      len === FixedPrecision.format.places
-        ? BigInt(decimalPart)
-        : BigInt(decimalPart) *
-          BigInt(10 ** (FixedPrecision.format.places - len));
-    return BigInt(integerPart) * FixedPrecision.SCALE + abs * decimal;
+    const intStr = str.slice(0, dotIndex);
+    const facStr = str.slice(dotIndex + 1, dotIndex + 1 + P);
+    const faclen = facStr.length;
+
+    if (dotIndex < 16) {
+      const int = Number(intStr);
+      const scale = FixedPrecision.SCALENUMBER;
+      if (Math.abs(int) <= Number.MAX_SAFE_INTEGER / scale) {
+        const nNum = int * scale;
+        if (P <= 16) {
+          const frac = Number(facStr);
+          const newLen = P >= faclen ? P - faclen : P;
+          const nScaled = BigInt(frac * Math.pow(10, newLen));
+          return nNum < 0 ? BigInt(nNum) - nScaled : BigInt(nNum) + nScaled;
+        }
+        const frac = BigInt(facStr);
+        const newLen = P >= faclen ? P - faclen : P;
+        const nScaled = frac * FixedPrecision.pow10Big(newLen);
+        return nNum < 0 ? BigInt(nNum) - nScaled : BigInt(nNum) + nScaled;
+      }
+      if (P <= 16) {
+        const frac = Number(facStr);
+        const nP = 16 - dotIndex;
+        if (nP >= P) {
+          return BigInt(int * scale + frac);
+        }
+        const Num = int * Math.pow(10, nP);
+        const nScaled = BigInt(frac * Math.pow(10, P - nP));
+        return Num < 0
+          ? BigInt(Num) * FixedPrecision.pow10Big(P - nP) - nScaled
+          : BigInt(Num) * FixedPrecision.pow10Big(P - nP) + nScaled;
+      }
+      const frac = BigInt(facStr);
+      if (!frac) {
+        return BigInt(int * scale);
+      }
+      const newLen = P >= faclen ? P - faclen : P;
+      const nScaled = frac * FixedPrecision.pow10Big(newLen);
+      return int < 0
+        ? BigInt(int * scale) - nScaled
+        : BigInt(int * scale) + nScaled;
+    }
+    const int = BigInt(intStr);
+
+    const scale = FixedPrecision.SCALE;
+    if (P < 16) {
+      const frac = Number(facStr);
+      if (!frac) {
+        return int * scale;
+      }
+      const newLen = P >= faclen ? P - faclen : P;
+      const nScaled = BigInt(frac * Math.pow(10, newLen));
+      return int < 0n ? int * scale - nScaled : int * scale + nScaled;
+    }
+    const frac = BigInt(facStr);
+    // const scale = FixedPrecision.SCALE
+    if (!frac) {
+      return int * scale;
+    }
+    const newLen = P >= faclen ? P - faclen : P;
+    const nScaled = frac * FixedPrecision.pow10Big(newLen);
+    return int < 0n ? int * scale - nScaled : int * scale + nScaled;
   }
 
   // Converts a number to bigint.
@@ -160,10 +263,17 @@ export default class FixedPrecision {
       throw new Error('Invalid number: value must be a finite number.');
     }
     const scaled = value * FixedPrecision.SCALENUMBER;
-    if (scaled > Number.MAX_SAFE_INTEGER || scaled < Number.MIN_SAFE_INTEGER) {
-      throw new Error('Number out of safe range after scaling');
+    if (Math.abs(scaled) > Number.MAX_SAFE_INTEGER) {
+      if (Number.isInteger(value)) {
+        return BigInt(value) * FixedPrecision.SCALE;
+      } else {
+        const num = Math.trunc(value);
+        const nNum = Math.abs(num - value);
+        const nScaled = BigInt(Math.trunc(nNum * FixedPrecision.SCALENUMBER));
+        return BigInt(num) * FixedPrecision.SCALE + nScaled;
+      }
     }
-    return BigInt(Math.floor(scaled));
+    return BigInt(Math.trunc(scaled));
   }
 
   // Converts an internal scaled BigInt to a number.
