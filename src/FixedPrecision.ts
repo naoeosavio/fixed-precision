@@ -427,14 +427,31 @@ export default class FixedPrecision {
    * (Only integer exponents are supported.)
    */
   public pow(exp: number): FixedPrecision {
-    const result = FixedPrecision.fromRaw(
-      this.value ** FixedPrecision.fromNumber(exp),
-    ).div(
-      FixedPrecision.fromRaw(
-        FixedPrecision.SCALE ** FixedPrecision.fromNumber(exp),
-      ),
-    );
-    return exp < 0 ? new FixedPrecision(1n).div(result) : result;
+    if (!Number.isInteger(exp)) throw new Error('Exponent must be an integer');
+    if (exp === 0) return FixedPrecision.fromRaw(FixedPrecision.SCALE); // 1.0
+
+    if (this.isZero()) {
+      if (exp < 0) throw new Error('0 ** negative is undefined');
+      return FixedPrecision.fromRaw(0n);
+    }
+
+    let e = Math.abs(exp);
+    let base = this.value; // raw (scaled)
+    let acc = FixedPrecision.SCALE; // raw(1.0)
+
+    // exponentiation by squaring in scaled space
+    while (e > 0) {
+      if (e & 1) acc = (acc * base) / FixedPrecision.SCALE;
+      base = (base * base) / FixedPrecision.SCALE;
+      e >>= 1;
+    }
+
+    if (exp < 0) {
+      // raw(1/x) = (SCALE * SCALE) / raw(x)
+      const inv = (FixedPrecision.SCALE * FixedPrecision.SCALE) / acc;
+      return FixedPrecision.fromRaw(inv);
+    }
+    return FixedPrecision.fromRaw(acc);
   }
 
   /**
