@@ -264,22 +264,20 @@ export default class FixedPrecision {
 
   // Converts a raw bigint to string (in normal decimal notation).
   static toString(value: bigint): string {
-    const abs = value < 0n ? 0 : 1;
+    const abs = value < 0n ? 1 : 0;
     const s = value.toString();
-    const intPart = abs
-      ? s.slice(0, -FixedPrecision.format.places) || '0'
-      : s.slice(1, -FixedPrecision.format.places) || '0';
+    const intPart = s.slice(abs, -FixedPrecision.format.places) || '0';
     let fracPart = s.slice(-FixedPrecision.format.places); //.replace(/0+$/, "");
     if (fracPart.length < FixedPrecision.format.places) {
       fracPart = fracPart.padStart(FixedPrecision.format.places, '0');
     }
     return abs
       ? fracPart
-        ? `${intPart}.${fracPart}`
-        : intPart
-      : fracPart
         ? `-${intPart}.${fracPart}`
-        : `-${intPart}`;
+        : `-${intPart}`
+      : fracPart
+        ? `${intPart}.${fracPart}`
+        : intPart;
   }
 
   // Instance conversion methods
