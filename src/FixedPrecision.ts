@@ -78,7 +78,7 @@ export default class FixedPrecision {
   constructor(val: FixedPrecisionValue) {
     switch (typeof val) {
       case 'bigint':
-        this.value = val * FixedPrecision.SCALE;
+        this.value = val;
         break;
       case 'number': {
         this.value = FixedPrecision.fromNumber(val);
@@ -151,7 +151,6 @@ export default class FixedPrecision {
 
       if (lens < 16) {
         const num = Number(str);
-
         return BigInt(num) * scale;
       }
       const num = BigInt(str);
@@ -177,7 +176,7 @@ export default class FixedPrecision {
     const intStr = str.slice(0, dotIndex);
     const facStr = str.slice(dotIndex + 1, dotIndex + 1 + P);
     const faclen = facStr.length;
-
+    const newLen = P >= faclen ? P - faclen : P;
     if (dotIndex < 16) {
       const int = Number(intStr);
       const scale = FixedPrecision.SCALENUMBER;
@@ -185,12 +184,10 @@ export default class FixedPrecision {
         const nNum = int * scale;
         if (P <= 16) {
           const frac = Number(facStr);
-          const newLen = P >= faclen ? P - faclen : P;
           const nScaled = BigInt(frac * Math.pow(10, newLen));
           return nNum < 0 ? BigInt(nNum) - nScaled : BigInt(nNum) + nScaled;
         }
         const frac = BigInt(facStr);
-        const newLen = P >= faclen ? P - faclen : P;
         const nScaled = frac * FixedPrecision.pow10Big(newLen);
         return nNum < 0 ? BigInt(nNum) - nScaled : BigInt(nNum) + nScaled;
       }
@@ -201,7 +198,7 @@ export default class FixedPrecision {
           return BigInt(int * scale + frac);
         }
         const Num = int * Math.pow(10, nP);
-        const nScaled = BigInt(frac * Math.pow(10, P - nP));
+        const nScaled = BigInt(frac * Math.pow(10, newLen));
         return int < 0
           ? BigInt(Num) * FixedPrecision.pow10Big(P - nP) - nScaled
           : BigInt(Num) * FixedPrecision.pow10Big(P - nP) + nScaled;
@@ -210,21 +207,18 @@ export default class FixedPrecision {
       if (!frac) {
         return BigInt(int * scale);
       }
-      const newLen = P >= faclen ? P - faclen : P;
       const nScaled = frac * FixedPrecision.pow10Big(newLen);
       return int < 0
         ? BigInt(int * scale) - nScaled
         : BigInt(int * scale) + nScaled;
     }
     const int = BigInt(intStr);
-
     const scale = FixedPrecision.SCALE;
     if (P < 16) {
       const frac = Number(facStr);
       if (!frac) {
         return int * scale;
       }
-      const newLen = P >= faclen ? P - faclen : P;
       const nScaled = BigInt(frac * Math.pow(10, newLen));
       return int < 0n ? int * scale - nScaled : int * scale + nScaled;
     }
@@ -232,7 +226,6 @@ export default class FixedPrecision {
     if (!frac) {
       return int * scale;
     }
-    const newLen = P >= faclen ? P - faclen : P;
     const nScaled = frac * FixedPrecision.pow10Big(newLen);
     return int < 0n ? int * scale - nScaled : int * scale + nScaled;
   }
