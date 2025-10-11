@@ -78,7 +78,7 @@ export default class FixedPrecision {
   constructor(val: FixedPrecisionValue) {
     switch (typeof val) {
       case 'bigint':
-        this.value = val;
+        this.value = val * FixedPrecision.SCALE;
         break;
       case 'number': {
         this.value = FixedPrecision.fromNumber(val);
