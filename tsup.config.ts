@@ -1,9 +1,13 @@
-import { defineConfig } from 'tsup';
+import { defineConfig } from "tsup";
 
 export default defineConfig({
-  entryPoints: ['src/FixedPrecision.ts'],
-  format: ['cjs', 'esm'],
+  entry: ["src/FixedPrecision.ts"],
+  format: ["esm", "cjs"],
   dts: true,
-  outDir: 'dist',
+  sourcemap: true,
   clean: true,
+  splitting: false,
+  target: "es2020",
+  outDir: "dist",
+  minify: false,
 });

@@ -24,30 +24,30 @@ npm install fixed-precision
 Below is an example of how to get started with FixedPrecision:
 
 ```ts
-import FixedPrecision, { fixedconfig } from 'fixed-precision';
+import FixedPrecision, { fixedconfig } from "fixed-precision";
 
 // Optional: Configure the library globally
 // Set 8 decimal places and use ROUND_HALF_UP (4) as the default rounding mode
 fixedconfig.configure({ places: 8, roundingMode: 4 });
 
 // Create FixedPrecision instances from various input types
-const a = new FixedPrecision('1.2345');
+const a = new FixedPrecision("1.2345");
 const b = new FixedPrecision(2.3456);
 
 // Arithmetic operations
 const sum = a.add(b);
-console.log('Sum:', sum.toString());
+console.log("Sum:", sum.toString());
 
 const product = a.mul(b);
-console.log('Product:', product.toString());
+console.log("Product:", product.toString());
 
 // Conversions
-console.log('As a number:', sum.toNumber());
-console.log('As a string:', sum.toString());
+console.log("As a number:", sum.toNumber());
+console.log("As a string:", sum.toString());
 
 // Rounding
 const rounded = sum.round(2); // Round to 2 decimal places
-console.log('Rounded:', rounded.toString());
+console.log("Rounded:", rounded.toString());
 ```
 
 ## API Overview
