@@ -78,7 +78,7 @@ export default class FixedPrecision {
   constructor(val: FixedPrecisionValue) {
     switch (typeof val) {
       case "bigint":
-        this.value = val * FixedPrecision.SCALE;
+        this.value = val;
         break;
       case "number": {
         this.value = FixedPrecision.fromNumber(val);
@@ -260,8 +260,11 @@ export default class FixedPrecision {
     const abs = value < 0n ? 1 : 0;
     const s = value.toString();
     const intPart = s.slice(abs, -FixedPrecision.format.places) || "0";
-    let fracPart = s.slice(-FixedPrecision.format.places); //.replace(/0+$/, "");
-    if (fracPart.length < FixedPrecision.format.places) {
+    let fracPart = s.slice(-FixedPrecision.format.places);
+    if (
+      fracPart.length !== 0 ||
+      fracPart.length < FixedPrecision.format.places
+    ) {
       fracPart = fracPart.padStart(FixedPrecision.format.places, "0");
     }
     return abs
@@ -468,7 +471,9 @@ export default class FixedPrecision {
       return new FixedPrecision(0n);
     }
     // Initial guess: x / 2.0
-    const initialGuess = this.div(new FixedPrecision(2n));
+    const initialGuess = this.div(
+      new FixedPrecision(2n * FixedPrecision.SCALE),
+    );
     return this.sqrtGo(initialGuess, FixedPrecision.format.places);
   }
 
@@ -483,7 +488,9 @@ export default class FixedPrecision {
       return guess;
     }
     // next = (guess + (x / guess)) / 2.0
-    const next = guess.add(this.div(guess)).div(new FixedPrecision(2n));
+    const next = guess
+      .add(this.div(guess))
+      .div(new FixedPrecision(2n * FixedPrecision.SCALE));
     if (guess.eq(next)) {
       return next;
     }

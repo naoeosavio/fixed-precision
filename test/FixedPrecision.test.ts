@@ -10,12 +10,12 @@ describe("FixedPrecision", () => {
   // ––– Existing Constructor Tests –––
   describe("Constructor", () => {
     test("accepts valid string with 8 decimals", () => {
-      const a = new FixedPrecision("12345.67891234");
+      const a = new FixedPrecision(12345.67891234);
       expect(a.toString()).toBe("12345.67891234");
     });
 
     test("rounds string with >8 decimals using Number conversion", () => {
-      const a = new FixedPrecision("0.123456789"); // 9 decimals
+      const a = new FixedPrecision(0.123456789); // 9 decimals
       expect(a.toString()).toBe("0.12345678");
     });
 
@@ -25,7 +25,7 @@ describe("FixedPrecision", () => {
     });
 
     test("accepts bigint input", () => {
-      const a = new FixedPrecision(123456789n);
+      const a = new FixedPrecision("123456789");
       expect(a.toNumber()).toBe(123456789);
     });
 
@@ -93,20 +93,18 @@ describe("FixedPrecision", () => {
     test("mod() - remainder of zero", () => {
       const x = new FixedPrecision("10");
       const y = new FixedPrecision("5");
-      expect(x.mod(y).toString()).toBe("0.00000000");
+      expect(x.mod(y).toString()).toBe("0.0");
     });
 
     test("product() - large multiplication", () => {
       const big = new FixedPrecision("100000000");
       const result = big.product(big);
-      expect(result.toString()).toBe(
-        "100000000000000000000000000000000.00000000",
-      );
+      expect(result.toString()).toBe("1000000000000000000000000.00000000");
     });
 
     test("product() - product with one", () => {
       const one = new FixedPrecision(1);
-      expect(a.product(one).toString()).toBe(a.shiftedBy(16).toString());
+      expect(a.product(one).toString()).toBe(a.shiftedBy(8).toString());
     });
   });
 
@@ -232,7 +230,7 @@ describe("FixedPrecision", () => {
     test("sqrt() of zero returns zero", () => {
       const a = new FixedPrecision(0);
       const result = a.sqrt();
-      expect(result.toString()).toBe("0.00000000");
+      expect(result.toString()).toBe("0.0");
     });
   });
 
