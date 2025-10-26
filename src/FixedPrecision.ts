@@ -92,23 +92,14 @@ export default class FixedPrecision {
     }
   }
 
-  static readonly POW10: readonly bigint[] = Array.from(
-    { length: 21 },
-    (_, i) => 10n ** BigInt(i),
-  );
-
-  static pow10Big = (n: number): bigint =>
-    n >= 0 && n < FixedPrecision.POW10.length
-      ? FixedPrecision.POW10[n]!
-      : 10n ** BigInt(n);
-
+  private static readonly Zero = new FixedPrecision(0n);
   /**
    * Helper method to create a FixedPrecision instance from a raw, already scaled bigint.
    * @param rawValue - The raw bigint value.
    * @returns A new FixedPrecision instance with the internal value set to rawValue.
    */
   private static fromRaw(rawValue: bigint): FixedPrecision {
-    const instance = new FixedPrecision(0n);
+    const instance = FixedPrecision.Zero;
     instance.value = rawValue;
     return instance;
   }
