@@ -139,9 +139,7 @@ export default class FixedPrecision {
             if (nP >= P) {
               return BigInt(num * scale);
             }
-            return (
-              BigInt(num * Math.pow(10, nP)) * FixedPrecision.pow10Big(P - nP)
-            );
+            return BigInt(num * 10 ** nP) * FixedPrecision.pow10Big(P - nP);
           }
         }
         const num = BigInt(str);
@@ -165,7 +163,7 @@ export default class FixedPrecision {
       if (nP >= P) {
         return BigInt(Math.trunc(num * scale + nScaled));
       }
-      const Num = num * Math.pow(10, nP);
+      const Num = num * 10 ** nP;
       const newNum = Math.trunc(Num);
       const NewFrac = Math.trunc(newNum - Num);
       if (!NewFrac) {
@@ -184,7 +182,7 @@ export default class FixedPrecision {
         const nNum = int * scale;
         if (P <= 16) {
           const frac = Number(facStr);
-          const nScaled = BigInt(frac * Math.pow(10, newLen));
+          const nScaled = BigInt(frac * 10 ** newLen);
           return nNum < 0 ? BigInt(nNum) - nScaled : BigInt(nNum) + nScaled;
         }
         const frac = BigInt(facStr);
@@ -197,8 +195,8 @@ export default class FixedPrecision {
         if (nP >= P) {
           return BigInt(int * scale + frac);
         }
-        const Num = int * Math.pow(10, nP);
-        const nScaled = BigInt(frac * Math.pow(10, newLen));
+        const Num = int * 10 ** nP;
+        const nScaled = BigInt(frac * 10 ** newLen);
         return int < 0
           ? BigInt(Num) * FixedPrecision.pow10Big(P - nP) - nScaled
           : BigInt(Num) * FixedPrecision.pow10Big(P - nP) + nScaled;
@@ -219,7 +217,7 @@ export default class FixedPrecision {
       if (!frac) {
         return int * scale;
       }
-      const nScaled = BigInt(frac * Math.pow(10, newLen));
+      const nScaled = BigInt(frac * 10 ** newLen);
       return int < 0n ? int * scale - nScaled : int * scale + nScaled;
     }
     const frac = BigInt(facStr);
@@ -233,7 +231,7 @@ export default class FixedPrecision {
   // Converts a number to bigint.
   static fromNumber(value: number): bigint {
     // Verify that the input is a finite number
-    if (isNaN(value) || !isFinite(value)) {
+    if (Number.isNaN(value) || !Number.isFinite(value)) {
       throw new Error("Invalid number: value must be a finite number.");
     }
     const scaled = value * FixedPrecision.SCALENUMBER;
@@ -566,7 +564,7 @@ export default class FixedPrecision {
     const max = 10 ** decimalPlaces;
     const randInt = Math.floor(Math.random() * max);
     const fracStr = randInt.toString().padStart(decimalPlaces, "0");
-    const valueStr = "0." + fracStr;
+    const valueStr = `0.${fracStr}`;
     return new FixedPrecision(valueStr);
   }
 
