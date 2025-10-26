@@ -19,6 +19,6 @@
     "noEmit": true,
 
     /* If transpiling with TypeScript: */
-    "module": "ESNext"
+    "module": "ES2020"
   }
 }

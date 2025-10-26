@@ -93,7 +93,7 @@ describe("FixedPrecision", () => {
     test("mod() - remainder of zero", () => {
       const x = new FixedPrecision("10");
       const y = new FixedPrecision("5");
-      expect(x.mod(y).toString()).toBe("0.0");
+      expect(x.mod(y).toString()).toBe("0.00000000");
     });
 
     test("product() - large multiplication", () => {
@@ -230,7 +230,7 @@ describe("FixedPrecision", () => {
     test("sqrt() of zero returns zero", () => {
       const a = new FixedPrecision(0);
       const result = a.sqrt();
-      expect(result.toString()).toBe("0.0");
+      expect(result.toString()).toBe("0.00000000");
     });
   });
 
