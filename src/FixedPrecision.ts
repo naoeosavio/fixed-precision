@@ -92,14 +92,13 @@ export default class FixedPrecision {
     }
   }
 
-  private static readonly Zero = new FixedPrecision(0n);
   /**
    * Helper method to create a FixedPrecision instance from a raw, already scaled bigint.
    * @param rawValue - The raw bigint value.
    * @returns A new FixedPrecision instance with the internal value set to rawValue.
    */
   private static fromRaw(rawValue: bigint): FixedPrecision {
-    const instance = FixedPrecision.Zero;
+    const instance = new FixedPrecision(0n);
     instance.value = rawValue;
     return instance;
   }
@@ -109,7 +108,7 @@ export default class FixedPrecision {
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
   // Converts a string (with up to 8 decimal places) to bigint.
-  static fromString(str: string): bigint {
+  private static fromString(str: string): bigint {
     const dotIndex = str.indexOf(".", 1);
     const P = FixedPrecision.format.places;
     const SCALE_BIG = FixedPrecision.SCALE;
@@ -216,7 +215,7 @@ export default class FixedPrecision {
   }
 
   // Converts a number to bigint.
-  static fromNumber(value: number): bigint {
+  private static fromNumber(value: number): bigint {
     // Verify that the input is a finite number
     if (Number.isNaN(value) || !Number.isFinite(value)) {
       throw new Error("Invalid number: value must be a finite number.");
@@ -236,12 +235,12 @@ export default class FixedPrecision {
   }
 
   // Converts an internal scaled BigInt to a number.
-  static toNumber(value: bigint): number {
+  private static toNumber(value: bigint): number {
     return Number(value) / FixedPrecision.SCALENUMBER;
   }
 
   // Converts a raw bigint to string (in normal decimal notation).
-  static toString(value: bigint): string {
+  private static toString(value: bigint): string {
     const abs = value < 0n ? 1 : 0;
     const s = value.toString();
     const intPart = s.slice(abs, -FixedPrecision.format.places) || "0";
@@ -449,16 +448,14 @@ export default class FixedPrecision {
    * (For simplicity, we use Math.sqrt on the number value.)
    */
   public sqrt(): FixedPrecision {
-    if (this.lt(new FixedPrecision(0n))) {
+    if (this.isNegative()) {
       throw new Error("Square root of negative number");
     }
-    if (this.eq(new FixedPrecision(0n))) {
+    if (this.isZero()) {
       return new FixedPrecision(0n);
     }
     // Initial guess: x / 2.0
-    const initialGuess = this.div(
-      new FixedPrecision(2n * FixedPrecision.SCALE),
-    );
+    const initialGuess = this.fraction(new FixedPrecision(2n));
     return this.sqrtGo(initialGuess, FixedPrecision.format.places);
   }
 
@@ -469,13 +466,11 @@ export default class FixedPrecision {
    * @returns Improved square root approximation.
    */
   private sqrtGo(guess: FixedPrecision, iter: number): FixedPrecision {
-    if (iter === 0) {
+    if (iter <= 0) {
       return guess;
     }
     // next = (guess + (x / guess)) / 2.0
-    const next = guess
-      .add(this.div(guess))
-      .div(new FixedPrecision(2n * FixedPrecision.SCALE));
+    const next = guess.add(this.div(guess)).fraction(FixedPrecision.fromRaw(2n));
     if (guess.eq(next)) {
       return next;
     }
