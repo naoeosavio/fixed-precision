@@ -470,7 +470,9 @@ export default class FixedPrecision {
       return guess;
     }
     // next = (guess + (x / guess)) / 2.0
-    const next = guess.add(this.div(guess)).fraction(FixedPrecision.fromRaw(2n));
+    const next = guess
+      .add(this.div(guess))
+      .fraction(FixedPrecision.fromRaw(2n));
     if (guess.eq(next)) {
       return next;
     }
