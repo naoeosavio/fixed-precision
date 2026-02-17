@@ -329,33 +329,39 @@ export default class FixedPrecision {
    *  Returns -1 if this < other, 0 if equal, and 1 if this > other.
    */
   public cmp(other: FixedPrecision): Comparison {
+    this.assertSameConfig(other);
     if (this.value < other.value) return -1;
     if (this.value > other.value) return 1;
     return 0;
   }
 
-  /** Returns true if this FixedPrecision equals other. */
+  /** Returns true if this FixedDecimal equals other. */
   public eq(other: FixedPrecision): boolean {
+    this.assertSameConfig(other);
     return this.value === other.value;
   }
 
-  /** Returns true if this FixedPrecision is greater than other. */
+  /** Returns true if this FixedDecimal is greater than other. */
   public gt(other: FixedPrecision): boolean {
+    this.assertSameConfig(other);
     return this.value > other.value;
   }
 
-  /** Returns true if this FixedPrecision is greater than or equal to other. */
+  /** Returns true if this FixedDecimal is greater than or equal to other. */
   public gte(other: FixedPrecision): boolean {
+    this.assertSameConfig(other);
     return this.value >= other.value;
   }
 
-  /** Returns true if this FixedPrecision is less than other. */
+  /** Returns true if this FixedDecimal is less than other. */
   public lt(other: FixedPrecision): boolean {
+    this.assertSameConfig(other);
     return this.value < other.value;
   }
 
-  /** Returns true if this FixedPrecision is less than or equal to other. */
+  /** Returns true if this FixedDecimal is less than or equal to other. */
   public lte(other: FixedPrecision): boolean {
+    this.assertSameConfig(other);
     return this.value <= other.value;
   }
 
