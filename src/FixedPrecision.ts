@@ -140,6 +140,15 @@ public static create(config: FixedPrecisionConfig) {
     }
   }
 
+    private coerce(value: FixedPrecision): FixedPrecision {
+      if (value instanceof FixedPrecision) {
+        this.assertSameConfig(value);
+        return value;
+      }
+  
+      return new FixedPrecision(value);
+    }
+
   /**
    * Helper method to create a FixedPrecision instance from a raw, already scaled bigint.
    * @param rawValue - The raw bigint value.
