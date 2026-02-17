@@ -381,63 +381,68 @@ public static create(config: FixedPrecisionConfig) {
     return this.value < 0n;
   }
 
-  /** Returns a FixedPrecision whose value is this FixedPrecision plus n. */
-  public add(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(this.value + other.value);
-  }
-
-  /** Alias for add. */
-  public plus(other: FixedPrecision): FixedPrecision {
-    return this.add(other);
-  }
-
-  /** Returns a FixedPrecision whose value is this FixedPrecision minus n. */
-  public sub(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(this.value - other.value);
-  }
-
-  /** Alias for sub. */
-  public minus(other: FixedPrecision): FixedPrecision {
-    return this.sub(other);
-  }
-
-  /** Returns a FixedPrecision whose value is this FixedPrecision times n. */
-  public mul(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(
-      (this.value * other.value) / FixedPrecision.SCALE,
-    );
-  }
-
-  public product(other: FixedPrecision): FixedPrecision {
-    return new FixedPrecision(this.value * other.value);
-  }
-
-  /** Returns a FixedPrecision whose value is this FixedPrecision divided by n. */
-  public div(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(
-      (this.value * FixedPrecision.SCALE) / other.value,
-    );
-  }
-
-  public fraction(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(this.value / other.value);
-  }
-
-  /** Returns a FixedPrecision representing the integer remainder of dividing this by n. */
-  public mod(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(
-      (this.value * FixedPrecision.SCALE) % other.value,
-    );
-  }
-  public leftover(other: FixedPrecision): FixedPrecision {
-    return FixedPrecision.fromRaw(this.value % other.value);
-  }
-
-  /** Returns a FixedPrecision whose value is the negation of this FixedPrecision. */
-  public neg(): FixedPrecision {
-    return FixedPrecision.fromRaw(-this.value);
-  }
-
+    public add(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw(this.value + o.value);
+    }
+  
+    /** Alias for add. */
+    public plus(other: FixedPrecision): FixedPrecision {
+      return this.add(other);
+    }
+  
+    /** Returns a FixedDecimal whose value is this FixedDecimal minus n. */
+    public sub(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw(this.value - o.value);
+    }
+  
+    /** Alias for sub. */
+    public minus(other: FixedPrecision): FixedPrecision {
+      return this.sub(other);
+    }
+  
+    /** Returns a FixedDecimal whose value is this FixedDecimal times n. */
+    // public mul(other: FixedDecimalValue): FixedDecimal {
+    //   return FixedPrecision.fromRaw(
+    //     (this.value * other.value) / this.SCALE,
+    //   );
+    // }
+    public mul(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw((this.value * o.value) / FixedPrecision.SCALE);
+    }
+  
+    public product(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw(this.value * o.value);
+    }
+  
+    /** Returns a FixedDecimal whose value is this FixedDecimal divided by n. */
+    public div(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw((this.value * FixedPrecision.SCALE) / o.value);
+    }
+  
+    public fraction(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw(this.value / o.value);
+    }
+  
+    /** Returns a FixedDecimal representing the integer remainder of dividing this by n. */
+    public mod(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw((this.value * FixedPrecision.SCALE) % o.value);
+    }
+    public leftover(other: FixedPrecision): FixedPrecision {
+      const o = this.coerce(other);
+      return FixedPrecision.fromRaw(this.value % o.value);
+    }
+  
+    /** Returns a FixedDecimal whose value is the negation of this FixedDecimal. */
+    public neg(): FixedPrecision {
+      return FixedPrecision.fromRaw(-this.value);
+    }
   /**
    * Returns a FixedPrecision whose value is this FixedPrecision raised to the power exp.
    * (Only integer exponents are supported.)
