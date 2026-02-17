@@ -36,7 +36,7 @@ export default class FixedPrecision {
    * Formatting settings.
    * By default, uses 8 decimal places and ROUND_HALF_UP rounding (4).
    */
-  public static format = {
+  private static format = {
     places: 8,
     roundingMode: 4 as RoundingMode,
   };
@@ -112,7 +112,7 @@ export default class FixedPrecision {
     }
 
     const places = config.places;
-    const roundingMode = config.roundingMode || 4;
+    const roundingMode = config.roundingMode || this.format.roundingMode;
     const SCALE = BigInt(10 ** places);
     const SCALENUMBER = 10 ** places;
 
@@ -805,6 +805,19 @@ export default class FixedPrecision {
   public raw(): bigint {
     return this.value;
   }
+  public get places(): number {
+    return FixedPrecision.format.places;
+  }
+  public get roundingMode(): RoundingMode {
+    return FixedPrecision.format.roundingMode;
+  }
+  public get SCALE(): bigint {
+    return FixedPrecision.SCALE;
+  }
+  public get SCALENUMBER(): number {
+    return FixedPrecision.SCALENUMBER;
+  }
+
 }
 
 /**
