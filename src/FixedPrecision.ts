@@ -119,14 +119,14 @@ public static create(config: FixedPrecisionConfig) {
   function FP(val: FixedPrecisionValue) {
     // Use per-instance engine to allow independent precisions
     const instance = new FixedPrecision(val)
-    // instance.places = places;
-    // instance.roundingMode = roundingMode;
-    // instance.SCALE = SCALE;
-    // instance.SCALENUMBER = SCALENUMBER;
+    instance.places = places;
+    instance.roundingMode = roundingMode;
+    instance.SCALE = SCALE;
+    instance.SCALENUMBER = SCALENUMBER;
     return instance;
 
   }
-
+  
   // Attach config metadata to the factory for convenience
   FP.places = places;
   FP.roundingMode = roundingMode;
@@ -134,6 +134,11 @@ public static create(config: FixedPrecisionConfig) {
   FP.SCALENUMBER = SCALENUMBER;
   return FP;
 }
+  private assertSameConfig(other: FixedPrecision) {  
+    if (this.places !== other.places) {
+      throw new Error("Cannot operate on different precisions");
+    }
+  }
 
   /**
    * Helper method to create a FixedPrecision instance from a raw, already scaled bigint.
