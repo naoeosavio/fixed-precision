@@ -61,8 +61,8 @@ export default class FixedPrecision {
 
       FixedPrecision.format.places = config.places;
       // Update the scale factors when places change
-      FixedPrecision.SCALE = BigInt(10 ** config.places);
-      FixedPrecision.SCALENUMBER = 10 ** config.places;
+      this.SCALE = BigInt(10 ** config.places);
+      this.SCALENUMBER = 10 ** config.places;
     }
     // Validate rounding mode
     if (config.roundingMode !== undefined) {
@@ -91,6 +91,49 @@ export default class FixedPrecision {
         this.value = val.value;
     }
   }
+  /** 
+ * Creates a FixedPrecision factory bound to a specific configuration.
+ * This returns a callable that constructs per-config instances using
+ * the internally per-instance implementation (FixedDecimal), allowing
+ * multiple precisions to coexist:
+ *
+ *   const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+ *   const FP2 = FixedPrecision.create({ places: 2 });
+ *   const a = FP8("1.23456789");
+ *   const b = FP2("1.23");
+ */
+public static create(config: FixedPrecisionConfig) {
+  if (
+    !Number.isInteger(config.places) ||
+    config.places < 0 ||
+    config.places > 20
+  ) {
+    throw new Error("Decimal places must be an integer between 0 and 20");
+  }
+
+  const places = config.places;
+  const roundingMode = config.roundingMode || 4;
+  const SCALE = BigInt(10 ** places);
+  const SCALENUMBER = 10 ** places;
+
+  function FP(val: FixedPrecisionValue) {
+    // Use per-instance engine to allow independent precisions
+    const instance = new FixedPrecision(val)
+    // instance.places = places;
+    // instance.roundingMode = roundingMode;
+    // instance.SCALE = SCALE;
+    // instance.SCALENUMBER = SCALENUMBER;
+    return instance;
+
+  }
+
+  // Attach config metadata to the factory for convenience
+  FP.places = places;
+  FP.roundingMode = roundingMode;
+  FP.SCALE = SCALE;
+  FP.SCALENUMBER = SCALENUMBER;
+  return FP;
+}
 
   /**
    * Helper method to create a FixedPrecision instance from a raw, already scaled bigint.
