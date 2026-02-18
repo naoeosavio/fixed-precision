@@ -3,6 +3,13 @@ export type Comparison = -1 | 0 | 1;
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
 
+type FPContext = {
+  places: number;
+  roundingMode: RoundingMode;
+  SCALE: bigint;
+  SCALENUMBER: number;
+};
+
 /**
  *  FixedPrecision Configuration System
  */
@@ -31,25 +38,33 @@ export interface FixedPrecisionConfig {
 
 export default class FixedPrecision {
   private value: bigint = 0n;
+  private readonly ctx!: FPContext;
+
+  private static makeContext(
+    places: number,
+    roundingMode: RoundingMode,
+  ): FPContext {
+    return {
+      places,
+      roundingMode,
+      SCALE: BigInt(10 ** places),
+      SCALENUMBER: 10 ** places,
+    };
+  }
 
   /**
-   * Formatting settings.
+   * Default context for instances created without a specific context.
    * By default, uses 8 decimal places and ROUND_HALF_UP rounding (4).
    */
-  private static format = {
-    places: 8,
-    roundingMode:<RoundingMode> 4,
-  };
-  // Pre-calculate the scale factor
-  private static SCALENUMBER: number = 10 ** FixedPrecision.format.places;
-  private static SCALE: bigint = BigInt(10 ** FixedPrecision.format.places);
+  private static defaultContext: FPContext = FixedPrecision.makeContext(8, 4);
 
   /**
-   * Configures the FixedPrecision library.
+   * Configures the FixedPrecision library's default context.
    * @param config - FixedPrecision configuration
    */
   public static configure(config: FixedPrecisionConfig): void {
-    // Validate decimal places
+    let { places, roundingMode } = FixedPrecision.defaultContext;
+
     if (config.places !== undefined) {
       if (
         !Number.isInteger(config.places) ||
@@ -58,21 +73,22 @@ export default class FixedPrecision {
       ) {
         throw new Error("Decimal places must be an integer between 0 and 20");
       }
-
-      FixedPrecision.format.places = config.places;
-      // Update the scale factors when places change
-      FixedPrecision.SCALE = BigInt(10 ** config.places);
-      FixedPrecision.SCALENUMBER = 10 ** config.places;
+      places = config.places;
     }
-    // Validate rounding mode
+
     if (config.roundingMode !== undefined) {
       if (![0, 1, 2, 3, 4, 5, 6, 7, 8].includes(config.roundingMode)) {
         throw new Error(
           "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8",
         );
       }
-      FixedPrecision.format.roundingMode = config.roundingMode;
+      roundingMode = config.roundingMode;
     }
+
+    FixedPrecision.defaultContext = FixedPrecision.makeContext(
+      places,
+      roundingMode,
+    );
   }
 
   constructor(val: FixedPrecisionValue) {
@@ -112,7 +128,7 @@ export default class FixedPrecision {
     }
 
     const places = config.places;
-    const roundingMode = config.roundingMode || this.format.roundingMode;
+    const roundingMode = config.roundingMode;
     const SCALE = BigInt(10 ** places);
     const SCALENUMBER = 10 ** places;
 
