@@ -135,6 +135,48 @@ FixedPrecision.configure({
 - **7:** ROUND_HALF_CEIL – In a tie, rounds toward +Infinity.
 - **8:** ROUND_HALF_FLOOR – In a tie, rounds toward -Infinity.
 
+## Precision Factories (Recommended)
+
+For applications that need multiple precisions at the same time, use immutable factories instead of mutating global configuration.
+
+Create isolated precision contexts with `FixedPrecision.create`:
+
+```ts
+import FixedPrecision, { fixedconfig } from "fixed-precision";
+
+// Independent factories
+const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+const FP2 = FixedPrecision.create({ places: 2 }); // default roundingMode=4
+
+const a = FP8("1.23456789"); // → "1.23456789" (8 places)
+const b = FP2("1.23");      // → "1.23"       (2 places)
+
+// Each factory is immutable and independent
+// Changing global config does not affect existing factories
+fixedconfig.configure({ places: 4 });
+FP8("1").toString(); // "1.00000000"
+FP2("1").toString(); // "1.00"
+new FixedPrecision("1").toString(); // "1.0000" (global default)
+
+// Safety: mixing different contexts throws
+// FP8("1").add(FP2("1")) -> Error: Cannot operate on different precisions
+```
+
+Why factories?
+- Performance: No per‑instance option parsing; the factory captures its scale.
+- Clarity: The chosen precision is explicit in the factory variable.
+- Safety: No shared mutable state; cross-context arithmetic is rejected.
+- Flexibility: Create as many contexts as you need and pass them around.
+
+API
+- `FixedPrecision.create({ places: number, roundingMode?: RoundingMode })` → factory function
+  - Call the factory as `factory(value)` to construct an instance in that context.
+  - `factory.format` is a frozen object with `{ places, roundingMode }`.
+
+Notes
+- Global configuration still works via `fixedconfig.configure(...)` or `FixedPrecision.configure(...)` for the default context.
+- Methods like `round`, `toFixed`, and `toExponential` default to the context’s `places` and `roundingMode` when parameters are omitted.
+
 ## Contributing
 
 1. Fork the repository.
