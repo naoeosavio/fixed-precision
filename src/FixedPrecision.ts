@@ -166,6 +166,12 @@ export default class FixedPrecision {
     return instance;
   }
 
+  private assertSameConfig(other: FixedPrecision) {
+    if (this.ctx.places !== other.ctx.places) {
+      throw new Error("Cannot operate on different precisions");
+    }
+  }
+
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Conversion helpers
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -332,7 +338,7 @@ export default class FixedPrecision {
 
   /** Returns a FixedPrecision whose value is the absolute value of this FixedPrecision. */
   public abs(): FixedPrecision {
-    return FixedPrecision.fromRaw(this.value < 0n ? -this.value : this.value);
+    return this.fromRaw(this.value < 0n ? -this.value : this.value);
   }
 
   /** Compares the values.
@@ -345,31 +351,31 @@ export default class FixedPrecision {
     return 0;
   }
 
-  /** Returns true if this FixedDecimal equals other. */
+  /** Returns true if this FixedPrecision equals other. */
   public eq(other: FixedPrecision): boolean {
     this.assertSameConfig(other);
     return this.value === other.value;
   }
 
-  /** Returns true if this FixedDecimal is greater than other. */
+  /** Returns true if this FixedPrecision is greater than other. */
   public gt(other: FixedPrecision): boolean {
     this.assertSameConfig(other);
     return this.value > other.value;
   }
 
-  /** Returns true if this FixedDecimal is greater than or equal to other. */
+  /** Returns true if this FixedPrecision is greater than or equal to other. */
   public gte(other: FixedPrecision): boolean {
     this.assertSameConfig(other);
     return this.value >= other.value;
   }
 
-  /** Returns true if this FixedDecimal is less than other. */
+  /** Returns true if this FixedPrecision is less than other. */
   public lt(other: FixedPrecision): boolean {
     this.assertSameConfig(other);
     return this.value < other.value;
   }
 
-  /** Returns true if this FixedDecimal is less than or equal to other. */
+  /** Returns true if this FixedPrecision is less than or equal to other. */
   public lte(other: FixedPrecision): boolean {
     this.assertSameConfig(other);
     return this.value <= other.value;
@@ -387,9 +393,10 @@ export default class FixedPrecision {
     return this.value < 0n;
   }
 
+  /** Returns a FixedPrecision whose value is this FixedPrecision plus n. */
   public add(other: FixedPrecision): FixedPrecision {
     this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(this.value + other.value);
+    return this.fromRaw(this.value + other.value);
   }
 
   /** Alias for add. */
@@ -397,10 +404,10 @@ export default class FixedPrecision {
     return this.add(other);
   }
 
-  /** Returns a FixedDecimal whose value is this FixedDecimal minus n. */
+  /** Returns a FixedPrecision whose value is this FixedPrecision minus n. */
   public sub(other: FixedPrecision): FixedPrecision {
     this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(this.value - other.value);
+    return this.fromRaw(this.value - other.value);
   }
 
   /** Alias for sub. */
@@ -411,14 +418,11 @@ export default class FixedPrecision {
   /** Returns a FixedPrecision whose value is this FixedPrecision times n. */
   public mul(other: FixedPrecision): FixedPrecision {
     this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(
-      (this.value * other.value) / FixedPrecision.SCALE,
-    );
+    return this.fromRaw((this.value * other.value) / this.ctx.SCALE);
   }
 
   public product(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(this.value * other.value);
+    return new FixedPrecision(this.value * other.value, this.ctx);
   }
 
   /** Returns a FixedDecimal whose value is this FixedDecimal divided by n. */
@@ -810,19 +814,6 @@ export default class FixedPrecision {
   public raw(): bigint {
     return this.value;
   }
-  public get places(): number {
-    return FixedPrecision.format.places;
-  }
-  public get roundingMode(): RoundingMode {
-    return FixedPrecision.format.roundingMode;
-  }
-  public get SCALE(): bigint {
-    return FixedPrecision.SCALE;
-  }
-  public get SCALENUMBER(): number {
-    return FixedPrecision.SCALENUMBER;
-  }
-
 }
 
 /**
