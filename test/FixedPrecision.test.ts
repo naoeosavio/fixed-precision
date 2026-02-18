@@ -408,4 +408,45 @@ describe("FixedPrecision", () => {
       );
     });
   });
+
+  // ––– Factory (create) –––
+  describe("Factory create()", () => {
+    test("factories have independent, fixed precisions", () => {
+      const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+      const FP2 = FixedPrecision.create({ places: 2 });
+
+      expect(FP8("1").toString()).toBe("1.00000000");
+      expect(FP2("1").toString()).toBe("1.00");
+    });
+
+    test("cross-factory arithmetic throws", () => {
+      const FP8 = FixedPrecision.create({ places: 8 });
+      const FP2 = FixedPrecision.create({ places: 2 });
+      expect(() => FP8("1").add(FP2("1"))).toThrow(
+        "Cannot operate on different precisions",
+      );
+    });
+
+    test("factory is immutable and ignores global configure", () => {
+      const FP2 = FixedPrecision.create({ places: 2 });
+      // Change global default
+      fixedconfig.configure({ places: 4 });
+
+      // Factory still uses its own precision
+      expect(FP2("1").toString()).toBe("1.00");
+      // Global default reflects new config
+      expect(new FixedPrecision("1").toString()).toBe("1.0000");
+    });
+
+    test("round() uses factory's default rounding mode when rm omitted", () => {
+      // ROUND_DOWN (1)
+      const FP8_DOWN = FixedPrecision.create({ places: 8, roundingMode: 1 });
+      const x = FP8_DOWN("1.23456789");
+      expect(x.round(4).toString()).toBe("1.23450000");
+      // Default ROUND_HALF_UP (4)
+      const FP8_HALFUP = FixedPrecision.create({ places: 8 });
+      const y = FP8_HALFUP("1.23456781");
+      expect(y.round(4).toString()).toBe("1.23460000");
+    });
+  });
 });
