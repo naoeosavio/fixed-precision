@@ -428,62 +428,57 @@ export default class FixedPrecision {
   /** Returns a FixedDecimal whose value is this FixedDecimal divided by n. */
   public div(other: FixedPrecision): FixedPrecision {
     this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(
-      (this.value * FixedPrecision.SCALE) / other.value,
-    );
+    return this.fromRaw((this.value * this.ctx.SCALE) / other.value);
   }
 
   public fraction(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(this.value / other.value);
+    return this.fromRaw(this.value / other.value);
   }
 
-  /** Returns a FixedDecimal representing the integer remainder of dividing this by n. */
+  /** Returns a FixedPrecision representing the integer remainder of dividing this by n. */
   public mod(other: FixedPrecision): FixedPrecision {
     this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(
-      (this.value * FixedPrecision.SCALE) % other.value,
-    );
+    return this.fromRaw((this.value * this.ctx.SCALE) % other.value);
   }
   public leftover(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return FixedPrecision.fromRaw(this.value % other.value);
+    return this.fromRaw(this.value % other.value);
   }
 
-  /** Returns a FixedDecimal whose value is the negation of this FixedDecimal. */
+  /** Returns a FixedPrecision whose value is the negation of this FixedPrecision. */
   public neg(): FixedPrecision {
-    return FixedPrecision.fromRaw(-this.value);
+    return this.fromRaw(-this.value);
   }
+
   /**
    * Returns a FixedPrecision whose value is this FixedPrecision raised to the power exp.
    * (Only integer exponents are supported.)
    */
   public pow(exp: number): FixedPrecision {
     if (!Number.isInteger(exp)) throw new Error("Exponent must be an integer");
-    if (exp === 0) return FixedPrecision.fromRaw(FixedPrecision.SCALE); // 1.0
+    if (exp === 0) return this.fromRaw(this.ctx.SCALE); // 1.0
 
     if (this.isZero()) {
       if (exp < 0) throw new Error("0 ** negative is undefined");
-      return FixedPrecision.fromRaw(0n);
+      return new FixedPrecision(0n, this.ctx);
     }
 
     let e = Math.abs(exp);
     let base = this.value; // raw (scaled)
-    let acc = FixedPrecision.SCALE; // raw(1.0)
+    let acc = this.ctx.SCALE; // raw(1.0)
 
     // exponentiation by squaring in scaled space
     while (e > 0) {
-      if (e & 1) acc = (acc * base) / FixedPrecision.SCALE;
-      base = (base * base) / FixedPrecision.SCALE;
+      if (e & 1) acc = (acc * base) / this.ctx.SCALE;
+      base = (base * base) / this.ctx.SCALE;
       e >>= 1;
     }
 
     if (exp < 0) {
       // raw(1/x) = (SCALE * SCALE) / raw(x)
-      const inv = (FixedPrecision.SCALE * FixedPrecision.SCALE) / acc;
-      return FixedPrecision.fromRaw(inv);
+      const inv = (this.ctx.SCALE * this.ctx.SCALE) / acc;
+      return this.fromRaw(inv);
     }
-    return FixedPrecision.fromRaw(acc);
+    return this.fromRaw(acc);
   }
 
   /**
