@@ -520,11 +520,11 @@ export default class FixedPrecision {
       throw new Error("Square root of negative number");
     }
     if (this.isZero()) {
-      return new FixedPrecision(0n);
+      return new FixedPrecision(0n, this.ctx);
     }
     // Initial guess: x / 2.0
-    const initialGuess = this.fraction(new FixedPrecision(2n));
-    return this.sqrtGo(initialGuess, FixedPrecision.format.places);
+    const initialGuess = this.fraction(new FixedPrecision(2n, this.ctx));
+    return this.sqrtGo(initialGuess, this.ctx.places);
   }
 
   /**
@@ -538,9 +538,7 @@ export default class FixedPrecision {
       return guess;
     }
     // next = (guess + (x / guess)) / 2.0
-    const next = guess
-      .add(this.div(guess))
-      .fraction(FixedPrecision.fromRaw(2n));
+    const next = guess.add(this.div(guess)).fraction(this.fromRaw(2n));
     if (guess.eq(next)) {
       return next;
     }
@@ -600,7 +598,7 @@ export default class FixedPrecision {
       }
       newRaw = this.value / shiftFactor;
     }
-    return FixedPrecision.fromRaw(newRaw);
+    return this.fromRaw(newRaw);
   }
 
   /**
@@ -610,12 +608,11 @@ export default class FixedPrecision {
    * @param decimalPlaces - Number of decimal places (default: FixedPrecision.format.places).
    * @returns A new FixedPrecision representing a random value.
    */
-  public static random(
-    decimalPlaces: number = FixedPrecision.format.places,
-  ): FixedPrecision {
-    const max = 10 ** decimalPlaces;
+  public static random(decimalPlaces?: number): FixedPrecision {
+    const dec = decimalPlaces ?? FixedPrecision.defaultContext.places;
+    const max = 10 ** dec;
     const randInt = Math.floor(Math.random() * max);
-    const fracStr = randInt.toString().padStart(decimalPlaces, "0");
+    const fracStr = randInt.toString().padStart(dec, "0");
     const valueStr = `0.${fracStr}`;
     return new FixedPrecision(valueStr);
   }
@@ -703,20 +700,19 @@ export default class FixedPrecision {
    * @param rm - Rounding mode (default: FixedPrecision.format.roundingMode)
    * @returns A new FixedPrecision instance with the rounded value.
    */
-  public round(
-    dp: number = FixedPrecision.format.places,
-    rm: RoundingMode = FixedPrecision.format.roundingMode,
-  ): FixedPrecision {
-    if (dp < 0 || dp > FixedPrecision.format.places) {
+  public round(dp?: number, rm?: RoundingMode): FixedPrecision {
+    const effDp = dp ?? this.ctx.places;
+    const effRm: RoundingMode = rm === undefined ? this.ctx.roundingMode : rm;
+    if (effDp < 0 || effDp > this.ctx.places) {
       throw new Error(
-        `Decimal places (dp) must be between 0 and ${FixedPrecision.format.places}`,
+        `Decimal places (dp) must be between 0 and ${this.ctx.places}`,
       );
     }
-    const diff = FixedPrecision.format.places - dp;
+    const diff = this.ctx.places - effDp;
     const factor = 10n ** BigInt(diff);
-    const rounded = this.roundToScale(factor, rm);
+    const rounded = this.roundToScale(factor, effRm);
     const newValue = rounded * factor;
-    return FixedPrecision.fromRaw(newValue);
+    return this.fromRaw(newValue);
   }
 
   /**
@@ -726,27 +722,21 @@ export default class FixedPrecision {
    * Example:
    *    new FixedPrecision("1.23456789").scale(2)  // represents 1.23
    */
-  public scale(
-    newScale: number,
-    rm: RoundingMode = FixedPrecision.format.roundingMode,
-  ): FixedPrecision {
-    if (newScale < 0 || newScale > FixedPrecision.format.places) {
-      throw new Error(
-        `newScale must be between 0 and ${FixedPrecision.format.places}`,
-      );
+  public scale(newScale: number, rm?: RoundingMode): FixedPrecision {
+    const effRm: RoundingMode = rm === undefined ? this.ctx.roundingMode : rm;
+    if (newScale < 0 || newScale > this.ctx.places) {
+      throw new Error(`newScale must be between 0 and ${this.ctx.places}`);
     }
-    const diff = FixedPrecision.format.places - newScale;
+    const diff = this.ctx.places - newScale;
     const factor = 10n ** BigInt(diff);
-    const rounded = this.roundToScale(factor, rm);
+    const rounded = this.roundToScale(factor, effRm);
     const newValue = rounded * factor;
-    return FixedPrecision.fromRaw(newValue);
+    return this.fromRaw(newValue);
   }
 
-  toExponential(
-    dp: number = FixedPrecision.format.places,
-    rm?: RoundingMode,
-  ): string {
-    const rounded = this.round(dp, rm);
+  toExponential(dp?: number, rm?: RoundingMode): string {
+    const effDp = dp ?? this.ctx.places;
+    const rounded = this.round(effDp, rm);
     const [int = "", frac = ""] = rounded.toString().split(".");
     const exp =
       int.length > 1
@@ -755,9 +745,9 @@ export default class FixedPrecision {
           ? -frac?.search(/[1-9]/) - 1
           : 0;
     const shifted = rounded.div(
-      new FixedPrecision(10n ** BigInt(Math.abs(exp))),
+      new FixedPrecision(10n ** BigInt(Math.abs(exp)), this.ctx),
     );
-    return `${shifted.toFixed(dp)}e${exp}`;
+    return `${shifted.toFixed(effDp)}e${exp}`;
   }
 
   toPrecision(sd: number, rm?: RoundingMode): string {
@@ -773,20 +763,15 @@ export default class FixedPrecision {
    * Returns a string representing the FixedPrecision in normal notation
    * to a fixed number of decimal places.
    */
-  public toFixed(
-    places: number = 0,
-    rm: RoundingMode = FixedPrecision.format.roundingMode,
-  ): string {
-    const decPlaces =
-      places !== undefined ? places : FixedPrecision.format.places;
-    if (decPlaces < 0 || decPlaces > FixedPrecision.format.places) {
-      throw new Error(
-        `places must be between 0 and ${FixedPrecision.format.places}`,
-      );
+  public toFixed(places: number = 0, rm?: RoundingMode): string {
+    const decPlaces = places !== undefined ? places : this.ctx.places;
+    if (decPlaces < 0 || decPlaces > this.ctx.places) {
+      throw new Error(`places must be between 0 and ${this.ctx.places}`);
     }
-    const diff = FixedPrecision.format.places - decPlaces;
+    const diff = this.ctx.places - decPlaces;
     const roundingFactor = 10n ** BigInt(diff);
-    const scaled = this.roundToScale(roundingFactor, rm);
+    const effRm: RoundingMode = rm === undefined ? this.ctx.roundingMode : rm;
+    const scaled = this.roundToScale(roundingFactor, effRm);
     const divisor = 10n ** BigInt(decPlaces);
     const intPart = scaled / divisor;
     const fracPart = (scaled % divisor).toString().padStart(decPlaces, "0");
