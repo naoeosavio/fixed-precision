@@ -110,7 +110,7 @@ export default class FixedPrecision {
     }
   }
 
-   /**
+  /**
    * Creates an immutable precision factory. Each factory returns instances
    * bound to its own places and rounding mode, avoiding global mutable state.
    *
