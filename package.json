@@ -1,6 +1,6 @@
 {
   "name": "fixed-precision",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A fixed-precision decimal arithmetic library for JavaScript/TypeScript",
   "main": "dist/FixedPrecision.js",
   "type": "module",
@@ -43,8 +43,9 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.4",
+    "@biomejs/biome": "2.2.6",
     "tsup": "^8.5.0",
     "vitest": "^3.0.8",
-    "@biomejs/biome": "2.2.6"
+     "typescript": "^5.5.4"
   }
 }
