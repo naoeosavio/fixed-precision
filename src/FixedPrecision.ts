@@ -38,7 +38,7 @@ export default class FixedPrecision {
    */
   private static format = {
     places: 8,
-    roundingMode: 4 as RoundingMode,
+    roundingMode:<RoundingMode> 4,
   };
   // Pre-calculate the scale factor
   private static SCALENUMBER: number = 10 ** FixedPrecision.format.places;
@@ -290,13 +290,14 @@ export default class FixedPrecision {
   private static toString(value: bigint): string {
     const abs = value < 0n ? 1 : 0;
     const s = value.toString();
-    const intPart = s.slice(abs, -FixedPrecision.format.places) || "0";
-    let fracPart = s.slice(-FixedPrecision.format.places);
+    const P = FixedPrecision.format.places;
+    const intPart = s.slice(abs, -P) || "0";
+    let fracPart = s.slice(-P);
     if (
       fracPart.length !== 0 ||
-      fracPart.length < FixedPrecision.format.places
+      fracPart.length < P
     ) {
-      fracPart = fracPart.padStart(FixedPrecision.format.places, "0");
+      fracPart = fracPart.padStart(P, "0");
     }
     return abs
       ? fracPart
