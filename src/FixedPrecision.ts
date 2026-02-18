@@ -99,11 +99,11 @@ export default class FixedPrecision {
         this.value = val;
         break;
       case "number": {
-        this.value = FixedPrecision.fromNumber(val);
+        this.value = FixedPrecision.fromNumberWithCtx(val, this.ctx);
         break;
       }
       case "string":
-        this.value = FixedPrecision.fromString(val);
+        this.value = FixedPrecision.fromStringWithCtx(val, this.ctx);
         break;
       default:
         this.value = val.value;
@@ -170,12 +170,12 @@ export default class FixedPrecision {
   // Conversion helpers
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
-  // Converts a string (with up to 8 decimal places) to bigint.
-  private static fromString(str: string): bigint {
+  // Context-aware conversions
+  private static fromStringWithCtx(str: string, ctx: FPContext): bigint {
     const dotIndex = str.indexOf(".", 1);
-    const P = FixedPrecision.format.places;
-    const SCALE_BIG = FixedPrecision.SCALE;
-    const SCALE_NUM = FixedPrecision.SCALENUMBER;
+    const P = ctx.places;
+    const SCALE_BIG = ctx.SCALE;
+    const SCALE_NUM = ctx.SCALENUMBER;
     const lens = str.length;
     if (dotIndex === -1) {
       if (P < 16) {
@@ -277,42 +277,35 @@ export default class FixedPrecision {
     return int < 0n ? int * SCALE_BIG - nScaled : int * SCALE_BIG + nScaled;
   }
 
-  // Converts a number to bigint.
-  private static fromNumber(value: number): bigint {
-    // Verify that the input is a finite number
+  private static fromNumberWithCtx(value: number, ctx: FPContext): bigint {
     if (Number.isNaN(value) || !Number.isFinite(value)) {
       throw new Error("Invalid number: value must be a finite number.");
     }
-    const scaled = value * FixedPrecision.SCALENUMBER;
+    const scaled = value * ctx.SCALENUMBER;
     if (Math.abs(scaled) > Number.MAX_SAFE_INTEGER) {
       if (Number.isInteger(value)) {
-        return BigInt(value) * FixedPrecision.SCALE;
+        return BigInt(value) * ctx.SCALE;
       } else {
         const num = Math.trunc(value);
         const nNum = Math.abs(num - value);
-        const nScaled = BigInt(Math.trunc(nNum * FixedPrecision.SCALENUMBER));
-        return BigInt(num) * FixedPrecision.SCALE + nScaled;
+        const nScaled = BigInt(Math.trunc(nNum * ctx.SCALENUMBER));
+        return BigInt(num) * ctx.SCALE + nScaled;
       }
     }
     return BigInt(Math.trunc(scaled));
   }
 
-  // Converts an internal scaled BigInt to a number.
-  private static toNumber(value: bigint): number {
-    return Number(value) / FixedPrecision.SCALENUMBER;
+  private static toNumberWithCtx(value: bigint, ctx: FPContext): number {
+    return Number(value) / ctx.SCALENUMBER;
   }
 
-  // Converts a raw bigint to string (in normal decimal notation).
-  private static toString(value: bigint): string {
+  private static toStringWithCtx(value: bigint, ctx: FPContext): string {
     const abs = value < 0n ? 1 : 0;
     const s = value.toString();
-    const P = FixedPrecision.format.places;
+    const P = ctx.places;
     const intPart = s.slice(abs, -P) || "0";
     let fracPart = s.slice(-P);
-    if (
-      fracPart.length !== 0 ||
-      fracPart.length < P
-    ) {
+    if (fracPart.length !== 0 || fracPart.length < P) {
       fracPart = fracPart.padStart(P, "0");
     }
     return abs
@@ -326,11 +319,11 @@ export default class FixedPrecision {
 
   // Instance conversion methods
   public toNumber(): number {
-    return FixedPrecision.toNumber(this.value);
+    return FixedPrecision.toNumberWithCtx(this.value, this.ctx);
   }
 
   public toString(): string {
-    return FixedPrecision.toString(this.value);
+    return FixedPrecision.toStringWithCtx(this.value, this.ctx);
   }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
