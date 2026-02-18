@@ -91,7 +91,9 @@ export default class FixedPrecision {
     );
   }
 
-  constructor(val: FixedPrecisionValue) {
+  constructor(val: FixedPrecisionValue, ctx?: FPContext) {
+    // establish context
+    this.ctx = ctx ?? FixedPrecision.defaultContext;
     switch (typeof val) {
       case "bigint":
         this.value = val;
@@ -107,18 +109,23 @@ export default class FixedPrecision {
         this.value = val.value;
     }
   }
-  /**
-   * Creates a FixedPrecision factory bound to a specific configuration.
-   * This returns a callable that constructs per-config instances using
-   * the internally per-instance implementation (FixedDecimal), allowing
-   * multiple precisions to coexist:
+
+   /**
+   * Creates an immutable precision factory. Each factory returns instances
+   * bound to its own places and rounding mode, avoiding global mutable state.
    *
+   * Example:
    *   const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
    *   const FP2 = FixedPrecision.create({ places: 2 });
    *   const a = FP8("1.23456789");
    *   const b = FP2("1.23");
    */
-  public static create(config: FixedPrecisionConfig) {
+  public static create(
+    config: FixedPrecisionConfig,
+  ): (val: FixedPrecisionValue) => FixedPrecision {
+    if (config.places === undefined) {
+      throw new Error("Decimal places must be specified in factory config");
+    }
     if (
       !Number.isInteger(config.places) ||
       config.places < 0 ||
@@ -126,33 +133,23 @@ export default class FixedPrecision {
     ) {
       throw new Error("Decimal places must be an integer between 0 and 20");
     }
+    const rm = config.roundingMode ?? 4;
+    if (![0, 1, 2, 3, 4, 5, 6, 7, 8].includes(rm)) {
+      throw new Error(
+        "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8",
+      );
+    }
 
-    const places = config.places;
-    const roundingMode = config.roundingMode;
-    const SCALE = BigInt(10 ** places);
-    const SCALENUMBER = 10 ** places;
+    const ctx = FixedPrecision.makeContext(config.places, rm);
 
-    function FP(val: FixedPrecisionValue) {
-      // Use per-instance engine to allow independent precisions
-      const instance = new FixedPrecision(val);
-      instance.places = places;
-      instance.roundingMode = roundingMode;
-      instance.SCALE = SCALE;
-      instance.SCALENUMBER = SCALENUMBER;
+    const factory: (val: FixedPrecisionValue) => FixedPrecision = (
+      val: FixedPrecisionValue,
+    ) => {
+      const instance = new FixedPrecision(val, ctx);
       return instance;
-    }
+    };
 
-    // Attach config metadata to the factory for convenience
-    FP.places = places;
-    FP.roundingMode = roundingMode;
-    FP.SCALE = SCALE;
-    FP.SCALENUMBER = SCALENUMBER;
-    return FP;
-  }
-  private assertSameConfig(other: FixedPrecision) {
-    if (this.places !== other.places) {
-      throw new Error("Cannot operate on different precisions");
-    }
+    return factory;
   }
 
   /**
@@ -160,9 +157,12 @@ export default class FixedPrecision {
    * @param rawValue - The raw bigint value.
    * @returns A new FixedPrecision instance with the internal value set to rawValue.
    */
-  private static fromRaw(rawValue: bigint): FixedPrecision {
-    const instance = new FixedPrecision(0n);
+  protected fromRaw(rawValue: bigint): FixedPrecision {
+    // const instance = new FixedPrecision(0n,this.ctx);
+    // instance.value = rawValue;
+    const instance = Object.create(FixedPrecision.prototype);
     instance.value = rawValue;
+    instance.ctx = this.ctx;
     return instance;
   }
 
@@ -415,12 +415,7 @@ export default class FixedPrecision {
     return this.sub(other);
   }
 
-  /** Returns a FixedDecimal whose value is this FixedDecimal times n. */
-  // public mul(other: FixedDecimalValue): FixedDecimal {
-  //   return FixedPrecision.fromRaw(
-  //     (this.value * other.value) / this.SCALE,
-  //   );
-  // }
+  /** Returns a FixedPrecision whose value is this FixedPrecision times n. */
   public mul(other: FixedPrecision): FixedPrecision {
     this.assertSameConfig(other);
     return FixedPrecision.fromRaw(
