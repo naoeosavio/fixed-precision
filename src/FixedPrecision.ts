@@ -110,7 +110,7 @@ export default class FixedPrecision {
     }
   }
 
-   /**
+  /**
    * Creates an immutable precision factory. Each factory returns instances
    * bound to its own places and rounding mode, avoiding global mutable state.
    *
@@ -158,11 +158,8 @@ export default class FixedPrecision {
    * @returns A new FixedPrecision instance with the internal value set to rawValue.
    */
   protected fromRaw(rawValue: bigint): FixedPrecision {
-    // const instance = new FixedPrecision(0n,this.ctx);
-    // instance.value = rawValue;
-    const instance = Object.create(FixedPrecision.prototype);
+    const instance = new FixedPrecision(0n, this.ctx);
     instance.value = rawValue;
-    instance.ctx = this.ctx;
     return instance;
   }
 
@@ -170,6 +167,15 @@ export default class FixedPrecision {
     if (this.ctx.places !== other.ctx.places) {
       throw new Error("Cannot operate on different precisions");
     }
+  }
+
+  private coerce(value: FixedPrecisionValue): FixedPrecision {
+    if (value instanceof FixedPrecision) {
+      this.assertSameConfig(value);
+      return value;
+    }
+
+    return new FixedPrecision(value, this.ctx);
   }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
