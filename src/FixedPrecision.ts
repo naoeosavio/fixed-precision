@@ -350,41 +350,41 @@ export default class FixedPrecision {
   /** Compares the values.
    *  Returns -1 if this < other, 0 if equal, and 1 if this > other.
    */
-  public cmp(other: FixedPrecision): Comparison {
-    this.assertSameConfig(other);
-    if (this.value < other.value) return -1;
-    if (this.value > other.value) return 1;
+  public cmp(other: FixedPrecisionValue): Comparison {
+    const o = this.coerce(other);
+    if (this.value < o.value) return -1;
+    if (this.value > o.value) return 1;
     return 0;
   }
 
   /** Returns true if this FixedPrecision equals other. */
-  public eq(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value === other.value;
+  public eq(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value === o.value;
   }
 
   /** Returns true if this FixedPrecision is greater than other. */
-  public gt(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value > other.value;
+  public gt(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value > o.value;
   }
 
   /** Returns true if this FixedPrecision is greater than or equal to other. */
-  public gte(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value >= other.value;
+  public gte(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value >= o.value;
   }
 
   /** Returns true if this FixedPrecision is less than other. */
-  public lt(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value < other.value;
+  public lt(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value < o.value;
   }
 
   /** Returns true if this FixedPrecision is less than or equal to other. */
-  public lte(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value <= other.value;
+  public lte(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value <= o.value;
   }
 
   public isZero(): boolean {
