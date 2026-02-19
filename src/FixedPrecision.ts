@@ -417,8 +417,8 @@ export default class FixedPrecision {
   }
 
   /** Alias for sub. */
-  public minus(other: FixedPrecision): FixedPrecision {
-    return this.sub(other);
+  public minus(other: FixedPrecisionValue): FixedPrecision {
+    return this.fromRaw(this.value - new FixedPrecision(other, this.ctx).value);
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision times n. */
@@ -427,8 +427,8 @@ export default class FixedPrecision {
     return this.fromRaw((this.value * o.value) / this.ctx.SCALE);
   }
 
-  public product(other: FixedPrecision): FixedPrecision {
-    return new FixedPrecision(this.value * other.value, this.ctx);
+  public product(other: FixedPrecisionValue): FixedPrecision {
+    return this.fromRaw(this.value * new FixedPrecision(other, this.ctx).value);
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision divided by n. */
@@ -437,8 +437,8 @@ export default class FixedPrecision {
     return this.fromRaw((this.value * this.ctx.SCALE) / o.value);
   }
 
-  public fraction(other: FixedPrecision): FixedPrecision {
-    return this.fromRaw(this.value / other.value);
+  public fraction(other: FixedPrecisionValue): FixedPrecision {
+    return this.fromRaw(this.value / new FixedPrecision(other, this.ctx).value);
   }
 
   /** Returns a FixedPrecision representing the integer remainder of dividing this by n. */
@@ -446,8 +446,8 @@ export default class FixedPrecision {
     const o = this.coerce(other);
     return this.fromRaw((this.value * this.ctx.SCALE) % o.value);
   }
-  public leftover(other: FixedPrecision): FixedPrecision {
-    return this.fromRaw(this.value % other.value);
+  public leftover(other: FixedPrecisionValue): FixedPrecision {
+    return this.fromRaw(this.value % new FixedPrecision(other, this.ctx).value);
   }
 
   /** Returns a FixedPrecision whose value is the negation of this FixedPrecision. */
