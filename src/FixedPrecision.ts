@@ -400,9 +400,9 @@ export default class FixedPrecision {
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision plus n. */
-  public add(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw(this.value + other.value);
+  public add(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw(this.value + o.value);
   }
 
   /** Alias for add. */
@@ -411,9 +411,9 @@ export default class FixedPrecision {
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision minus n. */
-  public sub(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw(this.value - other.value);
+  public sub(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw(this.value - o.value);
   }
 
   /** Alias for sub. */
@@ -422,19 +422,19 @@ export default class FixedPrecision {
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision times n. */
-  public mul(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw((this.value * other.value) / this.ctx.SCALE);
+  public mul(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw((this.value * o.value) / this.ctx.SCALE);
   }
 
   public product(other: FixedPrecision): FixedPrecision {
     return new FixedPrecision(this.value * other.value, this.ctx);
   }
 
-  /** Returns a FixedDecimal whose value is this FixedDecimal divided by n. */
-  public div(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw((this.value * this.ctx.SCALE) / other.value);
+  /** Returns a FixedPrecision whose value is this FixedPrecision divided by n. */
+  public div(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw((this.value * this.ctx.SCALE) / o.value);
   }
 
   public fraction(other: FixedPrecision): FixedPrecision {
@@ -442,9 +442,9 @@ export default class FixedPrecision {
   }
 
   /** Returns a FixedPrecision representing the integer remainder of dividing this by n. */
-  public mod(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw((this.value * this.ctx.SCALE) % other.value);
+  public mod(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw((this.value * this.ctx.SCALE) % o.value);
   }
   public leftover(other: FixedPrecision): FixedPrecision {
     return this.fromRaw(this.value % other.value);
