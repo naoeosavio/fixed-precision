@@ -155,6 +155,16 @@ a.add(c);      // Error: "Cannot operate on different precisions"
 
 // Direct bigint operations
 a.plus(200000000n);  // Works! Accepts pre-scaled bigint directly
+
+// Raw vs regular comparisons
+const d = FixedPrecision.create({ places: 2 })("2.00"); // value = 200
+a.lt(d);     // Error: "Cannot operate on different precisions"
+a.ltRaw(d);  // Works! Returns false (123000000 > 200)
+
+// Regular comparison with same configuration
+const e = new FixedPrecision("2.00"); // value = 200000000
+a.lt(e);     // Works! Returns true (1.23 < 2.00)
+a.ltRaw(e);  // Works! Returns true (123000000 < 200000000)
 ```
 
 ## API Overview
@@ -202,12 +212,23 @@ FixedPrecision provides two sets of arithmetic operations:
 
 ### Comparison Methods
 
+FixedPrecision provides two sets of comparison methods:
+
+**Regular comparisons** (validate configuration, ensure mathematical correctness):
 - **`cmp(other: FixedPrecisionValue): -1 | 0 | 1`**: Compares two values, returning -1 if less than, 0 if equal, and 1 if greater than. Accepts FixedPrecision instance, number, string, or bigint.
 - **`eq(other: FixedPrecisionValue): boolean`**: Checks if two values are equal. Accepts FixedPrecision instance, number, string, or bigint.
 - **`gt(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is greater than the given value. Accepts FixedPrecision instance, number, string, or bigint.
 - **`gte(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is greater than or equal to the given value. Accepts FixedPrecision instance, number, string, or bigint.
 - **`lt(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is less than the given value. Accepts FixedPrecision instance, number, string, or bigint.
 - **`lte(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is less than or equal to the given value. Accepts FixedPrecision instance, number, string, or bigint.
+
+**Raw comparisons** (compare scaled values directly, no configuration validation):
+- **`cmpRaw(other: FixedPrecisionValue): -1 | 0 | 1`**: Compares raw scaled values (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`eqRaw(other: FixedPrecisionValue): boolean`**: Returns true if raw scaled values are equal (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`gtRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is greater than other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`gteRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is greater than or equal to other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`ltRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is less than other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`lteRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is less than or equal to other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
 
 ### Rounding and Scaling
 

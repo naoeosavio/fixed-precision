@@ -404,6 +404,48 @@ export default class FixedPrecision {
     return this.value <= o.value;
   }
 
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+  // Raw comparison methods (without configuration validation)
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+  /** Compares raw scaled values (without configuration validation). */
+  public cmpRaw(other: FixedPrecisionValue): Comparison {
+    const otherValue = this.toScaledValue(other);
+    if (this.value < otherValue) return -1;
+    if (this.value > otherValue) return 1;
+    return 0;
+  }
+
+  /** Returns true if raw scaled values are equal (without configuration validation). */
+  public eqRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value === otherValue;
+  }
+
+  /** Returns true if this raw scaled value is greater than other (without configuration validation). */
+  public gtRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value > otherValue;
+  }
+
+  /** Returns true if this raw scaled value is greater than or equal to other (without configuration validation). */
+  public gteRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value >= otherValue;
+  }
+
+  /** Returns true if this raw scaled value is less than other (without configuration validation). */
+  public ltRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value < otherValue;
+  }
+
+  /** Returns true if this raw scaled value is less than or equal to other (without configuration validation). */
+  public lteRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value <= otherValue;
+  }
+
   public isZero(): boolean {
     return this.value === 0n;
   }
