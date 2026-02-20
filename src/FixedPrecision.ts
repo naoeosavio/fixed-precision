@@ -406,7 +406,7 @@ export default class FixedPrecision {
     return this.fromRaw(this.value + o.value);
   }
 
-  /** Alias for add. */
+  /** Returns the raw sum (without scaling). */
   public plus(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
     return this.fromRaw(this.value + o.value);
@@ -418,7 +418,7 @@ export default class FixedPrecision {
     return this.fromRaw(this.value - o.value);
   }
 
-  /** Alias for sub. */
+  /** Returns the raw difference (without scaling). */
   public minus(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
     return this.fromRaw(this.value - o.value);
@@ -430,6 +430,7 @@ export default class FixedPrecision {
     return this.fromRaw((this.value * o.value) / this.ctx.SCALE);
   }
 
+  /** Returns the raw product (without scaling). */
   public product(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
     return this.fromRaw(this.value * o.value);
@@ -441,6 +442,7 @@ export default class FixedPrecision {
     return this.fromRaw((this.value * this.ctx.SCALE) / o.value);
   }
 
+  /** Returns the raw quotient (without scaling). */
   public fraction(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
     return this.fromRaw(this.value / o.value);
@@ -451,6 +453,7 @@ export default class FixedPrecision {
     const o = this.coerce(other);
     return this.fromRaw((this.value * this.ctx.SCALE) % o.value);
   }
+  /** Returns the raw remainder (without scaling). */
   public leftover(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
     return this.fromRaw(this.value % o.value);
