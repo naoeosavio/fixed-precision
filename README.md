@@ -54,9 +54,13 @@ console.log("Mixed types:", mixed.toString()); // 50.00000000
 const rawResult = new FixedPrecision("1.23").product("2.00");
 console.log("Raw product:", rawResult.toString()); // 246000000.00000000
 
-// Direct bigint operations
-const bigintOp = new FixedPrecision("1.23").plus(200000000n);
+// Direct bigint operations (WARNING: bigint values are pre-scaled!)
+const bigintOp = new FixedPrecision("1.23").plus(200000000n); // 200000000n = 2.00 with 8 decimals
 console.log("Plus bigint:", bigintOp.toString()); // 3.23000000
+
+// ⚠️ Common mistake: using small bigint values
+const mistake = new FixedPrecision("1.23").plus(2n); // 2n = 0.00000002, not 2.00!
+console.log("Common mistake:", mistake.toString()); // 1.23000002 (not 3.23!)
 
 // Conversions
 console.log("As a number:", sum.toNumber());
@@ -120,8 +124,44 @@ All arithmetic and comparison methods accept `FixedPrecisionValue`, which is def
 type FixedPrecisionValue = string | number | bigint | FixedPrecision;
 ```
 
+**Important distinction:**
+- `string` and `number`: Interpreted as **decimal values** and scaled according to current context
+- `bigint`: Treated as **already scaled** (pre-scaled) values
+- `FixedPrecision`: Used directly with configuration validation
+
 ### Configuration Safety
 When operating with other FixedPrecision instances, the library validates that both instances have the same precision configuration (decimal places and rounding mode). Raw values are automatically converted using the current instance's context.
+
+### ⚠️ Important: BigInt Values are Treated as Pre-scaled
+
+**Critical:** When you pass a `bigint` value to FixedPrecision methods, it is treated as **already scaled** (pre-scaled), not as a decimal value. This is different from `number` and `string` inputs which are interpreted as decimal values and scaled automatically.
+
+```typescript
+// WARNING: BigInt values are treated as pre-scaled!
+const a = new FixedPrecision("1.23");  // 8 decimal places, value = 123000000
+
+// These are NOT equivalent:
+a.plus(2);           // Adds 2.00000000 (converts number to scaled: 200000000)
+a.plus(2n);          // Adds 0.00000002 (treats 2n as pre-scaled: 2)
+
+a.plus("2.00");      // Adds 2.00000000 (converts string to scaled: 200000000)
+a.plus(200000000n);  // Adds 2.00000000 (pre-scaled bigint: 200000000)
+
+// Creating instances with bigint:
+new FixedPrecision(123n);      // Creates 0.00000123 (8 decimal places)
+new FixedPrecision(123);       // Creates 123.00000000 (8 decimal places)
+new FixedPrecision("123");     // Creates 123.00000000 (8 decimal places)
+```
+
+**When to use bigint:**
+- When you have pre-calculated scaled values
+- For performance-critical operations
+- When working with raw scaled values from other FixedPrecision instances
+
+**When to avoid bigint:**
+- For literal decimal values (use `number` or `string` instead)
+- When you're not sure about the scaling factor
+- For user input or external data
 
 ### Operations with and without Scaling
 FixedPrecision provides two sets of arithmetic operations:
@@ -153,8 +193,9 @@ const c = FixedPrecision.create({ places: 2 })("2.00"); // value = 200 (2 decima
 a.plus(c);     // Works! Returns 1.23000200 (123000000 + 200 = 123000200)
 a.add(c);      // Error: "Cannot operate on different precisions"
 
-// Direct bigint operations
-a.plus(200000000n);  // Works! Accepts pre-scaled bigint directly
+// Direct bigint operations (WARNING: bigint values are pre-scaled!)
+a.plus(200000000n);  // Works! 200000000n represents 2.00 with 8 decimals
+// ⚠️ a.plus(2n) would add 0.00000002, not 2.00!
 
 // Raw vs regular comparisons
 const d = FixedPrecision.create({ places: 2 })("2.00"); // value = 200
@@ -176,6 +217,20 @@ Creates a new FixedPrecision instance from one of the following types:
 
 ```ts
 new FixedPrecision(value);
+```
+
+**⚠️ Critical: BigInt values are treated as pre-scaled!**
+- `string` and `number`: Interpreted as decimal values and scaled according to context
+- `bigint`: Treated as already scaled (pre-scaled) values
+- `FixedPrecision`: Used directly with configuration validation
+
+**Examples:**
+```typescript
+// With 8 decimal places default:
+new FixedPrecision("123.45");    // 123.45000000 (scaled: 12345000000)
+new FixedPrecision(123.45);      // 123.45000000 (scaled: 12345000000)
+new FixedPrecision(12345000000n); // 123.45000000 (pre-scaled bigint)
+new FixedPrecision(123n);        // 0.00000123 (pre-scaled: 123, not 123.00!)
 ```
 
 **Note:** All arithmetic and comparison methods now also accept these same types, enabling method chaining with raw values.
