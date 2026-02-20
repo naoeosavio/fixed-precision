@@ -50,6 +50,14 @@ console.log("Chained result:", result); // 5.16666667
 const mixed = new FixedPrecision(100).add("50").sub(25n).mul(2).div("5");
 console.log("Mixed types:", mixed.toString()); // 50.00000000
 
+// Raw operations (without scaling)
+const rawResult = new FixedPrecision("1.23").product("2.00");
+console.log("Raw product:", rawResult.toString()); // 246000000.00000000
+
+// Direct bigint operations
+const bigintOp = new FixedPrecision("1.23").plus(200000000n);
+console.log("Plus bigint:", bigintOp.toString()); // 3.23000000
+
 // Conversions
 console.log("As a number:", sum.toNumber());
 console.log("As a string:", sum.toString());
@@ -85,6 +93,18 @@ const complex = new FixedPrecision(1000)
   .mul(2n)
   .div(5)
   .mod(3);
+
+// Raw operations in chains
+const rawChain = new FixedPrecision("1.23")
+  .plus("2.00")    // Raw sum
+  .product("3.00") // Raw product
+  .minus("1.00");  // Raw difference
+
+// Mixing raw and scaled operations
+const mixedChain = new FixedPrecision(100)
+  .add(50)         // Scaled addition
+  .product(2)      // Raw multiplication
+  .div(3);         // Scaled division
 ```
 
 ### Benefits
@@ -108,17 +128,33 @@ FixedPrecision provides two sets of arithmetic operations:
 
 **With scaling (adjust for decimal places):**
 - `add()`, `sub()`, `mul()`, `div()`, `mod()` - Apply scaling factor to maintain correct decimal precision
+- **Configuration validation**: When operating with other FixedPrecision instances, validates that both have the same precision configuration
+- **Automatic conversion**: Raw values (string, number, bigint) are converted using the current instance's context
 
 **Without scaling (raw operations):**
-- `plus()`, `minus()`, `product()`, `fraction()`, `leftover()` - Operate directly on scaled values, useful for advanced calculations
+- `plus()`, `minus()`, `product()`, `fraction()`, `leftover()` - Operate directly on scaled values
+- **No configuration validation**: Can operate with FixedPrecision instances of different configurations
+- **Direct bigint support**: Accepts bigint values representing pre-scaled amounts
+- **Use cases**: Advanced calculations, working with pre-scaled values, mixing different precisions
 
 Example:
 ```typescript
 const a = new FixedPrecision("1.23");  // value = 123000000 (scaled by 10^8)
 const b = new FixedPrecision("2.00");  // value = 200000000 (scaled by 10^8)
 
+// With scaling (maintains decimal precision)
 a.mul(b);      // Returns 2.46 (with scaling: (123000000 * 200000000) / 10^8)
+
+// Without scaling (raw operations)
 a.product(b);  // Returns 24600000000000000 (without scaling: 123000000 * 200000000)
+
+// Raw operations with different configurations
+const c = FixedPrecision.create({ places: 2 })("2.00"); // value = 200 (2 decimal places)
+a.plus(c);     // Works! Returns 1.23000200 (123000000 + 200 = 123000200)
+a.add(c);      // Error: "Cannot operate on different precisions"
+
+// Direct bigint operations
+a.plus(200000000n);  // Works! Accepts pre-scaled bigint directly
 ```
 
 ## API Overview
@@ -142,16 +178,25 @@ new FixedPrecision(value);
 
 ### Arithmetic Operations
 
+FixedPrecision provides two sets of arithmetic operations:
+
+**Operations with scaling** (maintain decimal precision, validate configuration):
 - **`add(other: FixedPrecisionValue): FixedPrecision`**: Adds the given value to the current value (with scaling). Accepts FixedPrecision instance, number, string, or bigint.
-- **`plus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw sum (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 - **`sub(other: FixedPrecisionValue): FixedPrecision`**: Subtracts the given value from the current value (with scaling). Accepts FixedPrecision instance, number, string, or bigint.
-- **`minus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw difference (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 - **`mul(other: FixedPrecisionValue): FixedPrecision`**: Multiplies the current value by another value (with scaling). Accepts FixedPrecision instance, number, string, or bigint.
-- **`product(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw product (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 - **`div(other: FixedPrecisionValue): FixedPrecision`**: Divides the current value by another value (with scaling, throws an error on division by zero). Accepts FixedPrecision instance, number, string, or bigint.
-- **`fraction(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw quotient (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 - **`mod(other: FixedPrecisionValue): FixedPrecision`**: Returns the remainder of the division (modulus operation with scaling). Accepts FixedPrecision instance, number, string, or bigint.
+
+**Raw operations without scaling** (operate directly on scaled values, no configuration validation):
+- **`plus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw sum (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`minus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw difference (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`product(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw product (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`fraction(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw quotient (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 - **`leftover(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw remainder (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+
+**Other operations:**
+- **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
+- **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
 - **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
 - **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
 
