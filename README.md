@@ -7,6 +7,7 @@ FixedPrecision is a library for handling fixed-precision decimal numbers in Java
 - **Configurable Precision:** Set the number of decimal places from 0 to 20 for your calculations.
 - **Multiple Rounding Modes:** Support for modes such as ROUND_UP, ROUND_DOWN, ROUND_CEIL, ROUND_FLOOR, ROUND_HALF_UP, and more.
 - **Comprehensive Arithmetic Operations:** Perform addition, subtraction, multiplication, division, exponentiation, modulo, and even square root calculations.
+- **Method Chaining with Raw Values:** Perform arithmetic and comparison operations directly with numbers, strings, or bigints without explicit FixedPrecision instantiation.
 - **Flexible Conversions:** Convert between `string`, `number`, `bigint`, and FixedPrecision instances seamlessly.
 - **Formatting Utilities:** Retrieve representations in fixed, exponential, or custom precision notation.
 - **Random Number Generation:** Create random numbers with a specified number of decimal places.
@@ -41,6 +42,14 @@ console.log("Sum:", sum.toString());
 const product = a.mul(b);
 console.log("Product:", product.toString());
 
+// Chaining with raw numbers (new feature)
+const result = new FixedPrecision(10.5).add(5).div(3).toNumber();
+console.log("Chained result:", result); // 5.16666667
+
+// Mixed input types
+const mixed = new FixedPrecision(100).add("50").sub(25n).mul(2).div("5");
+console.log("Mixed types:", mixed.toString()); // 50.00000000
+
 // Conversions
 console.log("As a number:", sum.toNumber());
 console.log("As a string:", sum.toString());
@@ -49,6 +58,50 @@ console.log("As a string:", sum.toString());
 const rounded = sum.round(2); // Round to 2 decimal places
 console.log("Rounded:", rounded.toString());
 ```
+
+## Method Chaining with Raw Values
+
+FixedPrecision now supports arithmetic and comparison operations with raw values (numbers, strings, bigints) in addition to FixedPrecision instances. This enables cleaner, more concise code through method chaining.
+
+### Examples
+
+```typescript
+// Clean chaining without explicit instantiation
+const result = new FixedPrecision(10.5).add(5).div(3).toNumber();
+// Result: 5.16666667
+
+// Mixed input types in a single chain
+const mixed = new FixedPrecision(100).add("50").sub(25n).mul(2).div("5");
+// Result: 50.00000000
+
+// Comparison with raw values
+const isGreater = new FixedPrecision(10.5).add(5).gt(15); // true
+const isEqual = new FixedPrecision(10).mul(2).eq(20); // true
+
+// Complex calculations
+const complex = new FixedPrecision(1000)
+  .add(500)
+  .sub("250")
+  .mul(2n)
+  .div(5)
+  .mod(3);
+```
+
+### Benefits
+
+1. **Reduced Verbosity**: No need to wrap every operand in `new FixedPrecision()`
+2. **Improved Readability**: Code reads more naturally like mathematical expressions
+3. **Flexibility**: Mix and match input types as needed
+4. **Backwards Compatible**: Existing code using FixedPrecision instances continues to work unchanged
+
+### Type Support
+All arithmetic and comparison methods accept `FixedPrecisionValue`, which is defined as:
+```typescript
+type FixedPrecisionValue = string | number | bigint | FixedPrecision;
+```
+
+### Configuration Safety
+When operating with other FixedPrecision instances, the library validates that both instances have the same precision configuration (decimal places and rounding mode). Raw values are automatically converted using the current instance's context.
 
 ## API Overview
 
@@ -61,6 +114,8 @@ Creates a new FixedPrecision instance from one of the following types:
 new FixedPrecision(value);
 ```
 
+**Note:** All arithmetic and comparison methods now also accept these same types, enabling method chaining with raw values.
+
 ### Conversion Methods
 
 - **`toString()`**: Returns the decimal value as a string.
@@ -69,22 +124,27 @@ new FixedPrecision(value);
 
 ### Arithmetic Operations
 
-- **`add(other: FixedPrecision): FixedPrecision`**: Adds the given FixedPrecision to the current value.
-- **`sub(other: FixedPrecision): FixedPrecision`**: Subtracts the given FixedPrecision from the current value.
-- **`mul(other: FixedPrecision): FixedPrecision`**: Multiplies the current value by another FixedPrecision.
-- **`div(other: FixedPrecision): FixedPrecision`**: Divides the current value by another FixedPrecision (throws an error on division by zero).
-- **`mod(other: FixedPrecision): FixedPrecision`**: Returns the remainder of the division (modulus operation).
+- **`add(other: FixedPrecisionValue): FixedPrecision`**: Adds the given value to the current value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`plus(other: FixedPrecisionValue): FixedPrecision`**: Alias for `add()`.
+- **`sub(other: FixedPrecisionValue): FixedPrecision`**: Subtracts the given value from the current value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`minus(other: FixedPrecisionValue): FixedPrecision`**: Alias for `sub()`.
+- **`mul(other: FixedPrecisionValue): FixedPrecision`**: Multiplies the current value by another value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`product(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw product (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`div(other: FixedPrecisionValue): FixedPrecision`**: Divides the current value by another value (throws an error on division by zero). Accepts FixedPrecision instance, number, string, or bigint.
+- **`fraction(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw quotient (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`mod(other: FixedPrecisionValue): FixedPrecision`**: Returns the remainder of the division (modulus operation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`leftover(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw remainder (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 - **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
 - **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
 
 ### Comparison Methods
 
-- **`cmp(other: FixedPrecision): -1 | 0 | 1`**: Compares two FixedPrecisions, returning -1 if less than, 0 if equal, and 1 if greater than.
-- **`eq(other: FixedPrecision): boolean`**: Checks if two FixedPrecisions are equal.
-- **`gt(other: FixedPrecision): boolean`**: Returns `true` if the current value is greater than the given value.
-- **`gte(other: FixedPrecision): boolean`**: Returns `true` if the current value is greater than or equal to the given value.
-- **`lt(other: FixedPrecision): boolean`**: Returns `true` if the current value is less than the given value.
-- **`lte(other: FixedPrecision): boolean`**: Returns `true` if the current value is less than or equal to the given value.
+- **`cmp(other: FixedPrecisionValue): -1 | 0 | 1`**: Compares two values, returning -1 if less than, 0 if equal, and 1 if greater than. Accepts FixedPrecision instance, number, string, or bigint.
+- **`eq(other: FixedPrecisionValue): boolean`**: Checks if two values are equal. Accepts FixedPrecision instance, number, string, or bigint.
+- **`gt(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is greater than the given value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`gte(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is greater than or equal to the given value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`lt(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is less than the given value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`lte(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is less than or equal to the given value. Accepts FixedPrecision instance, number, string, or bigint.
 
 ### Rounding and Scaling
 
@@ -150,6 +210,9 @@ const FP2 = FixedPrecision.create({ places: 2 }); // default roundingMode=4
 
 const a = FP8("1.23456789"); // → "1.23456789" (8 places)
 const b = FP2("1.23");      // → "1.23"       (2 places)
+
+// Raw values work with factories too
+const result = FP8(10.5).add(5).div(3); // Works with raw numbers
 
 // Each factory is immutable and independent
 // Changing global config does not affect existing factories
