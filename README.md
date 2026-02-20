@@ -71,6 +71,16 @@ const rounded = sum.round(2); // Round to 2 decimal places
 console.log("Rounded:", rounded.toString());
 ```
 
+## 📚 Comprehensive Documentation
+
+For complete documentation, see the [docs/](docs/) directory:
+
+- [Quick Start Guide](docs/quick-start.md) - Get started in minutes
+- [Basic Concepts](docs/concepts.md) - Understanding scaled representation
+- [Arithmetic Operations](docs/arithmetic.md) - Complete guide to calculations
+- [Raw Operations](docs/raw-operations.md) - Working with scaled values directly
+- [⚠️ BigInt Warning](docs/bigint-warning.md) - Critical: BigInt values are pre-scaled
+
 ## Method Chaining with Raw Values
 
 FixedPrecision now supports arithmetic and comparison operations with raw values (numbers, strings, bigints) in addition to FixedPrecision instances. This enables cleaner, more concise code through method chaining.
