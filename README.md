@@ -7,6 +7,7 @@ FixedPrecision is a library for handling fixed-precision decimal numbers in Java
 - **Configurable Precision:** Set the number of decimal places from 0 to 20 for your calculations.
 - **Multiple Rounding Modes:** Support for modes such as ROUND_UP, ROUND_DOWN, ROUND_CEIL, ROUND_FLOOR, ROUND_HALF_UP, and more.
 - **Comprehensive Arithmetic Operations:** Perform addition, subtraction, multiplication, division, exponentiation, modulo, and even square root calculations.
+- **Method Chaining with Raw Values:** Perform arithmetic and comparison operations directly with numbers, strings, or bigints without explicit FixedPrecision instantiation.
 - **Flexible Conversions:** Convert between `string`, `number`, `bigint`, and FixedPrecision instances seamlessly.
 - **Formatting Utilities:** Retrieve representations in fixed, exponential, or custom precision notation.
 - **Random Number Generation:** Create random numbers with a specified number of decimal places.
@@ -41,6 +42,26 @@ console.log("Sum:", sum.toString());
 const product = a.mul(b);
 console.log("Product:", product.toString());
 
+// Chaining with raw numbers (new feature)
+const result = new FixedPrecision(10.5).add(5).div(3).toNumber();
+console.log("Chained result:", result); // 5.16666667
+
+// Mixed input types
+const mixed = new FixedPrecision(100).add("50").sub(25n).mul(2).div("5");
+console.log("Mixed types:", mixed.toString()); // 50.00000000
+
+// Raw operations (without scaling)
+const rawResult = new FixedPrecision("1.23").product("2.00");
+console.log("Raw product:", rawResult.toString()); // 246000000.00000000
+
+// Direct bigint operations (WARNING: bigint values are pre-scaled!)
+const bigintOp = new FixedPrecision("1.23").plus(200000000n); // 200000000n = 2.00 with 8 decimals
+console.log("Plus bigint:", bigintOp.toString()); // 3.23000000
+
+// ⚠️ Common mistake: using small bigint values
+const mistake = new FixedPrecision("1.23").plus(2n); // 2n = 0.00000002, not 2.00!
+console.log("Common mistake:", mistake.toString()); // 1.23000002 (not 3.23!)
+
 // Conversions
 console.log("As a number:", sum.toNumber());
 console.log("As a string:", sum.toString());
@@ -48,6 +69,143 @@ console.log("As a string:", sum.toString());
 // Rounding
 const rounded = sum.round(2); // Round to 2 decimal places
 console.log("Rounded:", rounded.toString());
+```
+
+## Method Chaining with Raw Values
+
+FixedPrecision now supports arithmetic and comparison operations with raw values (numbers, strings, bigints) in addition to FixedPrecision instances. This enables cleaner, more concise code through method chaining.
+
+### Examples
+
+```typescript
+// Clean chaining without explicit instantiation
+const result = new FixedPrecision(10.5).add(5).div(3).toNumber();
+// Result: 5.16666667
+
+// Mixed input types in a single chain
+const mixed = new FixedPrecision(100).add("50").sub(25n).mul(2).div("5");
+// Result: 50.00000000
+
+// Comparison with raw values
+const isGreater = new FixedPrecision(10.5).add(5).gt(15); // true
+const isEqual = new FixedPrecision(10).mul(2).eq(20); // true
+
+// Complex calculations
+const complex = new FixedPrecision(1000)
+  .add(500)
+  .sub("250")
+  .mul(2n)
+  .div(5)
+  .mod(3);
+
+// Raw operations in chains
+const rawChain = new FixedPrecision("1.23")
+  .plus("2.00")    // Raw sum
+  .product("3.00") // Raw product
+  .minus("1.00");  // Raw difference
+
+// Mixing raw and scaled operations
+const mixedChain = new FixedPrecision(100)
+  .add(50)         // Scaled addition
+  .product(2)      // Raw multiplication
+  .div(3);         // Scaled division
+```
+
+### Benefits
+
+1. **Reduced Verbosity**: No need to wrap every operand in `new FixedPrecision()`
+2. **Improved Readability**: Code reads more naturally like mathematical expressions
+3. **Flexibility**: Mix and match input types as needed
+4. **Backwards Compatible**: Existing code using FixedPrecision instances continues to work unchanged
+
+### Type Support
+All arithmetic and comparison methods accept `FixedPrecisionValue`, which is defined as:
+```typescript
+type FixedPrecisionValue = string | number | bigint | FixedPrecision;
+```
+
+**Important distinction:**
+- `string` and `number`: Interpreted as **decimal values** and scaled according to current context
+- `bigint`: Treated as **already scaled** (pre-scaled) values
+- `FixedPrecision`: Used directly with configuration validation
+
+### Configuration Safety
+When operating with other FixedPrecision instances, the library validates that both instances have the same precision configuration (decimal places and rounding mode). Raw values are automatically converted using the current instance's context.
+
+### ⚠️ Important: BigInt Values are Treated as Pre-scaled
+
+**Critical:** When you pass a `bigint` value to FixedPrecision methods, it is treated as **already scaled** (pre-scaled), not as a decimal value. This is different from `number` and `string` inputs which are interpreted as decimal values and scaled automatically.
+
+```typescript
+// WARNING: BigInt values are treated as pre-scaled!
+const a = new FixedPrecision("1.23");  // 8 decimal places, value = 123000000
+
+// These are NOT equivalent:
+a.plus(2);           // Adds 2.00000000 (converts number to scaled: 200000000)
+a.plus(2n);          // Adds 0.00000002 (treats 2n as pre-scaled: 2)
+
+a.plus("2.00");      // Adds 2.00000000 (converts string to scaled: 200000000)
+a.plus(200000000n);  // Adds 2.00000000 (pre-scaled bigint: 200000000)
+
+// Creating instances with bigint:
+new FixedPrecision(123n);      // Creates 0.00000123 (8 decimal places)
+new FixedPrecision(123);       // Creates 123.00000000 (8 decimal places)
+new FixedPrecision("123");     // Creates 123.00000000 (8 decimal places)
+```
+
+**When to use bigint:**
+- When you have pre-calculated scaled values
+- For performance-critical operations
+- When working with raw scaled values from other FixedPrecision instances
+
+**When to avoid bigint:**
+- For literal decimal values (use `number` or `string` instead)
+- When you're not sure about the scaling factor
+- For user input or external data
+
+### Operations with and without Scaling
+FixedPrecision provides two sets of arithmetic operations:
+
+**With scaling (adjust for decimal places):**
+- `add()`, `sub()`, `mul()`, `div()`, `mod()` - Apply scaling factor to maintain correct decimal precision
+- **Configuration validation**: When operating with other FixedPrecision instances, validates that both have the same precision configuration
+- **Automatic conversion**: Raw values (string, number, bigint) are converted using the current instance's context
+
+**Without scaling (raw operations):**
+- `plus()`, `minus()`, `product()`, `fraction()`, `leftover()` - Operate directly on scaled values
+- **No configuration validation**: Can operate with FixedPrecision instances of different configurations
+- **Direct bigint support**: Accepts bigint values representing pre-scaled amounts
+- **Use cases**: Advanced calculations, working with pre-scaled values, mixing different precisions
+
+Example:
+```typescript
+const a = new FixedPrecision("1.23");  // value = 123000000 (scaled by 10^8)
+const b = new FixedPrecision("2.00");  // value = 200000000 (scaled by 10^8)
+
+// With scaling (maintains decimal precision)
+a.mul(b);      // Returns 2.46 (with scaling: (123000000 * 200000000) / 10^8)
+
+// Without scaling (raw operations)
+a.product(b);  // Returns 24600000000000000 (without scaling: 123000000 * 200000000)
+
+// Raw operations with different configurations
+const c = FixedPrecision.create({ places: 2 })("2.00"); // value = 200 (2 decimal places)
+a.plus(c);     // Works! Returns 1.23000200 (123000000 + 200 = 123000200)
+a.add(c);      // Error: "Cannot operate on different precisions"
+
+// Direct bigint operations (WARNING: bigint values are pre-scaled!)
+a.plus(200000000n);  // Works! 200000000n represents 2.00 with 8 decimals
+// ⚠️ a.plus(2n) would add 0.00000002, not 2.00!
+
+// Raw vs regular comparisons
+const d = FixedPrecision.create({ places: 2 })("2.00"); // value = 200
+a.lt(d);     // Error: "Cannot operate on different precisions"
+a.ltRaw(d);  // Works! Returns false (123000000 > 200)
+
+// Regular comparison with same configuration
+const e = new FixedPrecision("2.00"); // value = 200000000
+a.lt(e);     // Works! Returns true (1.23 < 2.00)
+a.ltRaw(e);  // Works! Returns true (123000000 < 200000000)
 ```
 
 ## API Overview
@@ -61,6 +219,22 @@ Creates a new FixedPrecision instance from one of the following types:
 new FixedPrecision(value);
 ```
 
+**⚠️ Critical: BigInt values are treated as pre-scaled!**
+- `string` and `number`: Interpreted as decimal values and scaled according to context
+- `bigint`: Treated as already scaled (pre-scaled) values
+- `FixedPrecision`: Used directly with configuration validation
+
+**Examples:**
+```typescript
+// With 8 decimal places default:
+new FixedPrecision("123.45");    // 123.45000000 (scaled: 12345000000)
+new FixedPrecision(123.45);      // 123.45000000 (scaled: 12345000000)
+new FixedPrecision(12345000000n); // 123.45000000 (pre-scaled bigint)
+new FixedPrecision(123n);        // 0.00000123 (pre-scaled: 123, not 123.00!)
+```
+
+**Note:** All arithmetic and comparison methods now also accept these same types, enabling method chaining with raw values.
+
 ### Conversion Methods
 
 - **`toString()`**: Returns the decimal value as a string.
@@ -69,22 +243,47 @@ new FixedPrecision(value);
 
 ### Arithmetic Operations
 
-- **`add(other: FixedPrecision): FixedPrecision`**: Adds the given FixedPrecision to the current value.
-- **`sub(other: FixedPrecision): FixedPrecision`**: Subtracts the given FixedPrecision from the current value.
-- **`mul(other: FixedPrecision): FixedPrecision`**: Multiplies the current value by another FixedPrecision.
-- **`div(other: FixedPrecision): FixedPrecision`**: Divides the current value by another FixedPrecision (throws an error on division by zero).
-- **`mod(other: FixedPrecision): FixedPrecision`**: Returns the remainder of the division (modulus operation).
+FixedPrecision provides two sets of arithmetic operations:
+
+**Operations with scaling** (maintain decimal precision, validate configuration):
+- **`add(other: FixedPrecisionValue): FixedPrecision`**: Adds the given value to the current value (with scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`sub(other: FixedPrecisionValue): FixedPrecision`**: Subtracts the given value from the current value (with scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`mul(other: FixedPrecisionValue): FixedPrecision`**: Multiplies the current value by another value (with scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`div(other: FixedPrecisionValue): FixedPrecision`**: Divides the current value by another value (with scaling, throws an error on division by zero). Accepts FixedPrecision instance, number, string, or bigint.
+- **`mod(other: FixedPrecisionValue): FixedPrecision`**: Returns the remainder of the division (modulus operation with scaling). Accepts FixedPrecision instance, number, string, or bigint.
+
+**Raw operations without scaling** (operate directly on scaled values, no configuration validation):
+- **`plus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw sum (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`minus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw difference (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`product(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw product (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`fraction(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw quotient (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`leftover(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw remainder (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+
+**Other operations:**
+- **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
+- **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
 - **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
 - **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
 
 ### Comparison Methods
 
-- **`cmp(other: FixedPrecision): -1 | 0 | 1`**: Compares two FixedPrecisions, returning -1 if less than, 0 if equal, and 1 if greater than.
-- **`eq(other: FixedPrecision): boolean`**: Checks if two FixedPrecisions are equal.
-- **`gt(other: FixedPrecision): boolean`**: Returns `true` if the current value is greater than the given value.
-- **`gte(other: FixedPrecision): boolean`**: Returns `true` if the current value is greater than or equal to the given value.
-- **`lt(other: FixedPrecision): boolean`**: Returns `true` if the current value is less than the given value.
-- **`lte(other: FixedPrecision): boolean`**: Returns `true` if the current value is less than or equal to the given value.
+FixedPrecision provides two sets of comparison methods:
+
+**Regular comparisons** (validate configuration, ensure mathematical correctness):
+- **`cmp(other: FixedPrecisionValue): -1 | 0 | 1`**: Compares two values, returning -1 if less than, 0 if equal, and 1 if greater than. Accepts FixedPrecision instance, number, string, or bigint.
+- **`eq(other: FixedPrecisionValue): boolean`**: Checks if two values are equal. Accepts FixedPrecision instance, number, string, or bigint.
+- **`gt(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is greater than the given value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`gte(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is greater than or equal to the given value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`lt(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is less than the given value. Accepts FixedPrecision instance, number, string, or bigint.
+- **`lte(other: FixedPrecisionValue): boolean`**: Returns `true` if the current value is less than or equal to the given value. Accepts FixedPrecision instance, number, string, or bigint.
+
+**Raw comparisons** (compare scaled values directly, no configuration validation):
+- **`cmpRaw(other: FixedPrecisionValue): -1 | 0 | 1`**: Compares raw scaled values (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`eqRaw(other: FixedPrecisionValue): boolean`**: Returns true if raw scaled values are equal (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`gtRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is greater than other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`gteRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is greater than or equal to other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`ltRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is less than other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
+- **`lteRaw(other: FixedPrecisionValue): boolean`**: Returns true if this raw scaled value is less than or equal to other (without configuration validation). Accepts FixedPrecision instance, number, string, or bigint.
 
 ### Rounding and Scaling
 
@@ -150,6 +349,9 @@ const FP2 = FixedPrecision.create({ places: 2 }); // default roundingMode=4
 
 const a = FP8("1.23456789"); // → "1.23456789" (8 places)
 const b = FP2("1.23");      // → "1.23"       (2 places)
+
+// Raw values work with factories too
+const result = FP8(10.5).add(5).div(3); // Works with raw numbers
 
 // Each factory is immutable and independent
 // Changing global config does not affect existing factories

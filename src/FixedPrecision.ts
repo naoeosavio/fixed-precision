@@ -158,11 +158,8 @@ export default class FixedPrecision {
    * @returns A new FixedPrecision instance with the internal value set to rawValue.
    */
   protected fromRaw(rawValue: bigint): FixedPrecision {
-    // const instance = new FixedPrecision(0n,this.ctx);
-    // instance.value = rawValue;
-    const instance = Object.create(FixedPrecision.prototype);
+    const instance = new FixedPrecision(0n, this.ctx);
     instance.value = rawValue;
-    instance.ctx = this.ctx;
     return instance;
   }
 
@@ -170,6 +167,31 @@ export default class FixedPrecision {
     if (this.ctx.places !== other.ctx.places) {
       throw new Error("Cannot operate on different precisions");
     }
+  }
+
+  private coerce(value: FixedPrecisionValue): FixedPrecision {
+    if (value instanceof FixedPrecision) {
+      this.assertSameConfig(value);
+      return value;
+    }
+
+    return new FixedPrecision(value, this.ctx);
+  }
+
+  private toScaledValue(value: FixedPrecisionValue): bigint {
+    if (value instanceof FixedPrecision) {
+      return value.value;
+    }
+    if (typeof value === "bigint") {
+      return value;
+    }
+    if (typeof value === "number") {
+      return FixedPrecision.fromNumberWithCtx(value, this.ctx);
+    }
+    if (typeof value === "string") {
+      return FixedPrecision.fromStringWithCtx(value, this.ctx);
+    }
+    throw new Error(`Invalid value type: ${typeof value}`);
   }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -306,21 +328,22 @@ export default class FixedPrecision {
   }
 
   private static toStringWithCtx(value: bigint, ctx: FPContext): string {
-    const abs = value < 0n ? 1 : 0;
-    const s = value.toString();
+    const str = value.toString();
     const P = ctx.places;
-    const intPart = s.slice(abs, -P) || "0";
-    let fracPart = s.slice(-P);
-    if (fracPart.length !== 0 || fracPart.length < P) {
-      fracPart = fracPart.padStart(P, "0");
+    const isNegative = str[0] === "-";
+    const absStr = isNegative ? str.slice(1) : str;
+    const len = absStr.length;
+
+    if (len <= P) {
+      const padded = absStr.padStart(P + 1, "0");
+      const intPart = padded.slice(0, padded.length - P);
+      const fracPart = padded.slice(-P);
+      return `${(isNegative ? "-" : "") + intPart}.${fracPart}`;
     }
-    return abs
-      ? fracPart
-        ? `-${intPart}.${fracPart}`
-        : `-${intPart}`
-      : fracPart
-        ? `${intPart}.${fracPart}`
-        : intPart;
+
+    const intPart = absStr.slice(0, len - P);
+    const fracPart = absStr.slice(-P);
+    return `${(isNegative ? "-" : "") + intPart}.${fracPart}`;
   }
 
   // Instance conversion methods
@@ -344,41 +367,83 @@ export default class FixedPrecision {
   /** Compares the values.
    *  Returns -1 if this < other, 0 if equal, and 1 if this > other.
    */
-  public cmp(other: FixedPrecision): Comparison {
-    this.assertSameConfig(other);
-    if (this.value < other.value) return -1;
-    if (this.value > other.value) return 1;
+  public cmp(other: FixedPrecisionValue): Comparison {
+    const o = this.coerce(other);
+    if (this.value < o.value) return -1;
+    if (this.value > o.value) return 1;
     return 0;
   }
 
   /** Returns true if this FixedPrecision equals other. */
-  public eq(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value === other.value;
+  public eq(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value === o.value;
   }
 
   /** Returns true if this FixedPrecision is greater than other. */
-  public gt(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value > other.value;
+  public gt(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value > o.value;
   }
 
   /** Returns true if this FixedPrecision is greater than or equal to other. */
-  public gte(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value >= other.value;
+  public gte(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value >= o.value;
   }
 
   /** Returns true if this FixedPrecision is less than other. */
-  public lt(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value < other.value;
+  public lt(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value < o.value;
   }
 
   /** Returns true if this FixedPrecision is less than or equal to other. */
-  public lte(other: FixedPrecision): boolean {
-    this.assertSameConfig(other);
-    return this.value <= other.value;
+  public lte(other: FixedPrecisionValue): boolean {
+    const o = this.coerce(other);
+    return this.value <= o.value;
+  }
+
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+  // Raw comparison methods (without configuration validation)
+  // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+  /** Compares raw scaled values (without configuration validation). */
+  public cmpRaw(other: FixedPrecisionValue): Comparison {
+    const otherValue = this.toScaledValue(other);
+    if (this.value < otherValue) return -1;
+    if (this.value > otherValue) return 1;
+    return 0;
+  }
+
+  /** Returns true if raw scaled values are equal (without configuration validation). */
+  public eqRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value === otherValue;
+  }
+
+  /** Returns true if this raw scaled value is greater than other (without configuration validation). */
+  public gtRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value > otherValue;
+  }
+
+  /** Returns true if this raw scaled value is greater than or equal to other (without configuration validation). */
+  public gteRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value >= otherValue;
+  }
+
+  /** Returns true if this raw scaled value is less than other (without configuration validation). */
+  public ltRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value < otherValue;
+  }
+
+  /** Returns true if this raw scaled value is less than or equal to other (without configuration validation). */
+  public lteRaw(other: FixedPrecisionValue): boolean {
+    const otherValue = this.toScaledValue(other);
+    return this.value <= otherValue;
   }
 
   public isZero(): boolean {
@@ -394,54 +459,62 @@ export default class FixedPrecision {
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision plus n. */
-  public add(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw(this.value + other.value);
+  public add(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw(this.value + o.value);
   }
 
-  /** Alias for add. */
-  public plus(other: FixedPrecision): FixedPrecision {
-    return this.add(other);
+  /** Returns the raw sum (without scaling). */
+  public plus(other: FixedPrecisionValue): FixedPrecision {
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value + otherValue);
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision minus n. */
-  public sub(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw(this.value - other.value);
+  public sub(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw(this.value - o.value);
   }
 
-  /** Alias for sub. */
-  public minus(other: FixedPrecision): FixedPrecision {
-    return this.sub(other);
+  /** Returns the raw difference (without scaling). */
+  public minus(other: FixedPrecisionValue): FixedPrecision {
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value - otherValue);
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision times n. */
-  public mul(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw((this.value * other.value) / this.ctx.SCALE);
+  public mul(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw((this.value * o.value) / this.ctx.SCALE);
   }
 
-  public product(other: FixedPrecision): FixedPrecision {
-    return new FixedPrecision(this.value * other.value, this.ctx);
+  /** Returns the raw product (without scaling). */
+  public product(other: FixedPrecisionValue): FixedPrecision {
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value * otherValue);
   }
 
-  /** Returns a FixedDecimal whose value is this FixedDecimal divided by n. */
-  public div(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw((this.value * this.ctx.SCALE) / other.value);
+  /** Returns a FixedPrecision whose value is this FixedPrecision divided by n. */
+  public div(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw((this.value * this.ctx.SCALE) / o.value);
   }
 
-  public fraction(other: FixedPrecision): FixedPrecision {
-    return this.fromRaw(this.value / other.value);
+  /** Returns the raw quotient (without scaling). */
+  public fraction(other: FixedPrecisionValue): FixedPrecision {
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value / otherValue);
   }
 
   /** Returns a FixedPrecision representing the integer remainder of dividing this by n. */
-  public mod(other: FixedPrecision): FixedPrecision {
-    this.assertSameConfig(other);
-    return this.fromRaw((this.value * this.ctx.SCALE) % other.value);
+  public mod(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw((this.value * this.ctx.SCALE) % o.value);
   }
-  public leftover(other: FixedPrecision): FixedPrecision {
-    return this.fromRaw(this.value % other.value);
+  /** Returns the raw remainder (without scaling). */
+  public leftover(other: FixedPrecisionValue): FixedPrecision {
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value % otherValue);
   }
 
   /** Returns a FixedPrecision whose value is the negation of this FixedPrecision. */

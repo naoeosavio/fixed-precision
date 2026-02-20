@@ -1,8 +1,8 @@
 import { describe, expect, test } from "vitest";
 
 import FixedPrecision, {
-  fixedconfig,
   type FixedPrecisionConfig,
+  fixedconfig,
   type RoundingMode,
 } from "../src/FixedPrecision.js";
 
@@ -310,7 +310,7 @@ describe("FixedPrecision", () => {
       const rnd = FixedPrecision.random(8);
       const parts = rnd.toString().split(".");
       expect(parts[1]).toBeDefined();
-      expect(parts[1]!.length).toBe(8);
+      expect(parts[1]?.length).toBe(8);
     });
   });
 
@@ -447,6 +447,25 @@ describe("FixedPrecision", () => {
       const FP8_HALFUP = FixedPrecision.create({ places: 8 });
       const y = FP8_HALFUP("1.23456781");
       expect(y.round(4).toString()).toBe("1.23460000");
+    });
+  });
+
+  // ––– Chaining –––
+  describe("Chaining with Raw Numbers", () => {
+    // Chaining with raw numbers
+    test("chaining with raw numbers", () => {
+      const result = new FixedPrecision(10.5).add(5).div(3).toNumber();
+      expect(result).toBeCloseTo((10.5 + 5) / 3);
+    });
+    // Mixed input types
+    test("mixed input types in chaining", () => {
+      const result = new FixedPrecision(100).add("50").sub(25).mul(2).div("5");
+      expect(result.toNumber()).toBeCloseTo(((100 + 50 - 25) * 2) / 5);
+    });
+    // Comparison with raw numbers
+    test("comparison with raw numbers", () => {
+      expect(new FixedPrecision(10.5).add(5).gt(15)).toBe(true);
+      expect(new FixedPrecision(10).mul(2).eq(20)).toBe(true);
     });
   });
 });
