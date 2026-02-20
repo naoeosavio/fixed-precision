@@ -178,6 +178,22 @@ export default class FixedPrecision {
     return new FixedPrecision(value, this.ctx);
   }
 
+  private toScaledValue(value: FixedPrecisionValue): bigint {
+    if (value instanceof FixedPrecision) {
+      return value.value;
+    }
+    if (typeof value === "bigint") {
+      return value;
+    }
+    if (typeof value === "number") {
+      return FixedPrecision.fromNumberWithCtx(value, this.ctx);
+    }
+    if (typeof value === "string") {
+      return FixedPrecision.fromStringWithCtx(value, this.ctx);
+    }
+    throw new Error(`Invalid value type: ${typeof value}`);
+  }
+
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Conversion helpers
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -408,8 +424,8 @@ export default class FixedPrecision {
 
   /** Returns the raw sum (without scaling). */
   public plus(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(this.value + o.value);
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value + otherValue);
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision minus n. */
@@ -420,8 +436,8 @@ export default class FixedPrecision {
 
   /** Returns the raw difference (without scaling). */
   public minus(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(this.value - o.value);
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value - otherValue);
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision times n. */
@@ -432,8 +448,8 @@ export default class FixedPrecision {
 
   /** Returns the raw product (without scaling). */
   public product(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(this.value * o.value);
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value * otherValue);
   }
 
   /** Returns a FixedPrecision whose value is this FixedPrecision divided by n. */
@@ -444,8 +460,8 @@ export default class FixedPrecision {
 
   /** Returns the raw quotient (without scaling). */
   public fraction(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(this.value / o.value);
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value / otherValue);
   }
 
   /** Returns a FixedPrecision representing the integer remainder of dividing this by n. */
@@ -455,8 +471,8 @@ export default class FixedPrecision {
   }
   /** Returns the raw remainder (without scaling). */
   public leftover(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(this.value % o.value);
+    const otherValue = this.toScaledValue(other);
+    return this.fromRaw(this.value % otherValue);
   }
 
   /** Returns a FixedPrecision whose value is the negation of this FixedPrecision. */
