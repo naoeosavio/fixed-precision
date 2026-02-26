@@ -686,6 +686,12 @@ export default class FixedPrecision {
    * @param iter  Remaining iterations.
    * @returns Improved square root approximation.
    */
+  /**
+   * Recursive helper for Newton-Raphson square root approximation.
+   * @param guess - Current approximation
+   * @param iter - Remaining iterations
+   * @returns Improved square root approximation
+   */
   private sqrtGo(guess: FixedPrecision, iter: number): FixedPrecision {
     if (iter <= 0) {
       return guess;
@@ -779,6 +785,12 @@ export default class FixedPrecision {
    * @param roundingFactor - The rounding factor (power of 10).
    * @param rm - Rounding mode to use
    * @returns The quotient after rounding (without the discarded digits)
+   */
+  /**
+   * Internal rounding implementation that applies the specified rounding mode.
+   * @param roundingFactor - Power of 10 factor for rounding (e.g., 10^2 for 2 decimal places)
+   * @param rm - Rounding mode (0-8)
+   * @returns Rounded quotient as bigint
    */
   private roundToScale(roundingFactor: bigint, rm: RoundingMode): bigint {
     const quotient = this.value / roundingFactor;
@@ -887,7 +899,13 @@ export default class FixedPrecision {
     return this.fromRaw(newValue);
   }
 
-  toExponential(dp?: number, rm?: RoundingMode): string {
+  /**
+   * Returns a string representing the FixedPrecision in exponential notation.
+   * @param dp - Number of decimal places (default: current precision)
+   * @param rm - Rounding mode (default: current rounding mode)
+   * @returns String in exponential notation (e.g., "1.23e+2")
+   */
+  public toExponential(dp?: number, rm?: RoundingMode): string {
     const effDp = dp ?? this.ctx.places;
     const rounded = this.round(effDp, rm);
     const [int = "", frac = ""] = rounded.toString().split(".");
@@ -903,7 +921,14 @@ export default class FixedPrecision {
     return `${shifted.toFixed(effDp)}e${exp}`;
   }
 
-  toPrecision(sd: number, rm?: RoundingMode): string {
+  /**
+   * Returns a string representing the FixedPrecision with a specified number of significant digits.
+   * @param sd - Number of significant digits
+   * @param rm - Rounding mode (default: current rounding mode)
+   * @returns String with specified significant digits
+   * @throws Error if sd is invalid
+   */
+  public toPrecision(sd: number, rm?: RoundingMode): string {
     if (sd >= 1e6) {
       throw new Error("Invalid precision");
     }
@@ -933,17 +958,28 @@ export default class FixedPrecision {
       : intPart.toString();
   }
 
+  /**
+   * Returns the primitive value of this FixedPrecision (string representation).
+   * Used by JavaScript when object needs to be coerced to primitive.
+   * @returns String representation
+   */
   public valueOf(): string {
     return this.toString();
   }
 
   /**
    * Returns the type of this object as a string ('FixedPrecision')
+   * @returns String 'FixedPrecision'
    */
   public typeof(): "FixedPrecision" {
     return "FixedPrecision";
   }
 
+  /**
+   * Returns the raw scaled bigint value.
+   * Warning: Direct manipulation of raw values can break precision guarantees.
+   * @returns Internal scaled bigint representation
+   */
   public raw(): bigint {
     return this.value;
   }
