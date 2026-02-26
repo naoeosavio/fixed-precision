@@ -232,6 +232,13 @@ export default class FixedPrecision {
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
 
   // Context-aware conversions
+  /**
+   * Converts a string representation of a number to its scaled bigint value.
+   * Optimized for performance with different precision and string length scenarios.
+   * @param str - String representation of the number
+   * @param ctx - Context with precision configuration
+   * @returns Scaled bigint value
+   */
   private static fromStringWithCtx(str: string, ctx: FPContext): bigint {
     const dotIndex = str.indexOf(".", 1);
     const P = ctx.places;
@@ -338,6 +345,14 @@ export default class FixedPrecision {
     return int < 0n ? int * SCALE_BIG - nScaled : int * SCALE_BIG + nScaled;
   }
 
+  /**
+   * Converts a JavaScript number to its scaled bigint representation.
+   * Handles edge cases for large numbers and maintains precision.
+   * @param value - JavaScript number to convert
+   * @param ctx - Context with precision configuration
+   * @returns Scaled bigint value
+   * @throws Error if value is NaN or infinite
+   */
   private static fromNumberWithCtx(value: number, ctx: FPContext): bigint {
     if (Number.isNaN(value) || !Number.isFinite(value)) {
       throw new Error("Invalid number: value must be a finite number.");
@@ -356,10 +371,22 @@ export default class FixedPrecision {
     return BigInt(Math.trunc(scaled));
   }
 
+  /**
+   * Converts a scaled bigint value back to a JavaScript number.
+   * @param value - Scaled bigint value
+   * @param ctx - Context with precision configuration
+   * @returns JavaScript number representation
+   */
   private static toNumberWithCtx(value: bigint, ctx: FPContext): number {
     return Number(value) / ctx.SCALENUMBER;
   }
 
+  /**
+   * Converts a scaled bigint value to its string representation with proper decimal formatting.
+   * @param value - Scaled bigint value
+   * @param ctx - Context with precision configuration
+   * @returns String representation with correct decimal places
+   */
   private static toStringWithCtx(value: bigint, ctx: FPContext): string {
     const str = value.toString();
     const P = ctx.places;
@@ -379,11 +406,19 @@ export default class FixedPrecision {
     return `${(isNegative ? "-" : "") + intPart}.${fracPart}`;
   }
 
-  // Instance conversion methods
+  /**
+   * Converts this FixedPrecision to a JavaScript number.
+   * Note: May lose precision for very large values.
+   * @returns JavaScript number representation
+   */
   public toNumber(): number {
     return FixedPrecision.toNumberWithCtx(this.value, this.ctx);
   }
 
+  /**
+   * Converts this FixedPrecision to its string representation.
+   * @returns String representation with correct decimal places
+   */
   public toString(): string {
     return FixedPrecision.toStringWithCtx(this.value, this.ctx);
   }
@@ -479,14 +514,26 @@ export default class FixedPrecision {
     return this.value <= otherValue;
   }
 
+  /**
+   * Checks if this FixedPrecision represents zero.
+   * @returns true if value is zero
+   */
   public isZero(): boolean {
     return this.value === 0n;
   }
 
+  /**
+   * Checks if this FixedPrecision represents a positive number.
+   * @returns true if value is greater than zero
+   */
   public isPositive(): boolean {
     return this.value > 0n;
   }
 
+  /**
+   * Checks if this FixedPrecision represents a negative number.
+   * @returns true if value is less than zero
+   */
   public isNegative(): boolean {
     return this.value < 0n;
   }
