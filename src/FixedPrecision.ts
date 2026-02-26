@@ -40,6 +40,12 @@ export default class FixedPrecision {
   private value: bigint = 0n;
   private readonly ctx!: FPContext;
 
+  /**
+   * Creates a context object containing precision configuration and precomputed scale values.
+   * @param places - Number of decimal places (0-20)
+   * @param roundingMode - Rounding mode (0-8)
+   * @returns Context object with places, roundingMode, SCALE (bigint), and SCALENUMBER (number)
+   */
   private static makeContext(
     places: number,
     roundingMode: RoundingMode,
@@ -91,6 +97,11 @@ export default class FixedPrecision {
     );
   }
 
+  /**
+   * Creates a new FixedPrecision instance.
+   * @param val - Initial value (string, number, bigint, or FixedPrecision)
+   * @param ctx - Optional context for precision configuration (uses default if not provided)
+   */
   constructor(val: FixedPrecisionValue, ctx?: FPContext) {
     // establish context
     this.ctx = ctx ?? FixedPrecision.defaultContext;
@@ -115,10 +126,12 @@ export default class FixedPrecision {
    * bound to its own places and rounding mode, avoiding global mutable state.
    *
    * Example:
-   *   const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
-   *   const FP2 = FixedPrecision.create({ places: 2 });
-   *   const a = FP8("1.23456789");
-   *   const b = FP2("1.23");
+   * ```typescript
+   *  const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+   *  const FP2 = FixedPrecision.create({ places: 2 });
+   *  const a = FP8("1.23456789");
+   *  const b = FP2("1.23");
+   * ```
    */
   public static create(
     config: FixedPrecisionConfig,
@@ -163,12 +176,25 @@ export default class FixedPrecision {
     return instance;
   }
 
+  /**
+   * Validates that two FixedPrecision instances have the same precision configuration.
+   * @param other - Other FixedPrecision instance to compare
+   * @throws Error if precision configurations differ
+   */
   private assertSameConfig(other: FixedPrecision) {
+    if (this.ctx.places === other.ctx.places) return;
     if (this.ctx.places !== other.ctx.places) {
       throw new Error("Cannot operate on different precisions");
     }
   }
 
+  /**
+   * Converts a FixedPrecisionValue to a FixedPrecision instance with the same context.
+   * If the value is already a FixedPrecision, validates configuration compatibility.
+   * @param value - Value to coerce (string, number, bigint, or FixedPrecision)
+   * @returns FixedPrecision instance with the same context as this instance
+   * @throws Error if FixedPrecision instances have different precision configurations
+   */
   private coerce(value: FixedPrecisionValue): FixedPrecision {
     if (value instanceof FixedPrecision) {
       this.assertSameConfig(value);
@@ -178,6 +204,13 @@ export default class FixedPrecision {
     return new FixedPrecision(value, this.ctx);
   }
 
+  /**
+   * Converts any FixedPrecisionValue to its scaled bigint representation.
+   * Unlike coerce(), this method does not validate configuration compatibility.
+   * @param value - Value to convert (string, number, bigint, or FixedPrecision)
+   * @returns Scaled bigint value
+   * @throws Error if value type is invalid
+   */
   private toScaledValue(value: FixedPrecisionValue): bigint {
     if (value instanceof FixedPrecision) {
       return value.value;
@@ -541,9 +574,9 @@ export default class FixedPrecision {
 
     // exponentiation by squaring in scaled space
     while (e > 0) {
-      if (e & 1) acc = (acc * base) / this.ctx.SCALE;
+      if (e && 1) acc = (acc * base) / this.ctx.SCALE;
       base = (base * base) / this.ctx.SCALE;
-      e >>= 1;
+      e = e >> 1;
     }
 
     if (exp < 0) {
