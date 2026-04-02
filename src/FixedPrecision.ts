@@ -53,7 +53,8 @@ export default class FixedPrecision {
     return {
       places,
       roundingMode,
-      SCALE: BigInt(10 ** places),
+      // Use BigInt exponentiation to avoid precision issues for large powers of 10
+      SCALE: 10n ** BigInt(places),
       SCALENUMBER: 10 ** places,
     };
   }
@@ -621,7 +622,8 @@ export default class FixedPrecision {
 
     // exponentiation by squaring in scaled space
     while (e > 0) {
-      if (e && 1) acc = (acc * base) / this.ctx.SCALE;
+      // multiply when the current bit is set
+      if (e & 1) acc = (acc * base) / this.ctx.SCALE;
       base = (base * base) / this.ctx.SCALE;
       e = e >> 1;
     }
