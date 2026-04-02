@@ -140,3 +140,27 @@ tsup.config.ts
 .npm*
 .biome*
 biome.*
+
+# C implementation build files
+C/obj/
+C/bin/
+C/*.o
+C/*.a
+C/*.so
+C/*.dylib
+C/*.exe
+C/*.out
+C/*.app
+*.backup
+
+# Temporary test files
+debug_*
+test_*
+benchmark
+benchmark.o
+example
+example.o
+example_complete
+example_complete.o
+fixed_precision.o
+fixed_precision_example
