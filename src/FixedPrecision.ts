@@ -778,6 +778,56 @@ export default class FixedPrecision {
     return new FixedPrecision(valueStr);
   }
 
+  /**
+   * Returns the minimum value among the given values.
+   * All values are normalized to the default context for comparison.
+   *
+   * @param val - First value (required)
+   * @param vals - Additional values
+   * @returns The smallest FixedPrecision among the arguments
+   */
+  public static min(
+    val: FixedPrecisionValue,
+    ...vals: FixedPrecisionValue[]
+  ): FixedPrecision {
+    const normalize = (v: FixedPrecisionValue): FixedPrecision =>
+      v instanceof FixedPrecision
+        ? new FixedPrecision(v.toString())
+        : new FixedPrecision(v);
+
+    let result = normalize(val);
+    for (const v of vals) {
+      const fp = normalize(v);
+      if (fp.lt(result)) result = fp;
+    }
+    return result;
+  }
+
+  /**
+   * Returns the maximum value among the given values.
+   * All values are normalized to the default context for comparison.
+   *
+   * @param val - First value (required)
+   * @param vals - Additional values
+   * @returns The largest FixedPrecision among the arguments
+   */
+  public static max(
+    val: FixedPrecisionValue,
+    ...vals: FixedPrecisionValue[]
+  ): FixedPrecision {
+    const normalize = (v: FixedPrecisionValue): FixedPrecision =>
+      v instanceof FixedPrecision
+        ? new FixedPrecision(v.toString())
+        : new FixedPrecision(v);
+
+    let result = normalize(val);
+    for (const v of vals) {
+      const fp = normalize(v);
+      if (fp.gt(result)) result = fp;
+    }
+    return result;
+  }
+
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   // Formatting methods
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
