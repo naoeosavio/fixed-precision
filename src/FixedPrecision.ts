@@ -104,22 +104,8 @@ export default class FixedPrecision {
    * @param ctx - Optional context for precision configuration (uses default if not provided)
    */
   constructor(val: FixedPrecisionValue, ctx?: FPContext) {
-    // establish context
     this.ctx = ctx ?? FixedPrecision.defaultContext;
-    switch (typeof val) {
-      case "bigint":
-        this.value = val;
-        break;
-      case "number": {
-        this.value = FixedPrecision.fromNumberWithCtx(val, this.ctx);
-        break;
-      }
-      case "string":
-        this.value = FixedPrecision.fromStringWithCtx(val, this.ctx);
-        break;
-      default:
-        this.value = val.value;
-    }
+    this.value = FixedPrecision.toScaled(val, this.ctx);
   }
 
   /**
@@ -206,13 +192,13 @@ export default class FixedPrecision {
   }
 
   /**
-   * Converts any FixedPrecisionValue to its scaled bigint representation.
-   * Unlike coerce(), this method does not validate configuration compatibility.
-   * @param value - Value to convert (string, number, bigint, or FixedPrecision)
-   * @returns Scaled bigint value
-   * @throws Error if value type is invalid
+   * Converts any FixedPrecisionValue to its scaled bigint representation
+   * using the given context.
    */
-  private toScaledValue(value: FixedPrecisionValue): bigint {
+  private static toScaled(
+    value: FixedPrecisionValue,
+    ctx: FPContext,
+  ): bigint {
     if (value instanceof FixedPrecision) {
       return value.value;
     }
@@ -220,12 +206,23 @@ export default class FixedPrecision {
       return value;
     }
     if (typeof value === "number") {
-      return FixedPrecision.fromNumberWithCtx(value, this.ctx);
+      return FixedPrecision.fromNumberWithCtx(value, ctx);
     }
     if (typeof value === "string") {
-      return FixedPrecision.fromStringWithCtx(value, this.ctx);
+      return FixedPrecision.fromStringWithCtx(value, ctx);
     }
     throw new Error(`Invalid value type: ${typeof value}`);
+  }
+
+  /**
+   * Converts any FixedPrecisionValue to its scaled bigint representation.
+   * Unlike coerce(), this method does not validate configuration compatibility.
+   * @param value - Value to convert (string, number, bigint, or FixedPrecision)
+   * @returns Scaled bigint value
+   * @throws Error if value type is invalid
+   */
+  private toScaledValue(value: FixedPrecisionValue): bigint {
+    return FixedPrecision.toScaled(value, this.ctx);
   }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
