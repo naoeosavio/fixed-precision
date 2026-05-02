@@ -610,7 +610,7 @@ export default class FixedPrecision {
 
     if (this.isZero()) {
       if (exp < 0) throw new Error("0 ** negative is undefined");
-      return new FixedPrecision(0n, this.ctx);
+      return new FixedPrecision(0n);
     }
 
     let e = Math.abs(exp);
@@ -675,16 +675,10 @@ export default class FixedPrecision {
       return new FixedPrecision(0n, this.ctx);
     }
     // Initial guess: x / 2.0
-    const initialGuess = this.fraction(new FixedPrecision(2n, this.ctx));
+    const initialGuess = this.fraction(2n);
     return this.sqrtGo(initialGuess, this.ctx.places);
   }
 
-  /**
-   * Newton–Raphson iteration for square root.
-   * @param guess Current approximation.
-   * @param iter  Remaining iterations.
-   * @returns Improved square root approximation.
-   */
   /**
    * Recursive helper for Newton-Raphson square root approximation.
    * @param guess - Current approximation
@@ -696,8 +690,8 @@ export default class FixedPrecision {
       return guess;
     }
     // next = (guess + (x / guess)) / 2.0
-    const next = guess.add(this.div(guess)).fraction(this.fromRaw(2n));
-    if (guess.eq(next)) {
+    const next = guess.add(this.div(guess)).fraction(2n);
+    if (guess.eqRaw(next)) {
       return next;
     }
     return this.sqrtGo(next, iter - 1);
