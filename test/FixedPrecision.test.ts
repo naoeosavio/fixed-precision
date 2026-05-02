@@ -314,6 +314,113 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Static min() and max()", () => {
+    test("min() with single argument returns that value", () => {
+      const result = FixedPrecision.min("5.5");
+      expect(result.toString()).toBe("5.50000000");
+    });
+
+    test("min() returns the smaller of two values", () => {
+      const result = FixedPrecision.min("10.5", "3.2");
+      expect(result.toNumber()).toBe(3.2);
+    });
+
+    test("min() returns the minimum among multiple values", () => {
+      const result = FixedPrecision.min("5.0", "3.0", "7.0", "1.0", "4.0");
+      expect(result.toNumber()).toBe(1.0);
+    });
+
+    test("min() with negative values", () => {
+      const result = FixedPrecision.min("-5.0", "-10.0", "3.0");
+      expect(result.toNumber()).toBe(-10.0);
+    });
+
+    test("min() with FixedPrecision instances", () => {
+      const a = new FixedPrecision("100.5");
+      const b = new FixedPrecision("50.25");
+      const result = FixedPrecision.min(a, b);
+      expect(result.toNumber()).toBe(50.25);
+    });
+
+    test("min() with mixed primitives and FixedPrecision", () => {
+      const a = new FixedPrecision("10.0");
+      const result = FixedPrecision.min(a, "5.5", 3.0);
+      expect(result.toNumber()).toBe(3.0);
+    });
+
+    test("min() normalizes values from different contexts to default", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      const a = FP4("100.5");
+      const result = FixedPrecision.min(a, "50.25");
+      expect(result.toString()).toBe("50.25000000");
+    });
+
+    test("max() with single argument returns that value", () => {
+      const result = FixedPrecision.max("-3.5");
+      expect(result.toString()).toBe("-3.50000000");
+    });
+
+    test("max() returns the larger of two values", () => {
+      const result = FixedPrecision.max("10.5", "3.2");
+      expect(result.toNumber()).toBe(10.5);
+    });
+
+    test("max() returns the maximum among multiple values", () => {
+      const result = FixedPrecision.max("1.0", "3.0", "7.0", "5.0", "2.0");
+      expect(result.toNumber()).toBe(7.0);
+    });
+
+    test("max() with negative values", () => {
+      const result = FixedPrecision.max("-5.0", "-10.0", "-3.0");
+      expect(result.toNumber()).toBe(-3.0);
+    });
+
+    test("max() with FixedPrecision instances", () => {
+      const a = new FixedPrecision("50.25");
+      const b = new FixedPrecision("100.5");
+      const result = FixedPrecision.max(a, b);
+      expect(result.toNumber()).toBe(100.5);
+    });
+
+    test("max() with mixed primitives and FixedPrecision", () => {
+      const a = new FixedPrecision("10.0");
+      const result = FixedPrecision.max(a, "5.5", 3.0);
+      expect(result.toNumber()).toBe(10.0);
+    });
+
+    test("min() with equal values returns that value", () => {
+      const result = FixedPrecision.min("5.0", "5.0", "5.0");
+      expect(result.toNumber()).toBe(5.0);
+    });
+
+    test("max() with equal values returns that value", () => {
+      const result = FixedPrecision.max("5.0", "5.0", "5.0");
+      expect(result.toNumber()).toBe(5.0);
+    });
+
+    test("min() accepts an array", () => {
+      const result = FixedPrecision.min([2, 1, 4, 3]);
+      expect(result.toNumber()).toBe(1);
+    });
+
+    test("max() accepts an array", () => {
+      const result = FixedPrecision.max([2, 1, 4, 3]);
+      expect(result.toNumber()).toBe(4);
+    });
+
+    test("min() throws on empty array", () => {
+      expect(() => FixedPrecision.min([])).toThrow(
+        "FixedPrecision.min requires at least one argument",
+      );
+    });
+
+    test("max() throws on empty array", () => {
+      expect(() => FixedPrecision.max([])).toThrow(
+        "FixedPrecision.max requires at least one argument",
+      );
+    });
+  });
+
   describe("Formatting Methods", () => {
     describe("toExponential()", () => {
       test("toExponential() produces correct format for a small number", () => {

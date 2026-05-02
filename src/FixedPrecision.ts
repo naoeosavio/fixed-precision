@@ -104,22 +104,8 @@ export default class FixedPrecision {
    * @param ctx - Optional context for precision configuration (uses default if not provided)
    */
   constructor(val: FixedPrecisionValue, ctx?: FPContext) {
-    // establish context
     this.ctx = ctx ?? FixedPrecision.defaultContext;
-    switch (typeof val) {
-      case "bigint":
-        this.value = val;
-        break;
-      case "number": {
-        this.value = FixedPrecision.fromNumberWithCtx(val, this.ctx);
-        break;
-      }
-      case "string":
-        this.value = FixedPrecision.fromStringWithCtx(val, this.ctx);
-        break;
-      default:
-        this.value = val.value;
-    }
+    this.value = FixedPrecision.toScaled(val, this.ctx);
   }
 
   /**
@@ -206,13 +192,13 @@ export default class FixedPrecision {
   }
 
   /**
-   * Converts any FixedPrecisionValue to its scaled bigint representation.
-   * Unlike coerce(), this method does not validate configuration compatibility.
-   * @param value - Value to convert (string, number, bigint, or FixedPrecision)
-   * @returns Scaled bigint value
-   * @throws Error if value type is invalid
+   * Converts any FixedPrecisionValue to its scaled bigint representation
+   * using the given context.
    */
-  private toScaledValue(value: FixedPrecisionValue): bigint {
+  private static toScaled(
+    value: FixedPrecisionValue,
+    ctx: FPContext,
+  ): bigint {
     if (value instanceof FixedPrecision) {
       return value.value;
     }
@@ -220,12 +206,23 @@ export default class FixedPrecision {
       return value;
     }
     if (typeof value === "number") {
-      return FixedPrecision.fromNumberWithCtx(value, this.ctx);
+      return FixedPrecision.fromNumberWithCtx(value, ctx);
     }
     if (typeof value === "string") {
-      return FixedPrecision.fromStringWithCtx(value, this.ctx);
+      return FixedPrecision.fromStringWithCtx(value, ctx);
     }
     throw new Error(`Invalid value type: ${typeof value}`);
+  }
+
+  /**
+   * Converts any FixedPrecisionValue to its scaled bigint representation.
+   * Unlike coerce(), this method does not validate configuration compatibility.
+   * @param value - Value to convert (string, number, bigint, or FixedPrecision)
+   * @returns Scaled bigint value
+   * @throws Error if value type is invalid
+   */
+  private toScaledValue(value: FixedPrecisionValue): bigint {
+    return FixedPrecision.toScaled(value, this.ctx);
   }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -613,7 +610,7 @@ export default class FixedPrecision {
 
     if (this.isZero()) {
       if (exp < 0) throw new Error("0 ** negative is undefined");
-      return new FixedPrecision(0n, this.ctx);
+      return new FixedPrecision(0n);
     }
 
     let e = Math.abs(exp);
@@ -678,16 +675,10 @@ export default class FixedPrecision {
       return new FixedPrecision(0n, this.ctx);
     }
     // Initial guess: x / 2.0
-    const initialGuess = this.fraction(new FixedPrecision(2n, this.ctx));
+    const initialGuess = this.fraction(2n);
     return this.sqrtGo(initialGuess, this.ctx.places);
   }
 
-  /**
-   * Newton–Raphson iteration for square root.
-   * @param guess Current approximation.
-   * @param iter  Remaining iterations.
-   * @returns Improved square root approximation.
-   */
   /**
    * Recursive helper for Newton-Raphson square root approximation.
    * @param guess - Current approximation
@@ -699,8 +690,8 @@ export default class FixedPrecision {
       return guess;
     }
     // next = (guess + (x / guess)) / 2.0
-    const next = guess.add(this.div(guess)).fraction(this.fromRaw(2n));
-    if (guess.eq(next)) {
+    const next = guess.add(this.div(guess)).fraction(2n);
+    if (guess.eqRaw(next)) {
       return next;
     }
     return this.sqrtGo(next, iter - 1);
@@ -776,6 +767,65 @@ export default class FixedPrecision {
     const fracStr = randInt.toString().padStart(dec, "0");
     const valueStr = `0.${fracStr}`;
     return new FixedPrecision(valueStr);
+  }
+
+  /**
+   * Normalizes a FixedPrecisionValue to the default context.
+   */
+  private static normalized(v: FixedPrecisionValue): FixedPrecision {
+    return v instanceof FixedPrecision
+      ? new FixedPrecision(v.toString())
+      : new FixedPrecision(v);
+  }
+
+  /**
+   * Returns the minimum value among the given values.
+   * Accepts both variadic arguments and a single array.
+   * All values are normalized to the default context for comparison.
+   *
+   * @param val - Single value or array of values (required)
+   * @param vals - Additional values (variadic)
+   * @returns The smallest FixedPrecision among the arguments
+   */
+  public static min(
+    val: FixedPrecisionValue | FixedPrecisionValue[],
+    ...vals: FixedPrecisionValue[]
+  ): FixedPrecision {
+    const values = Array.isArray(val) ? val : [val, ...vals];
+    if (values.length === 0) {
+      throw new Error("FixedPrecision.min requires at least one argument");
+    }
+    let result = FixedPrecision.normalized(values[0]!);
+    for (let i = 1; i < values.length; i++) {
+      const fp = FixedPrecision.normalized(values[i]!);
+      if (fp.lt(result)) result = fp;
+    }
+    return result;
+  }
+
+  /**
+   * Returns the maximum value among the given values.
+   * Accepts both variadic arguments and a single array.
+   * All values are normalized to the default context for comparison.
+   *
+   * @param val - Single value or array of values (required)
+   * @param vals - Additional values (variadic)
+   * @returns The largest FixedPrecision among the arguments
+   */
+  public static max(
+    val: FixedPrecisionValue | FixedPrecisionValue[],
+    ...vals: FixedPrecisionValue[]
+  ): FixedPrecision {
+    const values = Array.isArray(val) ? val : [val, ...vals];
+    if (values.length === 0) {
+      throw new Error("FixedPrecision.max requires at least one argument");
+    }
+    let result = FixedPrecision.normalized(values[0]!);
+    for (let i = 1; i < values.length; i++) {
+      const fp = FixedPrecision.normalized(values[i]!);
+      if (fp.gt(result)) result = fp;
+    }
+    return result;
   }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––

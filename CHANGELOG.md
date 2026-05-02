@@ -5,6 +5,17 @@ All notable changes to the fixed-precision library will be documented in this fi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-05-02
+
+### Added
+- **`FixedPrecision.min(val, ...vals)`** and **`FixedPrecision.max(val, ...vals)`** static methods
+  - `Math.min`/`Math.max` style: variadic, static, normalizes all values to default context
+  - Accepts strings, numbers, bigints, and `FixedPrecision` instances with different contexts
+
+### Changed
+- Extracted shared `toScaled()` private static helper to unify value resolution logic
+  - Used by both `constructor` and `toScaledValue()` to eliminate duplicated switching logic
+
 ## [1.3.0] - 2026-02-20
 
 ### Added
@@ -129,6 +140,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed**: for any bug fixes
 - **Security**: in case of vulnerabilities
 
+[1.4.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.1.0...v1.2.0
 [1.1.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.0.8...v1.1.0
