@@ -770,25 +770,34 @@ export default class FixedPrecision {
   }
 
   /**
+   * Normalizes a FixedPrecisionValue to the default context.
+   */
+  private static normalized(v: FixedPrecisionValue): FixedPrecision {
+    return v instanceof FixedPrecision
+      ? new FixedPrecision(v.toString())
+      : new FixedPrecision(v);
+  }
+
+  /**
    * Returns the minimum value among the given values.
+   * Accepts both variadic arguments and a single array.
    * All values are normalized to the default context for comparison.
    *
-   * @param val - First value (required)
-   * @param vals - Additional values
+   * @param val - Single value or array of values (required)
+   * @param vals - Additional values (variadic)
    * @returns The smallest FixedPrecision among the arguments
    */
   public static min(
-    val: FixedPrecisionValue,
+    val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    const normalize = (v: FixedPrecisionValue): FixedPrecision =>
-      v instanceof FixedPrecision
-        ? new FixedPrecision(v.toString())
-        : new FixedPrecision(v);
-
-    let result = normalize(val);
-    for (const v of vals) {
-      const fp = normalize(v);
+    const values = Array.isArray(val) ? val : [val, ...vals];
+    if (values.length === 0) {
+      throw new Error("FixedPrecision.min requires at least one argument");
+    }
+    let result = FixedPrecision.normalized(values[0]!);
+    for (let i = 1; i < values.length; i++) {
+      const fp = FixedPrecision.normalized(values[i]!);
       if (fp.lt(result)) result = fp;
     }
     return result;
@@ -796,24 +805,24 @@ export default class FixedPrecision {
 
   /**
    * Returns the maximum value among the given values.
+   * Accepts both variadic arguments and a single array.
    * All values are normalized to the default context for comparison.
    *
-   * @param val - First value (required)
-   * @param vals - Additional values
+   * @param val - Single value or array of values (required)
+   * @param vals - Additional values (variadic)
    * @returns The largest FixedPrecision among the arguments
    */
   public static max(
-    val: FixedPrecisionValue,
+    val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    const normalize = (v: FixedPrecisionValue): FixedPrecision =>
-      v instanceof FixedPrecision
-        ? new FixedPrecision(v.toString())
-        : new FixedPrecision(v);
-
-    let result = normalize(val);
-    for (const v of vals) {
-      const fp = normalize(v);
+    const values = Array.isArray(val) ? val : [val, ...vals];
+    if (values.length === 0) {
+      throw new Error("FixedPrecision.max requires at least one argument");
+    }
+    let result = FixedPrecision.normalized(values[0]!);
+    for (let i = 1; i < values.length; i++) {
+      const fp = FixedPrecision.normalized(values[i]!);
       if (fp.gt(result)) result = fp;
     }
     return result;

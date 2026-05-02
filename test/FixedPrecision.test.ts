@@ -397,6 +397,28 @@ describe("FixedPrecision", () => {
       const result = FixedPrecision.max("5.0", "5.0", "5.0");
       expect(result.toNumber()).toBe(5.0);
     });
+
+    test("min() accepts an array", () => {
+      const result = FixedPrecision.min([2, 1, 4, 3]);
+      expect(result.toNumber()).toBe(1);
+    });
+
+    test("max() accepts an array", () => {
+      const result = FixedPrecision.max([2, 1, 4, 3]);
+      expect(result.toNumber()).toBe(4);
+    });
+
+    test("min() throws on empty array", () => {
+      expect(() => FixedPrecision.min([])).toThrow(
+        "FixedPrecision.min requires at least one argument",
+      );
+    });
+
+    test("max() throws on empty array", () => {
+      expect(() => FixedPrecision.max([])).toThrow(
+        "FixedPrecision.max requires at least one argument",
+      );
+    });
   });
 
   describe("Formatting Methods", () => {
