@@ -85,6 +85,56 @@ Generates a random FixedPrecision value between 0 (inclusive) and 1 (exclusive).
 const random = FixedPrecision.random(4); // Random value with 4 decimals
 ```
 
+### `FixedPrecision.min(val, ...vals)`
+
+Returns the smallest value among the given arguments. Accepts both variadic arguments and a single array.
+All values are normalized to the default context.
+
+**Parameters:**
+- `val`: `FixedPrecisionValue | FixedPrecisionValue[]` - A single value or an array of values
+- `...vals`: `FixedPrecisionValue[]` - Additional values (variadic)
+
+**Returns:** `FixedPrecision`
+
+**Throws:** `Error` if called with an empty array
+
+**Example:**
+```typescript
+// Variadic
+FixedPrecision.min("5.0", "3.0", "7.0", "1.0"); // "1.00000000"
+
+// Array
+FixedPrecision.min([2, 1, 4, 3]); // "1.00000000"
+
+// Mixed types
+FixedPrecision.min(10, "5.5", FixedPrecision.random()); // smallest among them
+```
+
+### `FixedPrecision.max(val, ...vals)`
+
+Returns the largest value among the given arguments. Accepts both variadic arguments and a single array.
+All values are normalized to the default context.
+
+**Parameters:**
+- `val`: `FixedPrecisionValue | FixedPrecisionValue[]` - A single value or an array of values
+- `...vals`: `FixedPrecisionValue[]` - Additional values (variadic)
+
+**Returns:** `FixedPrecision`
+
+**Throws:** `Error` if called with an empty array
+
+**Example:**
+```typescript
+// Variadic
+FixedPrecision.max(2, 1, 4, 3); // "4.00000000"
+
+// Array
+FixedPrecision.max(["5.0", "3.0", "7.0", "1.0"]); // "7.00000000"
+
+// Mixed types
+FixedPrecision.max(10, "5.5", new FixedPrecision("20.0")); // "20.00000000"
+```
+
 ### `FixedPrecision.configure(config: FixedPrecisionConfig)`
 
 Configures global defaults.

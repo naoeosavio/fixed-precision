@@ -142,6 +142,32 @@ const negative = positive.neg(); // "-100.00000000"
 const backToPositive = negative.neg(); // "100.00000000"
 ```
 
+### Minimum and Maximum (`min` / `max`)
+
+Static methods that work like `Math.min()` and `Math.max()` for fixed-precision values.
+All values are normalized to the default context before comparison.
+
+```typescript
+// Variadic arguments
+FixedPrecision.min("5.0", "3.0", "7.0", "1.0"); // "1.00000000"
+FixedPrecision.max(2, 1, 4, 3);                  // "4.00000000"
+
+// Array form
+FixedPrecision.min([2, 1, 4, 3]);      // "1.00000000"
+FixedPrecision.max(["5.0", "3.0"]);    // "5.00000000"
+
+// Mixed types and FixedPrecision instances
+const a = new FixedPrecision("100.5");
+FixedPrecision.min(a, "50.25", 3.0); // "3.00000000"
+
+// Values from different precision factories are normalized
+const FP4 = FixedPrecision.create({ places: 4 });
+const b = FP4("10.50");
+FixedPrecision.max(b, "5.0"); // "10.50000000" (default 8 places)
+```
+
+
+
 ## Chaining Operations
 
 FixedPrecision supports fluent method chaining:
