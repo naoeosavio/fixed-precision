@@ -166,6 +166,23 @@ const b = FP4("10.50");
 FixedPrecision.max(b, "5.0"); // "10.50000000" (default 8 places)
 ```
 
+### Sum (`sum`)
+
+Adds all given values together. Accepts variadic arguments or an array.
+Empty input returns zero.
+
+```typescript
+// Variadic
+FixedPrecision.sum(1, 2, 3, 4);       // "10.00000000"
+FixedPrecision.sum("2.5", "3.5");      // "6.00000000"
+
+// Array
+FixedPrecision.sum([10, 20, 30]);      // "60.00000000"
+
+// Empty
+FixedPrecision.sum([]); // "0.00000000"
+```
+
 
 
 ## Chaining Operations

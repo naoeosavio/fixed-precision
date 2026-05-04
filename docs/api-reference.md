@@ -135,6 +135,30 @@ FixedPrecision.max(["5.0", "3.0", "7.0", "1.0"]); // "7.00000000"
 FixedPrecision.max(10, "5.5", new FixedPrecision("20.0")); // "20.00000000"
 ```
 
+### `FixedPrecision.sum(val, ...vals?)`
+
+Returns the sum of the given values. Accepts both variadic arguments and a single array.
+All values are normalized to the default context before summing.
+Returns zero for empty array or no arguments.
+
+**Parameters:**
+- `val`: `FixedPrecisionValue | FixedPrecisionValue[]` (optional) - A single value or an array of values
+- `...vals`: `FixedPrecisionValue[]` - Additional values (variadic)
+
+**Returns:** `FixedPrecision`
+
+**Example:**
+```typescript
+// Variadic
+FixedPrecision.sum(1, 2, 3, 4); // "10.00000000"
+
+// Array
+FixedPrecision.sum([2.5, 3.5, 1.0]); // "7.00000000"
+
+// Empty array or no arguments returns zero
+FixedPrecision.sum([]); // "0.00000000"
+```
+
 ### `FixedPrecision.configure(config: FixedPrecisionConfig)`
 
 Configures global defaults.

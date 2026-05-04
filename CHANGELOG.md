@@ -10,7 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - **`FixedPrecision.min(val, ...vals)`** and **`FixedPrecision.max(val, ...vals)`** static methods
   - `Math.min`/`Math.max` style: variadic, static, normalizes all values to default context
+  - Accepts both variadic arguments and a single array
   - Accepts strings, numbers, bigints, and `FixedPrecision` instances with different contexts
+- **`FixedPrecision.sum(val, ...vals?)`** static method
+  - Sums all values, accepting variadic arguments or a single array
+  - Returns zero for empty array
 
 ### Changed
 - Extracted shared `toScaled()` private static helper to unify value resolution logic
