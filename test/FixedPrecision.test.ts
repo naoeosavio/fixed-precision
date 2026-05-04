@@ -421,6 +421,46 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Static sum()", () => {
+    test("sum() adds multiple values", () => {
+      const result = FixedPrecision.sum("2.5", "3.5", "1.0");
+      expect(result.toNumber()).toBe(7.0);
+    });
+
+    test("sum() with single argument returns that value", () => {
+      const result = FixedPrecision.sum("5.5");
+      expect(result.toNumber()).toBe(5.5);
+    });
+
+    test("sum() accepts an array", () => {
+      const result = FixedPrecision.sum([1, 2, 3, 4]);
+      expect(result.toNumber()).toBe(10);
+    });
+
+    test("sum() with negative values", () => {
+      const result = FixedPrecision.sum("10.0", "-3.0", "-2.0");
+      expect(result.toNumber()).toBe(5.0);
+    });
+
+    test("sum() with FixedPrecision instances and primitives", () => {
+      const a = new FixedPrecision("10.5");
+      const result = FixedPrecision.sum(a, "5.25", 3.0);
+      expect(result.toNumber()).toBe(18.75);
+    });
+
+    test("sum() normalizes values from different contexts", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      const a = FP4("10.50");
+      const result = FixedPrecision.sum(a, "20.25");
+      expect(result.toString()).toBe("30.75000000");
+    });
+
+    test("sum() returns zero for empty array", () => {
+      const result = FixedPrecision.sum([]);
+      expect(result.toNumber()).toBe(0);
+    });
+  });
+
   describe("Formatting Methods", () => {
     describe("toExponential()", () => {
       test("toExponential() produces correct format for a small number", () => {

@@ -610,7 +610,7 @@ export default class FixedPrecision {
 
     if (this.isZero()) {
       if (exp < 0) throw new Error("0 ** negative is undefined");
-      return new FixedPrecision(0n);
+      return new FixedPrecision(0n, this.ctx);
     }
 
     let e = Math.abs(exp);
@@ -792,12 +792,14 @@ export default class FixedPrecision {
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
     const values = Array.isArray(val) ? val : [val, ...vals];
-    if (values.length === 0) {
+    const first = values[0];
+    if (first === undefined) {
       throw new Error("FixedPrecision.min requires at least one argument");
     }
-    let result = FixedPrecision.normalized(values[0]!);
-    for (let i = 1; i < values.length; i++) {
-      const fp = FixedPrecision.normalized(values[i]!);
+    const rest = values.slice(1);
+    let result = FixedPrecision.normalized(first);
+    for (const value of rest) {
+      const fp = FixedPrecision.normalized(value);
       if (fp.lt(result)) result = fp;
     }
     return result;
@@ -817,15 +819,46 @@ export default class FixedPrecision {
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
     const values = Array.isArray(val) ? val : [val, ...vals];
-    if (values.length === 0) {
+    const first = values[0];
+    if (first === undefined) {
       throw new Error("FixedPrecision.max requires at least one argument");
     }
-    let result = FixedPrecision.normalized(values[0]!);
-    for (let i = 1; i < values.length; i++) {
-      const fp = FixedPrecision.normalized(values[i]!);
+    const rest = values.slice(1);
+    let result = FixedPrecision.normalized(first);
+    for (const value of rest) {
+      const fp = FixedPrecision.normalized(value);
       if (fp.gt(result)) result = fp;
     }
     return result;
+  }
+
+  /**
+   * Returns the sum of the given values.
+   * Accepts both variadic arguments and a single array.
+   * All values are normalized to the default context before summing.
+   * An empty array returns zero.
+   *
+   * @param val - Single value or array of values
+   * @param vals - Additional values (variadic)
+   * @returns The sum of all arguments as a new FixedPrecision
+   */
+  public static sum(
+    val: FixedPrecisionValue | FixedPrecisionValue[],
+    ...vals: FixedPrecisionValue[]
+  ): FixedPrecision {
+    const values = Array.isArray(val) ? val : [val, ...vals];
+    if (values[0] === undefined) {
+      return new FixedPrecision(0n);
+    }
+    const first = FixedPrecision.normalized(values[0])
+    const rest = values.slice(1);
+    let total = first.value;
+    for (const value of rest) {
+      total += FixedPrecision.normalized(value).value;
+    }
+    const instance = new FixedPrecision(0n, first.ctx);
+    instance.value = total;
+    return instance;
   }
 
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
