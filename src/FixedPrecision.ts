@@ -195,10 +195,7 @@ export default class FixedPrecision {
    * Converts any FixedPrecisionValue to its scaled bigint representation
    * using the given context.
    */
-  private static toScaled(
-    value: FixedPrecisionValue,
-    ctx: FPContext,
-  ): bigint {
+  private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
     if (value instanceof FixedPrecision) {
       return value.value;
     }
@@ -850,7 +847,7 @@ export default class FixedPrecision {
     if (values[0] === undefined) {
       return new FixedPrecision(0n);
     }
-    const first = FixedPrecision.normalized(values[0])
+    const first = FixedPrecision.normalized(values[0]);
     const rest = values.slice(1);
     let total = first.value;
     for (const value of rest) {
