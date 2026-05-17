@@ -538,8 +538,11 @@ export default class FixedPrecision {
    * @returns String representation with correct decimal places
    */
   private static toStringWithCtx(value: bigint, ctx: FPContext): string {
-    const str = value.toString();
     const P = ctx.places;
+
+    if (P === 0) return value.toString();
+
+    const str = value.toString();
     const isNegative = str[0] === "-";
     const absStr = isNegative ? str.slice(1) : str;
     const len = absStr.length;
