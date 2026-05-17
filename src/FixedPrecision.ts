@@ -1020,82 +1020,85 @@ export default class FixedPrecision {
   // Formatting methods
   // ––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
   /**
-   * Rounds the internal value according to the given scaling factor and rounding mode.
-   *
-   * @param roundingFactor - The rounding factor (power of 10).
-   * @param rm - Rounding mode to use
-   * @returns The quotient after rounding (without the discarded digits)
-   */
-  /**
    * Internal rounding implementation that applies the specified rounding mode.
    * @param roundingFactor - Power of 10 factor for rounding (e.g., 10^2 for 2 decimal places)
    * @param rm - Rounding mode (0-8)
    * @returns Rounded quotient as bigint
    */
   private roundToScale(roundingFactor: bigint, rm: RoundingMode): bigint {
-    const quotient = this.value / roundingFactor;
-    const remainder = this.value % roundingFactor;
-    // Use absolute remainder for comparisons.
-    const absRem = remainder < 0n ? -remainder : remainder;
+    const value = this.value;
+    const q = value / roundingFactor;
+    const rem = value % roundingFactor;
+    const isPositive = value > 0n;
+
     switch (rm) {
       case 0: // ROUND_UP: round away from zero
-        return remainder === 0n
-          ? quotient
-          : this.value > 0n
-            ? quotient + 1n
-            : quotient - 1n;
+        return rem === 0n ? q : isPositive ? q + 1n : q - 1n;
       case 1: // ROUND_DOWN: round towards zero (truncate)
-        return quotient;
+        return q;
       case 2: // ROUND_CEIL: round towards +Infinity
-        return this.value > 0n && remainder !== 0n ? quotient + 1n : quotient;
+        return isPositive && rem !== 0n ? q + 1n : q;
       case 3: // ROUND_FLOOR: round towards -Infinity
-        return this.value < 0n && remainder !== 0n ? quotient - 1n : quotient;
+        return !isPositive && rem !== 0n ? q - 1n : q;
       case 4: // ROUND_HALF_UP: if exactly half, round away from zero
-        return 2n * absRem >= roundingFactor
-          ? this.value > 0n
-            ? quotient + 1n
-            : quotient - 1n
-          : quotient;
       case 5: // ROUND_HALF_DOWN: if exactly half, round towards zero
-        return 2n * absRem > roundingFactor
-          ? this.value > 0n
-            ? quotient + 1n
-            : quotient - 1n
-          : quotient;
-      case 6: // ROUND_HALF_EVEN: if exactly half, round to even
-        if (2n * absRem === roundingFactor) {
-          return quotient % 2n === 0n
-            ? quotient
-            : this.value > 0n
-              ? quotient + 1n
-              : quotient - 1n;
-        }
-        return 2n * absRem > roundingFactor
-          ? this.value > 0n
-            ? quotient + 1n
-            : quotient - 1n
-          : quotient;
       case 7: // ROUND_HALF_CEIL: if exactly half, round towards +Infinity
-        if (2n * absRem === roundingFactor) {
-          return this.value > 0n ? quotient + 1n : quotient;
-        }
-        return 2n * absRem > roundingFactor
-          ? this.value > 0n
-            ? quotient + 1n
-            : quotient
-          : quotient;
+        return FixedPrecision.roundHalf(q, rem, roundingFactor, isPositive, rm);
+      case 6: // ROUND_HALF_EVEN: if exactly half, round to even
+        return FixedPrecision.roundHalfEven(q, rem, roundingFactor, isPositive);
       case 8: // ROUND_HALF_FLOOR: if exactly half, round towards -Infinity
-        if (2n * absRem === roundingFactor) {
-          return this.value < 0n ? quotient - 1n : quotient;
-        }
-        return 2n * absRem > roundingFactor
-          ? this.value > 0n
-            ? quotient + 1n
-            : quotient - 1n
-          : quotient;
+        return FixedPrecision.roundHalfFloor(
+          q,
+          rem,
+          roundingFactor,
+          isPositive,
+        );
       default:
         throw new Error(`Rounding mode ${rm} is not supported.`);
     }
+  }
+
+  private static roundHalf(
+    q: bigint,
+    rem: bigint,
+    factor: bigint,
+    isPositive: boolean,
+    rm: RoundingMode,
+  ): bigint {
+    const twiceAbsRem = 2n * (rem < 0n ? -rem : rem);
+
+    if (rm === 7) {
+      return isPositive && twiceAbsRem >= factor ? q + 1n : q;
+    }
+
+    const shouldRound = rm === 4 ? twiceAbsRem >= factor : twiceAbsRem > factor;
+    return shouldRound ? (isPositive ? q + 1n : q - 1n) : q;
+  }
+
+  private static roundHalfEven(
+    q: bigint,
+    rem: bigint,
+    factor: bigint,
+    isPositive: boolean,
+  ): bigint {
+    const twiceAbsRem = 2n * (rem < 0n ? -rem : rem);
+    if (twiceAbsRem === factor) {
+      return q % 2n === 0n ? q : isPositive ? q + 1n : q - 1n;
+    }
+    return twiceAbsRem > factor ? (isPositive ? q + 1n : q - 1n) : q;
+  }
+
+  private static roundHalfFloor(
+    q: bigint,
+    rem: bigint,
+    factor: bigint,
+    isPositive: boolean,
+  ): bigint {
+    const twiceAbsRem = 2n * (rem < 0n ? -rem : rem);
+    if (isPositive) {
+      return twiceAbsRem > factor ? q + 1n : q;
+    }
+    return twiceAbsRem >= factor ? q - 1n : q;
   }
 
   /**
