@@ -4,9 +4,9 @@ import {
   modulo,
   multiply,
   negate,
-  power,
   subtract,
 } from "./functions/arithmetic/operations";
+import { power } from "./functions/arithmetic/power";
 import { collectValues } from "./functions/construction/values";
 import {
   configureContext,
