@@ -18,7 +18,7 @@ import {
   rawValue,
   valueOfString,
 } from "./functions/expression/primitive";
-import { sqrtWithNewton } from "./functions/geometry/sqrt";
+import { squareRoot } from "./functions/geometry/sqrt";
 import {
   isNegativeValue,
   isPositiveValue,
@@ -314,11 +314,7 @@ export default class FixedPrecision {
   }
 
   public sqrt(): FixedPrecision {
-    return sqrtWithNewton<FixedPrecision>(
-      this,
-      this.ctx.places,
-      () => new FixedPrecision(0n, this.ctx),
-    );
+    return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
   }
 
   public toJSON(): string {
