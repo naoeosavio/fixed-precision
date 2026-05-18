@@ -1,28 +1,28 @@
-export function addRaw(left: bigint, right: bigint): bigint {
+export function add(left: bigint, right: bigint): bigint {
   return left + right;
 }
 
-export function subRaw(left: bigint, right: bigint): bigint {
+export function subtract(left: bigint, right: bigint): bigint {
   return left - right;
 }
 
-export function mulRaw(left: bigint, right: bigint): bigint {
+export function multiply(left: bigint, right: bigint): bigint {
   return left * right;
 }
 
-export function divRaw(left: bigint, right: bigint): bigint {
+export function divide(left: bigint, right: bigint): bigint {
   return left / right;
 }
 
-export function modRaw(left: bigint, right: bigint): bigint {
+export function modulo(left: bigint, right: bigint): bigint {
   return left % right;
 }
 
-export function negRaw(value: bigint): bigint {
+export function negate(value: bigint): bigint {
   return -value;
 }
 
-export function powRaw(value: bigint, exp: number, scale: bigint): bigint {
+export function power(value: bigint, exp: number, scale: bigint): bigint {
   if (!Number.isInteger(exp)) throw new Error("Exponent must be an integer");
   if (exp === 0) return scale;
 
