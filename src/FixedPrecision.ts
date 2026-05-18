@@ -18,13 +18,6 @@ import {
   rawValue,
   valueOfString,
 } from "./functions/expression/primitive";
-import {
-  fractionRaw,
-  leftoverRaw,
-  minusRaw,
-  plusRaw,
-  productRaw,
-} from "./functions/fraction/raw";
 import { sqrtWithNewton } from "./functions/geometry/sqrt";
 import {
   isNegativeValue,
@@ -258,7 +251,7 @@ export default class FixedPrecision {
   }
 
   public plus(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(plusRaw(this.value, this.toScaledValue(other)));
+    return this.fromRaw(addRaw(this.value, this.toScaledValue(other)));
   }
 
   public sub(other: FixedPrecisionValue): FixedPrecision {
@@ -267,34 +260,34 @@ export default class FixedPrecision {
   }
 
   public minus(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(minusRaw(this.value, this.toScaledValue(other)));
+    return this.fromRaw(subRaw(this.value, this.toScaledValue(other)));
   }
 
   public mul(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
-    return this.fromRaw(mulRaw(this.value, o.value, this.ctx.SCALE));
+    return this.fromRaw(divRaw(mulRaw(this.value, o.value), this.ctx.SCALE));
   }
 
   public product(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(productRaw(this.value, this.toScaledValue(other)));
+    return this.fromRaw(mulRaw(this.value, this.toScaledValue(other)));
   }
 
   public div(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
-    return this.fromRaw(divRaw(this.value, o.value, this.ctx.SCALE));
+    return this.fromRaw(divRaw(mulRaw(this.value, this.ctx.SCALE), o.value));
   }
 
   public fraction(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(fractionRaw(this.value, this.toScaledValue(other)));
+    return this.fromRaw(divRaw(this.value, this.toScaledValue(other)));
   }
 
   public mod(other: FixedPrecisionValue): FixedPrecision {
     const o = this.coerce(other);
-    return this.fromRaw(modRaw(this.value, o.value, this.ctx.SCALE));
+    return this.fromRaw(modRaw(mulRaw(this.value, this.ctx.SCALE), o.value));
   }
 
   public leftover(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(leftoverRaw(this.value, this.toScaledValue(other)));
+    return this.fromRaw(modRaw(this.value, this.toScaledValue(other)));
   }
 
   public neg(): FixedPrecision {

@@ -6,16 +6,16 @@ export function subRaw(left: bigint, right: bigint): bigint {
   return left - right;
 }
 
-export function mulRaw(left: bigint, right: bigint, scale: bigint): bigint {
-  return (left * right) / scale;
+export function mulRaw(left: bigint, right: bigint): bigint {
+  return left * right;
 }
 
-export function divRaw(left: bigint, right: bigint, scale: bigint): bigint {
-  return (left * scale) / right;
+export function divRaw(left: bigint, right: bigint): bigint {
+  return left / right;
 }
 
-export function modRaw(left: bigint, right: bigint, scale: bigint): bigint {
-  return (left * scale) % right;
+export function modRaw(left: bigint, right: bigint): bigint {
+  return left % right;
 }
 
 export function negRaw(value: bigint): bigint {
