@@ -1,6 +1,6 @@
 import type { FPContext, RoundingMode } from "../../FixedPrecision";
 
-export function absValue(value: bigint): bigint {
+export function absoluteValue(value: bigint): bigint {
   return value < 0n ? -value : value;
 }
 

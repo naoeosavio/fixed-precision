@@ -32,7 +32,7 @@ import {
 } from "./functions/numeric/constants";
 import { fromNumberWithCtx, toNumberWithCtx } from "./functions/numeric/number";
 import {
-  absValue,
+  absoluteValue,
   roundToScaleValue,
   roundValue,
   scaleValue,
@@ -176,7 +176,7 @@ export default class FixedPrecision {
   }
 
   public abs(): FixedPrecision {
-    return this.fromRaw(absValue(this.value));
+    return this.fromRaw(absoluteValue(this.value));
   }
 
   public cmp(other: FixedPrecisionValue): Comparison {
@@ -396,10 +396,6 @@ export default class FixedPrecision {
     const instance = new FixedPrecision(0n, first.ctx);
     instance.value = total;
     return instance;
-  }
-
-  private roundToScale(roundingFactor: bigint, rm: RoundingMode): bigint {
-    return roundToScaleValue(this.value, roundingFactor, rm);
   }
 
   public round(dp?: number, rm?: RoundingMode): FixedPrecision {
