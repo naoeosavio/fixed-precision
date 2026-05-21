@@ -68,19 +68,18 @@ export function roundToScaleValue(
 export function roundValue(
   value: bigint,
   dp: number,
-  rm: RoundingMode | undefined,
+  rm: RoundingMode,
   ctx: FPContext,
 ): bigint {
-  const effRm: RoundingMode = rm === undefined ? ctx.roundingMode : rm;
   if (dp < 0 || dp > ctx.places) {
     throw new Error(`Decimal places (dp) must be between 0 and ${ctx.places}`);
   }
   const diff = ctx.places - dp;
   const factor = BIGINT_POWERS_OF_TEN[diff]!;
-  if (effRm === 4) {
+  if (rm === 4) {
     return roundHalfUpScaledValue(value, factor);
   }
-  return roundToScaleValue(value, factor, effRm) * factor;
+  return roundToScaleValue(value, factor, rm) * factor;
 }
 
 export function scaleValue(
@@ -94,20 +93,21 @@ export function scaleValue(
     throw new Error(`newScale must be between 0 and ${ctx.places}`);
   }
   const diff = ctx.places - newScale;
-  const factor = BIGINT_POWERS_OF_TEN[diff] as bigint;
-  const rounded = roundToScaleValue(value, factor, effRm);
-  return rounded * factor;
+  const factor = BIGINT_POWERS_OF_TEN[diff]!;
+  return roundToScaleValue(value, factor, effRm) * factor;
 }
-
 export function shiftedByValue(value: bigint, n: number): bigint {
-  const shiftFactor = 10n ** BigInt(Math.abs(n));
+  const shiftFactor = BIGINT_POWERS_OF_TEN[Math.abs(n)]!;
   if (n >= 0) {
     return value * shiftFactor;
   }
-  if (value % shiftFactor !== 0n) {
+
+  const q = value / shiftFactor;
+  const rem = value - q * shiftFactor;
+  if (rem !== 0n) {
     throw new Error("Inexact shift");
   }
-  return value / shiftFactor;
+  return q;
 }
 
 function roundHalfUpScaledValue(value: bigint, factor: bigint): bigint {
