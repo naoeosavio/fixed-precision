@@ -501,13 +501,18 @@ describe("FixedPrecision", () => {
   });
 
   describe("scale() method", () => {
-    test("scale() rounds correctly to 4 decimals", () => {
+    test("scale() changes context and rounds correctly to 4 decimals", () => {
       const a = new FixedPrecision("123.456789");
-      expect(a.scale(4).toString()).toBe("123.45680000");
+      expect(a.scale(4).toString()).toBe("123.4568");
     });
-    test("scale() rounds correctly to 0 decimals", () => {
+    test("scale() changes context and rounds correctly to 0 decimals", () => {
       const a = new FixedPrecision("99.99999999");
-      expect(a.scale(0, 4).toString()).toBe("100.00000000");
+      expect(a.scale(0, 4).toString()).toBe("100");
+    });
+    test("scale() can increase decimal places", () => {
+      const FP2 = FixedPrecision.create({ places: 2 });
+      const a = FP2("1.23");
+      expect(a.scale(4).toString()).toBe("1.2300");
     });
   });
 

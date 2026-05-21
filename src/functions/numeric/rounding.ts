@@ -1,6 +1,6 @@
 import type { FPContext, RoundingMode } from "../../FixedPrecision";
 
-const BIGINT_POWERS_OF_TEN:bigint[] = [
+const BIGINT_POWERS_OF_TEN: bigint[] = [
   1n,
   10n,
   100n,
@@ -23,6 +23,14 @@ const BIGINT_POWERS_OF_TEN:bigint[] = [
   10_000_000_000_000_000_000n,
   100_000_000_000_000_000_000n,
 ] as const;
+
+function powerOfTen(exponent: number): bigint {
+  const value = BIGINT_POWERS_OF_TEN[exponent];
+  if (value === undefined) {
+    throw new Error("Decimal places must be an integer between 0 and 20");
+  }
+  return value;
+}
 
 export function absoluteValue(value: bigint): bigint {
   return value < 0n ? -value : value;
@@ -75,7 +83,7 @@ export function roundValue(
     throw new Error(`Decimal places (dp) must be between 0 and ${ctx.places}`);
   }
   const diff = ctx.places - dp;
-  const factor = BIGINT_POWERS_OF_TEN[diff]!;
+  const factor = powerOfTen(diff);
   if (rm === 4) {
     return roundHalfUpScaledValue(value, factor);
   }
@@ -84,20 +92,32 @@ export function roundValue(
 
 export function scaleValue(
   value: bigint,
-  newScale: number,
-  rm: RoundingMode | undefined,
+  newPlaces: number,
+  rm: RoundingMode,
   ctx: FPContext,
 ): bigint {
-  const effRm: RoundingMode = rm === undefined ? ctx.roundingMode : rm;
-  if (newScale < 0 || newScale > ctx.places) {
-    throw new Error(`newScale must be between 0 and ${ctx.places}`);
+  if (!Number.isInteger(newPlaces) || newPlaces < 0 || newPlaces > 20) {
+    throw new Error("newScale must be an integer between 0 and 20");
   }
-  const diff = ctx.places - newScale;
-  const factor = BIGINT_POWERS_OF_TEN[diff]!;
-  return roundToScaleValue(value, factor, effRm) * factor;
+
+  if (newPlaces === ctx.places) {
+    return value;
+  }
+
+  if (newPlaces > ctx.places) {
+    return value * powerOfTen(newPlaces - ctx.places);
+  }
+
+  const factor = powerOfTen(ctx.places - newPlaces);
+  return roundToScaleValue(value, factor, rm);
 }
+
 export function shiftedByValue(value: bigint, n: number): bigint {
-  const shiftFactor = BIGINT_POWERS_OF_TEN[Math.abs(n)]!;
+  if (!Number.isInteger(n) || Math.abs(n) > 20) {
+    throw new Error("shift must be an integer between -20 and 20");
+  }
+
+  const shiftFactor = powerOfTen(Math.abs(n));
   if (n >= 0) {
     return value * shiftFactor;
   }
