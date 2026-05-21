@@ -1,4 +1,5 @@
 import type { FPContext } from "../../FixedPrecision";
+import { powerOfTen } from "../utils";
 
 export function fromStringWithCtx(str: string, ctx: FPContext): bigint {
   const dotIndex = str.indexOf(".", 1);
@@ -63,7 +64,7 @@ function fromShortIntegerStringWithCtx(
   if (nP >= P) {
     return BigInt(num * SCALE_NUM);
   }
-  return BigInt(num * 10 ** nP) * BigInt(10 ** (P - nP));
+  return BigInt(num * 10 ** nP) * powerOfTen(P - nP);
 }
 
 function fromLargeScaleIntegerStringWithCtx(
@@ -98,9 +99,9 @@ function fromShortDecimalStringWithCtx(
   const newNum = Math.trunc(Num);
   const NewFrac = Math.trunc(newNum - Num);
   if (!NewFrac) {
-    return BigInt(newNum) * BigInt(10 ** (P - nP));
+    return BigInt(newNum) * powerOfTen(P - nP);
   }
-  return BigInt(newNum) * BigInt(10 ** (P - nP)) + BigInt(NewFrac);
+  return BigInt(newNum) * powerOfTen(P - nP) + BigInt(NewFrac);
 }
 
 function fromLongDecimalStringWithCtx(
@@ -180,7 +181,7 @@ function fromLongDecimalWithSafeNumberInteger(
   }
 
   const frac = BigInt(facStr);
-  const nScaled = frac * BigInt(10 ** newLen);
+  const nScaled = frac * powerOfTen(newLen);
   return nNum < 0 ? BigInt(nNum) - nScaled : BigInt(nNum) + nScaled;
 }
 
@@ -201,8 +202,8 @@ function fromLongDecimalWithSmallScaleNumberInteger(
   const Num = int * 10 ** nP;
   const nScaled = BigInt(frac * 10 ** newLen);
   return int < 0
-    ? BigInt(Num) * BigInt(10 ** (P - nP)) - nScaled
-    : BigInt(Num) * BigInt(10 ** (P - nP)) + nScaled;
+    ? BigInt(Num) * powerOfTen(P - nP) - nScaled
+    : BigInt(Num) * powerOfTen(P - nP) + nScaled;
 }
 
 function fromLongDecimalWithLargeScaleNumberInteger(
@@ -215,7 +216,7 @@ function fromLongDecimalWithLargeScaleNumberInteger(
   if (!frac) {
     return BigInt(int * SCALE_NUM);
   }
-  const nScaled = frac * BigInt(10 ** newLen);
+  const nScaled = frac * powerOfTen(newLen);
   return int < 0
     ? BigInt(int * SCALE_NUM) - nScaled
     : BigInt(int * SCALE_NUM) + nScaled;
@@ -241,6 +242,6 @@ function fromLongDecimalWithBigInteger(
   if (!frac) {
     return int * SCALE_BIG;
   }
-  const nScaled = frac * BigInt(10 ** newLen);
+  const nScaled = frac * powerOfTen(newLen);
   return int < 0n ? int * SCALE_BIG - nScaled : int * SCALE_BIG + nScaled;
 }

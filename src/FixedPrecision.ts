@@ -14,11 +14,6 @@ import {
   makeContext,
   makeFactoryContext,
 } from "./functions/core/context";
-import {
-  fixedPrecisionType,
-  rawValue,
-  valueOfString,
-} from "./functions/expression/primitive";
 import { squareRoot } from "./functions/geometry/sqrt";
 import {
   isNegativeValue,
@@ -441,15 +436,15 @@ export default class FixedPrecision {
   }
 
   public valueOf(): string {
-    return valueOfString(this.toString());
+    return this.toString();
   }
 
   public typeof(): "FixedPrecision" {
-    return fixedPrecisionType();
+    return "FixedPrecision";
   }
 
   public raw(): bigint {
-    return rawValue(this.value);
+    return this.value;
   }
 }
 
