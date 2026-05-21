@@ -21,3 +21,7 @@ export function modulo(left: bigint, right: bigint): bigint {
 export function negate(value: bigint): bigint {
   return -value;
 }
+
+export function absolute(value: bigint): bigint {
+  return value < 0n ? -value : value;
+}

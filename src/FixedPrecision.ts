@@ -1,4 +1,5 @@
 import {
+  absolute,
   add,
   divide,
   modulo,
@@ -32,7 +33,6 @@ import {
 } from "./functions/numeric/constants";
 import { fromNumberWithCtx, toNumberWithCtx } from "./functions/numeric/number";
 import {
-  absoluteValue,
   roundValue,
   scaleValue,
   shiftedByValue,
@@ -175,7 +175,7 @@ export default class FixedPrecision {
   }
 
   public abs(): FixedPrecision {
-    return this.fromRaw(absoluteValue(this.value));
+    return this.fromRaw(absolute(this.value));
   }
 
   public cmp(other: FixedPrecisionValue): Comparison {
