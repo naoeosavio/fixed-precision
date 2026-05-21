@@ -113,21 +113,10 @@ export function scaleValue(
 }
 
 export function shiftedByValue(value: bigint, n: number): bigint {
-  if (!Number.isInteger(n) || Math.abs(n) > 20) {
-    throw new Error("shift must be an integer between -20 and 20");
+  if (!Number.isInteger(n)) {
+    throw new Error("shift must be an integer");
   }
-
-  const shiftFactor = powerOfTen(Math.abs(n));
-  if (n >= 0) {
-    return value * shiftFactor;
-  }
-
-  const q = value / shiftFactor;
-  const rem = value - q * shiftFactor;
-  if (rem !== 0n) {
-    throw new Error("Inexact shift");
-  }
-  return q;
+  return value >> BigInt(n);
 }
 
 function roundHalfUpScaledValue(value: bigint, factor: bigint): bigint {

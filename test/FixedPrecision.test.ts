@@ -104,7 +104,7 @@ describe("FixedPrecision", () => {
 
     test("product() - product with one", () => {
       const one = new FixedPrecision(1);
-      expect(a.product(one).toString()).toBe(a.shiftedBy(8).toString());
+      expect(a.product(one).toString()).toBe("1050000000.00000000");
     });
   });
 
@@ -283,19 +283,17 @@ describe("FixedPrecision", () => {
   });
 
   describe("shiftedBy() method", () => {
-    test("shiftedBy() shifts left (positive n)", () => {
-      const a = new FixedPrecision("1.23456789");
-      const shifted = a.shiftedBy(2);
-      expect(shifted.toString()).toBe("123.45678900");
+    test("shiftedBy() shifts raw bigint right with positive n", () => {
+      const shifted = new FixedPrecision(1000n).shiftedBy(1);
+      expect(shifted.raw()).toBe(500n);
     });
-    test("shiftedBy() shifts right (negative n) exactly", () => {
-      const a = new FixedPrecision("123.45678900");
-      const shifted = a.shiftedBy(-2);
-      expect(shifted.toString()).toBe("1.23456789");
+    test("shiftedBy() shifts raw bigint left with negative n", () => {
+      const shifted = new FixedPrecision(1000n).shiftedBy(-1);
+      expect(shifted.raw()).toBe(2000n);
     });
-    test("shiftedBy() throws error on inexact shift", () => {
-      const a = new FixedPrecision("123.45678900");
-      expect(() => a.shiftedBy(-3)).toThrow("Inexact shift");
+    test("shiftedBy() throws error on non-integer shift", () => {
+      const a = new FixedPrecision(1000n);
+      expect(() => a.shiftedBy(1.5)).toThrow("shift must be an integer");
     });
   });
 
