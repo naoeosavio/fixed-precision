@@ -1,5 +1,29 @@
 import type { FPContext, RoundingMode } from "../../FixedPrecision";
 
+const BIGINT_POWERS_OF_TEN:bigint[] = [
+  1n,
+  10n,
+  100n,
+  1_000n,
+  10_000n,
+  100_000n,
+  1_000_000n,
+  10_000_000n,
+  100_000_000n,
+  1_000_000_000n,
+  10_000_000_000n,
+  100_000_000_000n,
+  1_000_000_000_000n,
+  10_000_000_000_000n,
+  100_000_000_000_000n,
+  1_000_000_000_000_000n,
+  10_000_000_000_000_000n,
+  100_000_000_000_000_000n,
+  1_000_000_000_000_000_000n,
+  10_000_000_000_000_000_000n,
+  100_000_000_000_000_000_000n,
+] as const;
+
 export function absoluteValue(value: bigint): bigint {
   return value < 0n ? -value : value;
 }
@@ -10,18 +34,24 @@ export function roundToScaleValue(
   rm: RoundingMode,
 ): bigint {
   const q = value / roundingFactor;
-  const rem = value % roundingFactor;
+  if (rm === 1) {
+    return q;
+  }
+
+  const rem = value - q * roundingFactor;
+  if (rem === 0n) {
+    return q;
+  }
+
   const isPositive = value > 0n;
 
   switch (rm) {
     case 0:
-      return rem === 0n ? q : isPositive ? q + 1n : q - 1n;
-    case 1:
-      return q;
+      return isPositive ? q + 1n : q - 1n;
     case 2:
-      return isPositive && rem !== 0n ? q + 1n : q;
+      return isPositive ? q + 1n : q;
     case 3:
-      return !isPositive && rem !== 0n ? q - 1n : q;
+      return !isPositive ? q - 1n : q;
     case 4:
     case 5:
     case 7:
@@ -37,19 +67,20 @@ export function roundToScaleValue(
 
 export function roundValue(
   value: bigint,
-  dp: number | undefined,
+  dp: number,
   rm: RoundingMode | undefined,
   ctx: FPContext,
 ): bigint {
-  const effDp = dp ?? ctx.places;
   const effRm: RoundingMode = rm === undefined ? ctx.roundingMode : rm;
-  if (effDp < 0 || effDp > ctx.places) {
+  if (dp < 0 || dp > ctx.places) {
     throw new Error(`Decimal places (dp) must be between 0 and ${ctx.places}`);
   }
-  const diff = ctx.places - effDp;
-  const factor = 10n ** BigInt(diff);
-  const rounded = roundToScaleValue(value, factor, effRm);
-  return rounded * factor;
+  const diff = ctx.places - dp;
+  const factor = BIGINT_POWERS_OF_TEN[diff]!;
+  if (effRm === 4) {
+    return roundHalfUpScaledValue(value, factor);
+  }
+  return roundToScaleValue(value, factor, effRm) * factor;
 }
 
 export function scaleValue(
@@ -63,7 +94,7 @@ export function scaleValue(
     throw new Error(`newScale must be between 0 and ${ctx.places}`);
   }
   const diff = ctx.places - newScale;
-  const factor = 10n ** BigInt(diff);
+  const factor = BIGINT_POWERS_OF_TEN[diff] as bigint;
   const rounded = roundToScaleValue(value, factor, effRm);
   return rounded * factor;
 }
@@ -77,6 +108,21 @@ export function shiftedByValue(value: bigint, n: number): bigint {
     throw new Error("Inexact shift");
   }
   return value / shiftFactor;
+}
+
+function roundHalfUpScaledValue(value: bigint, factor: bigint): bigint {
+  const q = value / factor;
+  const base = q * factor;
+  const rem = value - base;
+  if (rem === 0n) {
+    return value;
+  }
+
+  const twiceAbsRem = rem < 0n ? -rem * 2n : rem * 2n;
+  if (twiceAbsRem < factor) {
+    return base;
+  }
+  return value > 0n ? base + factor : base - factor;
 }
 
 function roundHalf(

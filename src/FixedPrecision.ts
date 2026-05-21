@@ -34,7 +34,6 @@ import { fromNumberWithCtx, toNumberWithCtx } from "./functions/numeric/number";
 import {
   absoluteValue,
   roundValue,
-  scaleValue,
   shiftedByValue,
 } from "./functions/numeric/rounding";
 import { randomDecimalString } from "./functions/probability/random";
@@ -393,12 +392,12 @@ export default class FixedPrecision {
     return instance;
   }
 
-  public round(dp?: number, rm?: RoundingMode): FixedPrecision {
+  public round(dp: number = this.ctx.places, rm: RoundingMode = this.ctx.roundingMode): FixedPrecision {
     return this.fromRaw(roundValue(this.value, dp, rm, this.ctx));
   }
 
-  public scale(newScale: number, rm?: RoundingMode): FixedPrecision {
-    return this.fromRaw(scaleValue(this.value, newScale, rm, this.ctx));
+  public scale(newScale: number, rm: RoundingMode = this.ctx.roundingMode): FixedPrecision {
+    return this.fromRaw(roundValue(this.value, newScale, rm, this.ctx));
   }
 
   public toExponential(dp?: number, rm?: RoundingMode): string {
