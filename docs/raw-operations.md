@@ -254,10 +254,14 @@ function safeRawOperation(a: FixedPrecision, b: FixedPrecision): FixedPrecision 
 
 ### 4. Create Helper Functions
 ```typescript
-function addWithDifferentPrecisions(a: FixedPrecision, b: FixedPrecision): FixedPrecision {
+function addWithPrecision(
+  a: FixedPrecision,
+  b: FixedPrecision,
+  targetPlaces: number,
+): FixedPrecision {
   // Convert both to same precision first
-  const aScaled = a.scale(Math.max(a.ctx.places, b.ctx.places));
-  const bScaled = b.scale(Math.max(a.ctx.places, b.ctx.places));
+  const aScaled = a.scale(targetPlaces);
+  const bScaled = b.scale(targetPlaces);
   
   // Then use regular addition
   return aScaled.add(bScaled);

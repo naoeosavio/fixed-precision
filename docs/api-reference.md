@@ -693,13 +693,14 @@ value.trunc(); // "123.00000000"
 
 #### `scale(newScale: number, rm?: RoundingMode): FixedPrecision`
 
-Adjusts the value to a new number of decimal places.
+Adjusts the value to a new number of decimal places. The returned instance uses
+`newScale` as its context `places`, so string output reflects the new scale.
 
 **Parameters:**
 - `newScale`: `number` - New number of decimal places (0-20)
 - `rm`: `RoundingMode` (optional) - Rounding mode for adjustment
 
-**Returns:** `FixedPrecision` - New instance with adjusted scale
+**Returns:** `FixedPrecision` - New instance with the adjusted value and context scale
 
 **Example:**
 ```typescript
@@ -710,22 +711,22 @@ value.scale(4); // "123.4568"
 
 #### `shiftedBy(n: number): FixedPrecision`
 
-Shifts the value by `n` decimal places.
+Applies a bigint bit shift to the raw scaled value (`raw >> BigInt(n)`).
+This is a raw binary shift, not a decimal-place shift.
 
 **Parameters:**
-- `n`: `number` - Number of decimal places to shift
-  - Positive: multiplies by 10ⁿ
-  - Negative: divides by 10ⁿ (must be exact)
+- `n`: `number` - Integer bit shift amount
+  - Positive: shifts right
+  - Negative: shifts left
 
 **Returns:** `FixedPrecision` - New instance with shifted value
 
-**Throws:** `Error` if negative shift is inexact
+**Throws:** `Error` if `n` is not an integer
 
 **Example:**
 ```typescript
-const value = new FixedPrecision("123.45");
-value.shiftedBy(2); // "12345.00" (×100)
-value.shiftedBy(-1); // "12.345" (÷10)
+new FixedPrecision(1000n).shiftedBy(1).raw(); // 500n
+new FixedPrecision(1000n).shiftedBy(-1).raw(); // 2000n
 ```
 
 ### Utility Methods
