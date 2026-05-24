@@ -573,6 +573,29 @@ describe("FixedPrecision", () => {
       expect(() => a.rightArithShift(-1)).toThrow();
     });
   });
+  
+  describe("Combinatorics Operations", () => {
+    test("factorial", () => {
+      expect(FixedPrecision.factorial(5).toNumber()).toBe(120);
+      expect(FixedPrecision.factorial(0).toNumber()).toBe(1);
+      expect(() => FixedPrecision.factorial(-1)).toThrow();
+    });
+
+    test("permutations", () => {
+      expect(FixedPrecision.permutations(5, 2).toNumber()).toBe(20);
+      expect(FixedPrecision.permutations(5, 5).toNumber()).toBe(120);
+      expect(FixedPrecision.permutations(5, 6).toNumber()).toBe(0);
+      expect(() => FixedPrecision.permutations(-1, 2)).toThrow();
+    });
+
+    test("combinations", () => {
+      expect(FixedPrecision.combinations(5, 2).toNumber()).toBe(10);
+      expect(FixedPrecision.combinations(5, 3).toNumber()).toBe(10);
+      expect(FixedPrecision.combinations(5, 5).toNumber()).toBe(1);
+      expect(FixedPrecision.combinations(5, 6).toNumber()).toBe(0);
+      expect(() => FixedPrecision.combinations(-1, 2)).toThrow();
+    });
+  });
 
   describe("scale() method", () => {
     test("scale() changes context and rounds correctly to 4 decimals", () => {

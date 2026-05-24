@@ -18,6 +18,11 @@ import {
 } from "./functions/bitwise";
 import { collectValues } from "./functions/construction/values";
 import {
+  combinationsValue,
+  factorialValue,
+  permutationsValue,
+} from "./functions/combinatorics";
+import {
   configureContext,
   makeContext,
   makeFactoryContext,
@@ -470,6 +475,41 @@ export default class FixedPrecision {
     instance.value = total;
     return instance;
   }
+
+  public static factorial(n: number | FixedPrecision): FixedPrecision {
+    const ctx =
+      n instanceof FixedPrecision ? n.ctx : FixedPrecision.defaultContext;
+    const val =
+      n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
+    return new FixedPrecision(factorialValue(val) * ctx.SCALE, ctx);
+  }
+
+  public static permutations(
+    n: number | FixedPrecision,
+    k: number | FixedPrecision,
+  ): FixedPrecision {
+    const ctx =
+      n instanceof FixedPrecision ? n.ctx : FixedPrecision.defaultContext;
+    const valN =
+      n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
+    const valK =
+      k instanceof FixedPrecision ? k.trunc().toNumber() : Math.trunc(k);
+    return new FixedPrecision(permutationsValue(valN, valK) * ctx.SCALE, ctx);
+  }
+
+  public static combinations(
+    n: number | FixedPrecision,
+    k: number | FixedPrecision,
+  ): FixedPrecision {
+    const ctx =
+      n instanceof FixedPrecision ? n.ctx : FixedPrecision.defaultContext;
+    const valN =
+      n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
+    const valK =
+      k instanceof FixedPrecision ? k.trunc().toNumber() : Math.trunc(k);
+    return new FixedPrecision(combinationsValue(valN, valK) * ctx.SCALE, ctx);
+  }
+
 
   public round(
     dp: number = this.ctx.places,
