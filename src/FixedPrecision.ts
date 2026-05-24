@@ -20,6 +20,7 @@ import {
   isPositiveValue,
   isZeroValue,
 } from "./functions/logical/sign";
+import { crossProduct, dotProduct } from "./functions/matrix";
 import {
   eNumber,
   phiNumber,
@@ -337,6 +338,29 @@ export default class FixedPrecision {
     const dec = decimalPlaces ?? FixedPrecision.defaultContext.places;
     return new FixedPrecision(randomDecimalString(dec));
   }
+
+  public static dot(
+    a: FixedPrecisionValue[],
+    b: FixedPrecisionValue[],
+  ): FixedPrecision {
+    const ctx = FixedPrecision.defaultContext;
+    const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
+    const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
+    const result = dotProduct(rawA, rawB, ctx.SCALE);
+    return new FixedPrecision(result, ctx);
+  }
+
+  public static cross(
+    a: FixedPrecisionValue[],
+    b: FixedPrecisionValue[],
+  ): FixedPrecision[] {
+    const ctx = FixedPrecision.defaultContext;
+    const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
+    const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
+    const result = crossProduct(rawA, rawB, ctx.SCALE);
+    return result.map((v) => new FixedPrecision(v, ctx));
+  }
+
 
   private static normalized(v: FixedPrecisionValue): FixedPrecision {
     return v instanceof FixedPrecision
