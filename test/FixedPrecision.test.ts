@@ -486,6 +486,43 @@ describe("FixedPrecision", () => {
       });
     });
 
+    describe("prec()", () => {
+      const down = 1;
+      const halfUp = 4;
+
+      test("prec() rounds to significant digits with half-up by default", () => {
+        const x = new FixedPrecision("9876.54321");
+        expect(x.prec(2).toString()).toBe("9900.00000000");
+        expect(x.prec(7).toString()).toBe("9876.54300000");
+        expect(x.prec(20).toString()).toBe("9876.54321000");
+      });
+      test("prec() supports down and half-up modes", () => {
+        const x = new FixedPrecision("9876.54321");
+        expect(x.prec(1, down).toString()).toBe("9000.00000000");
+        expect(x.prec(1, halfUp).toString()).toBe("10000.00000000");
+      });
+      test("prec() does not mutate the original value", () => {
+        const x = new FixedPrecision("9876.54321");
+        x.prec(2);
+        expect(x.toString()).toBe("9876.54321000");
+      });
+      test("prec() handles small and negative values", () => {
+        expect(new FixedPrecision("0.00123456").prec(2).toString()).toBe(
+          "0.00120000",
+        );
+        expect(new FixedPrecision("-9876.54321").prec(2).toString()).toBe(
+          "-9900.00000000",
+        );
+      });
+      test("prec() validates significant digits and rounding mode", () => {
+        const x = new FixedPrecision("9876.54321");
+        expect(() => x.prec(0)).toThrow("Precision must be a positive integer");
+        expect(() => x.prec(2, 9 as RoundingMode)).toThrow(
+          "Rounding mode 9 is not supported.",
+        );
+      });
+    });
+
     describe("toFixed()", () => {
       test("toFixed() produces correct output with 0 places", () => {
         const a = new FixedPrecision("123.456789");

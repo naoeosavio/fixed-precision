@@ -27,6 +27,7 @@ import {
   sqrt2Number,
 } from "./functions/numeric/constants";
 import { fromNumberWithCtx, toNumberWithCtx } from "./functions/numeric/number";
+import { precisionValue } from "./functions/numeric/precision";
 import {
   roundValue,
   scaleValue,
@@ -404,6 +405,13 @@ export default class FixedPrecision {
     const instance = new FixedPrecision(0n, nextCtx);
     instance.value = nextValue;
     return instance;
+  }
+
+  public prec(
+    sd: number,
+    rm: RoundingMode = this.ctx.roundingMode,
+  ): FixedPrecision {
+    return this.fromRaw(precisionValue(this.value, sd, rm, this.ctx));
   }
 
   public toExponential(dp?: number, rm?: RoundingMode): string {

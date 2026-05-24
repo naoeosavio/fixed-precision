@@ -655,6 +655,31 @@ value.round(2); // "123.46"
 value.round(4, 1); // "123.4567" (ROUND_DOWN)
 ```
 
+#### `prec(sd: number, rm?: RoundingMode): FixedPrecision`
+
+Rounds the value to the specified number of significant digits. The returned
+instance keeps the original context scale and the original instance is not
+mutated.
+
+**Parameters:**
+- `sd`: `number` - Significant digits
+- `rm`: `RoundingMode` (optional) - Rounding mode (defaults to context rounding mode)
+
+**Returns:** `FixedPrecision` - New instance rounded to significant digits
+
+**Example:**
+```typescript
+const down = 1; // ROUND_DOWN
+const halfUp = 4; // ROUND_HALF_UP
+const value = new FixedPrecision("9876.54321");
+
+value.prec(2).toString(); // "9900.00000000"
+value.prec(7).toString(); // "9876.54300000"
+value.prec(20).toString(); // "9876.54321000"
+value.prec(1, down).toString(); // "9000.00000000"
+value.prec(1, halfUp).toString(); // "10000.00000000"
+```
+
 #### `ceil(): FixedPrecision`
 
 Returns the ceiling of the value (rounds upward for positive numbers).

@@ -301,6 +301,10 @@ FixedPrecision provides two sets of comparison methods:
   Rounds the value to the specified number of decimal places (`dp`) using the rounding mode (`rm`).  
   _Example:_ `value.round(2)` rounds the value to 2 decimal places.
 
+- **`prec(sd: number, rm?: RoundingMode): FixedPrecision`**  
+  Rounds the value to the specified number of significant digits (`sd`) using the rounding mode (`rm`). The returned instance keeps the original context scale.  
+  _Example:_ `new FixedPrecision("9876.54321").prec(2).toString()` returns `"9900.00000000"`.
+
 - **`ceil(): FixedPrecision`**  
   Returns the ceiling of the value (rounds upward for positive numbers).
 
