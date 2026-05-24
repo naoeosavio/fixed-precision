@@ -534,6 +534,45 @@ describe("FixedPrecision", () => {
       });
     });
   });
+  
+  describe("Bitwise Operations", () => {
+    const FP0 = FixedPrecision.create({ places: 0 });
+
+    test("bitAnd", () => {
+      const a = FP0(12);
+      const b = FP0(5);
+      expect(a.bitAnd(b).toString()).toBe("4");
+    });
+
+    test("bitOr", () => {
+      const a = FP0(12);
+      const b = FP0(5);
+      expect(a.bitOr(b).toString()).toBe("13");
+    });
+
+    test("bitXor", () => {
+      const a = FP0(12);
+      const b = FP0(5);
+      expect(a.bitXor(b).toString()).toBe("9");
+    });
+
+    test("bitNot", () => {
+      const a = FP0(12);
+      expect(a.bitNot().toString()).toBe("-13");
+    });
+
+    test("leftShift", () => {
+      const a = FP0(12);
+      expect(a.leftShift(2).toString()).toBe("48");
+      expect(() => a.leftShift(-1)).toThrow();
+    });
+
+    test("rightArithShift", () => {
+      const a = FP0(12);
+      expect(a.rightArithShift(2).toString()).toBe("3");
+      expect(() => a.rightArithShift(-1)).toThrow();
+    });
+  });
 
   describe("scale() method", () => {
     test("scale() changes context and rounds correctly to 4 decimals", () => {

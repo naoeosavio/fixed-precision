@@ -8,6 +8,14 @@ import {
   subtract,
 } from "./functions/arithmetic/operations";
 import { power } from "./functions/arithmetic/power";
+import {
+  bitAnd,
+  bitNot,
+  bitOr,
+  bitXor,
+  leftShift,
+  rightArithShift,
+} from "./functions/bitwise";
 import { collectValues } from "./functions/construction/values";
 import {
   configureContext,
@@ -284,6 +292,39 @@ export default class FixedPrecision {
 
   public leftover(other: FixedPrecisionValue): FixedPrecision {
     return this.fromRaw(modulo(this.value, this.toScaledValue(other)));
+  }
+
+  public bitAnd(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw(bitAnd(this.value, o.value));
+  }
+
+  public bitOr(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw(bitOr(this.value, o.value));
+  }
+
+  public bitXor(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw(bitXor(this.value, o.value));
+  }
+
+  public bitNot(): FixedPrecision {
+    return this.fromRaw(bitNot(this.value));
+  }
+
+  public leftShift(n: number): FixedPrecision {
+    if (!Number.isInteger(n) || n < 0) {
+      throw new Error("Shift amount must be a non-negative integer");
+    }
+    return this.fromRaw(leftShift(this.value, n));
+  }
+
+  public rightArithShift(n: number): FixedPrecision {
+    if (!Number.isInteger(n) || n < 0) {
+      throw new Error("Shift amount must be a non-negative integer");
+    }
+    return this.fromRaw(rightArithShift(this.value, n));
   }
 
   public neg(): FixedPrecision {
