@@ -22,6 +22,7 @@ import {
   makeContext,
   makeFactoryContext,
 } from "./functions/core/context";
+import { getNumeratorAndDenominator } from "./functions/fraction";
 import { squareRoot } from "./functions/geometry/sqrt";
 import {
   isNegativeValue,
@@ -353,6 +354,22 @@ export default class FixedPrecision {
 
   public sqrt(): FixedPrecision {
     return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
+  }
+
+  public num(): FixedPrecision {
+    const { numerator } = getNumeratorAndDenominator(
+      this.value,
+      this.ctx.SCALE,
+    );
+    return new FixedPrecision(numerator * this.ctx.SCALE, this.ctx);
+  }
+
+  public den(): FixedPrecision {
+    const { denominator } = getNumeratorAndDenominator(
+      this.value,
+      this.ctx.SCALE,
+    );
+    return new FixedPrecision(denominator * this.ctx.SCALE, this.ctx);
   }
 
   public toJSON(): string {

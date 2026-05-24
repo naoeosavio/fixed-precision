@@ -605,6 +605,58 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Fraction Operations", () => {
+    test("numerator and denominator", () => {
+      const x = new FixedPrecision("12.34"); // Places = 8, SCALE = 10^8
+      const num = x.num();
+      const den = x.den();
+
+      // 12.34 = 1234 / 100 = 617 / 50
+      expect(num.toNumber()).toBe(617);
+      expect(den.toNumber()).toBe(50);
+
+      // Verify that num / den reconstructs the original value
+      expect(num.div(den).toString()).toBe("12.34000000");
+    });
+
+    test("negative numerator", () => {
+      const x = new FixedPrecision("-1.5");
+      expect(x.num().toNumber()).toBe(-3);
+      expect(x.den().toNumber()).toBe(2);
+    });
+  });
+
+  describe("Matrix/Vector Operations", () => {
+    test("dot product", () => {
+      const a = [1, 2, 3];
+      const b = [4, 5, 6];
+      expect(FixedPrecision.dot(a, b).toNumber()).toBe(32); // 1*4 + 2*5 + 3*6 = 32
+    });
+
+    test("cross product", () => {
+      const a = [1, 2, 3];
+      const b = [4, 5, 6];
+      const result = FixedPrecision.cross(a, b);
+
+      expect(result.length).toBe(3);
+      expect(result[0]?.toNumber()).toBe(-3);
+      expect(result[1]?.toNumber()).toBe(6);
+      expect(result[2]?.toNumber()).toBe(-3);
+    });
+
+    test("dot product vector length mismatch", () => {
+      const a = [1, 2];
+      const b = [4, 5, 6];
+      expect(() => FixedPrecision.dot(a, b)).toThrow();
+    });
+
+    test("cross product vector length mismatch", () => {
+      const a = [1, 2];
+      const b = [4, 5, 6];
+      expect(() => FixedPrecision.cross(a, b)).toThrow();
+    });
+  });
+
   describe("Configuration", () => {
     test("configure() sets new decimal places", () => {
       const config: FixedPrecisionConfig = { places: 10 };
