@@ -35,7 +35,7 @@ export function toNumberWithCtx(value: bigint, ctx: FPContext): number {
 
 function toNumberByParts(value: bigint, ctx: FPContext): number {
   const intPart = value / ctx.SCALE;
-  const fracPart = value % ctx.SCALE;
+  const fracPart = value - intPart * ctx.SCALE;
   if (fracPart === 0n) {
     return Number(intPart);
   }

@@ -37,9 +37,66 @@ describe("FixedPrecision", () => {
   });
 
   describe("toNumber() method", () => {
+    test("toNumber() converts zero forms to positive zero", () => {
+      const positiveZeroInputs = [
+        "0",
+        "0.0",
+        "0.000000000000",
+      ];
+      const negativeZeroInputs = [
+        "-0",
+        "-0.0",
+        "-0.000000000000",
+      ];
+
+      for (const input of [...positiveZeroInputs, ...negativeZeroInputs]) {
+        const result = new FixedPrecision(input).toNumber();
+        expect(result).toBe(0);
+        expect(Object.is(result, -0)).toBe(false);
+      }
+    });
+
+    test("toNumber() rejects non-finite numeric inputs", () => {
+      const unsupportedInputs = [
+        Infinity,
+        "Infinity",
+        -Infinity,
+        "-Infinity",
+        NaN,
+        "NaN",
+      ];
+
+      for (const input of unsupportedInputs) {
+        expect(() => new FixedPrecision(input).toNumber()).toThrow();
+      }
+    });
+
+    test("toNumber() converts one forms and safe integer bounds", () => {
+      const cases: Array<[string | number, number]> = [
+        [1, 1],
+        ["1", 1],
+        ["1.0", 1],
+        [-1, -1],
+        ["-1", -1],
+        ["-1.0", -1],
+        ["9007199254740991", 9007199254740991],
+        ["-9007199254740991", -9007199254740991],
+      ];
+
+      for (const [input, expected] of cases) {
+        expect(new FixedPrecision(input).toNumber()).toBe(expected);
+      }
+    });
+
+    test("toNumber() converts high precision finite decimal strings", () => {
+      const FP15 = FixedPrecision.create({ places: 15 });
+      expect(FP15("123.456789876543").toNumber()).toBe(123.456789876543);
+      expect(FP15("-123.456789876543").toNumber()).toBe(-123.456789876543);
+    });
+
     test("toNumber() preserves rounded high-precision values above MAX_SAFE_INTEGER", () => {
       const FP20 = FixedPrecision.create({ places: 20 });
-      const rounded = FP20(499.99999999999994).round(4);
+      const rounded = FP20("499.99999999999994").round(4);
 
       expect(rounded.toString()).toBe("500.00000000000000000000");
       expect(rounded.toNumber()).toBe(500);
