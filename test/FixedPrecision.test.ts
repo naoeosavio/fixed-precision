@@ -234,6 +234,89 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("transcendental methods", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+
+    test("ln() returns natural logarithm", () => {
+      const result = FP20("2.71828182845904523536").ln();
+      expect(result.toNumber()).toBeCloseTo(1, 14);
+      expect(result.toString()).toBe("0.99999999999999999999");
+    });
+
+    test("ln() keeps guard-digit precision for non-trivial values", () => {
+      expect(FP20("10").ln().toString()).toBe("2.30258509299404568401");
+      expect(FP20("123.456789").ln().toString()).toBe("4.81589120820374401402");
+    });
+
+    test("log() defaults to natural logarithm", () => {
+      const value = FP20("2");
+      expect(value.log().toNumber()).toBeCloseTo(Math.log(2), 14);
+      expect(value.log().toString()).toBe(value.ln().toString());
+      expect(value.log().toString()).toBe("0.69314718055994530941");
+    });
+
+    test("log() accepts an explicit base", () => {
+      const result = FP20("16").log(2);
+      expect(result.toNumber()).toBeCloseTo(4, 14);
+      expect(result.toString()).toBe("4.00000000000000000000");
+    });
+
+    test("log() keeps guard-digit precision for exact integer results", () => {
+      expect(FP20("81").log(3).toString()).toBe("4.00000000000000000000");
+    });
+
+    test("log10() returns base-10 logarithm", () => {
+      expect(FP20("100").log10().toNumber()).toBeCloseTo(2, 14);
+      expect(FP20("100").log10().toString()).toBe("2.00000000000000000000");
+      expect(FP20("0.01").log10().toString()).toBe("-2.00000000000000000000");
+    });
+
+    test("log2() returns base-2 logarithm", () => {
+      const result = FP20("8").log2();
+      expect(result.toNumber()).toBeCloseTo(3, 14);
+      expect(result.toString()).toBe("3.00000000000000000000");
+    });
+
+    test("log2() keeps guard-digit precision for non-powers of two", () => {
+      expect(FP20("10").log2().toString()).toBe("3.32192809488736234787");
+    });
+
+    test("exp() returns e raised to the value", () => {
+      expect(FP20("1").exp().toNumber()).toBeCloseTo(Math.E, 14);
+      expect(FP20("1").exp().toString()).toBe("2.71828182845904523536");
+      expect(FP20("-1").exp().toNumber()).toBeCloseTo(Math.exp(-1), 14);
+      expect(FP20("-1").exp().toString()).toBe("0.36787944117144232159");
+    });
+
+    test("FixedPrecision.exp() returns e raised to the argument", () => {
+      fixedconfig.configure({ places: 20, roundingMode: 4 });
+      try {
+        expect(FixedPrecision.exp(2).toNumber()).toBeCloseTo(Math.exp(2), 14);
+        expect(FixedPrecision.exp(2).toString()).toBe("7.38905609893065022723");
+        expect(FixedPrecision.exp("2").toString()).toBe(
+          FP20("2").exp().toString(),
+        );
+      } finally {
+        fixedconfig.configure({ places: 8, roundingMode: 4 });
+      }
+    });
+
+    test("log methods validate domain and base", () => {
+      expect(() => FP20("0").ln()).toThrow(
+        "Logarithm is undefined for non-positive values",
+      );
+      expect(() => FP20("-1").log10()).toThrow(
+        "Logarithm is undefined for non-positive values",
+      );
+      expect(() => FP20("10").log(1)).toThrow(
+        "Logarithm base must be positive and not equal to 1",
+      );
+      expect(() => FP20("10").log(0)).toThrow(
+        "Logarithm base must be positive and not equal to 1",
+      );
+    });
+  });
+
   // ––– Rounding and Formatting Methods –––
   describe("Rounding Methods", () => {
     describe("ceil()", () => {

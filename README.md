@@ -272,8 +272,12 @@ FixedPrecision provides two sets of arithmetic operations:
 **Other operations:**
 - **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
 - **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
-- **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
-- **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
+- **`ln(): FixedPrecision`**: Computes the natural logarithm of the current value using bigint fixed-point arithmetic.
+- **`log(base?: FixedPrecisionValue): FixedPrecision`**: Computes the natural logarithm, or logarithm in the supplied base.
+- **`log10(): FixedPrecision`**: Computes the base-10 logarithm.
+- **`log2(): FixedPrecision`**: Computes the base-2 logarithm.
+- **`exp(): FixedPrecision`**: Computes `e` raised to the current value.
+- **`FixedPrecision.exp(value: FixedPrecisionValue): FixedPrecision`**: Computes `e` raised to the supplied value.
 
 ### Comparison Methods
 

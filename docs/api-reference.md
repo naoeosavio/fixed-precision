@@ -85,6 +85,20 @@ Generates a random FixedPrecision value between 0 (inclusive) and 1 (exclusive).
 const random = FixedPrecision.random(4); // Random value with 4 decimals
 ```
 
+### `FixedPrecision.exp(value: FixedPrecisionValue)`
+
+Computes `e` raised to the supplied value using the global default context.
+
+**Parameters:**
+- `value`: `FixedPrecisionValue` - Exponent value
+
+**Returns:** `FixedPrecision`
+
+**Example:**
+```typescript
+FixedPrecision.exp(2).toNumber(); // 7.38905609
+```
+
 ### `FixedPrecision.min(val, ...vals)`
 
 Returns the smallest value among the given arguments. Accepts both variadic arguments and a single array.
@@ -341,6 +355,85 @@ Computes the square root of this value.
 ```typescript
 const value = new FixedPrecision("16.00");
 value.sqrt(); // "4.00000000"
+```
+
+#### `ln(): FixedPrecision`
+
+Computes the natural logarithm of this value.
+Transcendental functions use bigint fixed-point arithmetic and return values in
+the current context scale.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative
+
+**Example:**
+```typescript
+new FixedPrecision("2").ln(); // "0.69314718"
+```
+
+**Precision note:** With a 20-place factory,
+`FP20("2.71828182845904523536").ln().toString()` returns
+`"0.99999999999999999999"`, not exactly `"1.00000000000000000000"`, because the
+input is the 20-decimal-place truncation of `e`. The true value starts with
+`2.718281828459045235360287471352662497757...`, so
+`2.71828182845904523536` is slightly smaller than `e`.
+
+#### `log(base?: FixedPrecisionValue): FixedPrecision`
+
+Computes the natural logarithm of this value, or the logarithm in the supplied
+base.
+
+**Parameters:**
+- `base`: `FixedPrecisionValue` (optional) - Logarithm base
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative, or if base is not positive or
+is equal to 1
+
+**Example:**
+```typescript
+new FixedPrecision("2").log(); // "0.69314718"
+new FixedPrecision("16").log(2); // "4.00000000"
+```
+
+#### `log10(): FixedPrecision`
+
+Computes the base-10 logarithm of this value.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative
+
+**Example:**
+```typescript
+new FixedPrecision("100").log10(); // "2.00000000"
+```
+
+#### `log2(): FixedPrecision`
+
+Computes the base-2 logarithm of this value.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative
+
+**Example:**
+```typescript
+new FixedPrecision("8").log2(); // "3.00000000"
+```
+
+#### `exp(): FixedPrecision`
+
+Computes `e` raised to this value.
+Use `FixedPrecision.exp(value)` to pass the exponent directly.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Example:**
+```typescript
+new FixedPrecision("1").exp(); // "2.71828182"
 ```
 
 #### `neg(): FixedPrecision`

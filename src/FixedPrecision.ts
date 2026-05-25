@@ -48,6 +48,13 @@ import {
   scaleValue,
   shiftedByValue,
 } from "./functions/numeric/rounding";
+import {
+  expValue,
+  log2Value,
+  log10Value,
+  logValue,
+  naturalLogValue,
+} from "./functions/numeric/transcendental";
 import { randomDecimalString } from "./functions/probability/random";
 import {
   compareValues,
@@ -349,6 +356,13 @@ export default class FixedPrecision {
     return new FixedPrecision(eNumber());
   }
 
+  public static exp(value: FixedPrecisionValue): FixedPrecision {
+    const ctx = FixedPrecision.defaultContext;
+    const instance = new FixedPrecision(0n, ctx);
+    instance.value = expValue(FixedPrecision.toScaled(value, ctx), ctx);
+    return instance;
+  }
+
   public static phi(): FixedPrecision {
     return new FixedPrecision(phiNumber());
   }
@@ -359,6 +373,30 @@ export default class FixedPrecision {
 
   public sqrt(): FixedPrecision {
     return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
+  }
+
+  public ln(): FixedPrecision {
+    return this.fromRaw(naturalLogValue(this.value, this.ctx));
+  }
+
+  public log(base?: FixedPrecisionValue): FixedPrecision {
+    if (base === undefined) {
+      return this.ln();
+    }
+    const o = this.coerce(base);
+    return this.fromRaw(logValue(this.value, o.value, this.ctx));
+  }
+
+  public log10(): FixedPrecision {
+    return this.fromRaw(log10Value(this.value, this.ctx));
+  }
+
+  public log2(): FixedPrecision {
+    return this.fromRaw(log2Value(this.value, this.ctx));
+  }
+
+  public exp(): FixedPrecision {
+    return this.fromRaw(expValue(this.value, this.ctx));
   }
 
   public num(): FixedPrecision {
