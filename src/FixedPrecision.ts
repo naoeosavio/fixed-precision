@@ -16,12 +16,12 @@ import {
   leftShift,
   rightArithShift,
 } from "./functions/bitwise";
-import { collectValues } from "./functions/construction/values";
 import {
   combinationsValue,
   factorialValue,
   permutationsValue,
 } from "./functions/combinatorics";
+import { collectValues } from "./functions/construction/values";
 import {
   configureContext,
   makeContext,
@@ -424,7 +424,6 @@ export default class FixedPrecision {
     return result.map((v) => new FixedPrecision(v, ctx));
   }
 
-
   private static normalized(v: FixedPrecisionValue): FixedPrecision {
     return v instanceof FixedPrecision
       ? new FixedPrecision(v.toString())
@@ -509,7 +508,6 @@ export default class FixedPrecision {
       k instanceof FixedPrecision ? k.trunc().toNumber() : Math.trunc(k);
     return new FixedPrecision(combinationsValue(valN, valK) * ctx.SCALE, ctx);
   }
-
 
   public round(
     dp: number = this.ctx.places,

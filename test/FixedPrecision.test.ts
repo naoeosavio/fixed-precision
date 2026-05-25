@@ -279,21 +279,33 @@ describe("FixedPrecision", () => {
         const a = new FixedPrecision("1.23456789");
         expect(a.round(4, 1).toString()).toBe("1.23450000");
       });
+      test("round() handles half-up positive and negative ties", () => {
+        expect(new FixedPrecision("1.23455000").round(4, 4).toString()).toBe(
+          "1.23460000",
+        );
+        expect(new FixedPrecision("-1.23455000").round(4, 4).toString()).toBe(
+          "-1.23460000",
+        );
+      });
+      test("round() keeps the original context scale", () => {
+        const rounded = new FixedPrecision("1.23456789").round(2);
+        expect(rounded.toString()).toBe("1.23000000");
+      });
     });
   });
 
   describe("shiftedBy() method", () => {
-    test("shiftedBy() shifts raw bigint right with positive n", () => {
+    test("shiftedBy() multiplies raw bigint by powers of ten with positive n", () => {
       const shifted = new FixedPrecision(1000n).shiftedBy(1);
-      expect(shifted.raw()).toBe(500n);
+      expect(shifted.raw()).toBe(10000n);
     });
-    test("shiftedBy() shifts raw bigint left with negative n", () => {
+    test("shiftedBy() divides raw bigint by powers of ten with negative n", () => {
       const shifted = new FixedPrecision(1000n).shiftedBy(-1);
-      expect(shifted.raw()).toBe(2000n);
+      expect(shifted.raw()).toBe(100n);
     });
-    test("shiftedBy() throws error on non-integer shift", () => {
-      const a = new FixedPrecision(1000n);
-      expect(() => a.shiftedBy(1.5)).toThrow("shift must be an integer");
+    test("shiftedBy() accepts inexact negative shift", () => {
+      const a = new FixedPrecision(1001n);
+      expect(a.shiftedBy(-1).raw()).toBe(100n);
     });
   });
 
@@ -534,7 +546,7 @@ describe("FixedPrecision", () => {
       });
     });
   });
-  
+
   describe("Bitwise Operations", () => {
     const FP0 = FixedPrecision.create({ places: 0 });
 
@@ -573,7 +585,7 @@ describe("FixedPrecision", () => {
       expect(() => a.rightArithShift(-1)).toThrow();
     });
   });
-  
+
   describe("Combinatorics Operations", () => {
     test("factorial", () => {
       expect(FixedPrecision.factorial(5).toNumber()).toBe(120);
@@ -610,6 +622,20 @@ describe("FixedPrecision", () => {
       const FP2 = FixedPrecision.create({ places: 2 });
       const a = FP2("1.23");
       expect(a.scale(4).toString()).toBe("1.2300");
+    });
+    test("scale() does not mutate the original value", () => {
+      const a = new FixedPrecision("123.456789");
+      a.scale(2);
+      expect(a.toString()).toBe("123.45678900");
+    });
+    test("scale() validates the target scale", () => {
+      const a = new FixedPrecision("123.456789");
+      expect(() => a.scale(-1)).toThrow(
+        "newScale must be an integer between 0 and 20",
+      );
+      expect(() => a.scale(21)).toThrow(
+        "newScale must be an integer between 0 and 20",
+      );
     });
   });
 

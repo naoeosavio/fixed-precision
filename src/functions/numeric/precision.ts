@@ -1,5 +1,5 @@
 import type { FPContext, RoundingMode } from "../../FixedPrecision";
-import { powerOfTen } from "../utils";
+import { precisionPowerOfTen } from "../utils";
 import { roundToScaleValue } from "./rounding";
 
 export function precisionValue(
@@ -29,8 +29,4 @@ function assertSignificantDigits(sd: number): void {
   if (!Number.isInteger(sd) || sd < 1 || sd >= 1e6) {
     throw new Error("Precision must be a positive integer");
   }
-}
-
-function precisionPowerOfTen(exponent: number): bigint {
-  return exponent <= 20 ? powerOfTen(exponent) : 10n ** BigInt(exponent);
 }

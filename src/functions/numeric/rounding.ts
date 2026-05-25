@@ -1,5 +1,5 @@
 import type { FPContext, RoundingMode } from "../../FixedPrecision";
-import { powerOfTen } from "../utils";
+import { powerOfTen, precisionPowerOfTen } from "../utils";
 
 export function roundToScaleValue(
   value: bigint,
@@ -78,10 +78,12 @@ export function scaleValue(
 }
 
 export function shiftedByValue(value: bigint, n: number): bigint {
-  if (!Number.isInteger(n)) {
-    throw new Error("shift must be an integer");
+  const shiftFactor = precisionPowerOfTen(Math.abs(n));
+  if (n >= 0) {
+    return value * shiftFactor;
+  } else {
+    return value / shiftFactor;
   }
-  return value >> BigInt(n);
 }
 
 function roundHalfUpScaledValue(value: bigint, factor: bigint): bigint {

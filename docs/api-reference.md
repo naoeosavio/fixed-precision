@@ -736,22 +736,22 @@ value.scale(4); // "123.4568"
 
 #### `shiftedBy(n: number): FixedPrecision`
 
-Applies a bigint bit shift to the raw scaled value (`raw >> BigInt(n)`).
-This is a raw binary shift, not a decimal-place shift.
+Shifts the raw scaled value by powers of ten. A positive `n` multiplies by
+`10 ** n`; a negative `n` divides by `10 ** abs(n)` and truncates toward zero
+when the division is not exact.
 
 **Parameters:**
-- `n`: `number` - Integer bit shift amount
-  - Positive: shifts right
-  - Negative: shifts left
+- `n`: `number` - Integer decimal shift amount
+  - Positive: multiplies by powers of ten
+  - Negative: divides by powers of ten
 
 **Returns:** `FixedPrecision` - New instance with shifted value
 
-**Throws:** `Error` if `n` is not an integer
-
 **Example:**
 ```typescript
-new FixedPrecision(1000n).shiftedBy(1).raw(); // 500n
-new FixedPrecision(1000n).shiftedBy(-1).raw(); // 2000n
+new FixedPrecision(1000n).shiftedBy(1).raw(); // 10000n
+new FixedPrecision(1000n).shiftedBy(-1).raw(); // 100n
+new FixedPrecision(1001n).shiftedBy(-1).raw(); // 100n
 ```
 
 ### Utility Methods

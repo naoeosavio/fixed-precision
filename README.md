@@ -318,7 +318,7 @@ FixedPrecision provides two sets of comparison methods:
   Adjusts the value to a new number of decimal places by scaling and rounding as necessary. The returned instance uses `newScale` as its context scale.
 
 - **`shiftedBy(n: number): FixedPrecision`**  
-  Applies a bigint bit shift to the raw scaled value (`raw >> BigInt(n)`). A positive `n` shifts right; a negative `n` shifts left. This is not decimal-place shifting.
+  Shifts the raw scaled value by powers of ten. A positive `n` multiplies by `10 ** n`; a negative `n` divides by `10 ** abs(n)` and truncates toward zero when the division is not exact.
 
 ### Random Number Generation
 
