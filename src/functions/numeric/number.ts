@@ -1,4 +1,7 @@
 import type { FPContext } from "../../FixedPrecision";
+import { toStringWithCtx } from "../string/format";
+
+const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
 
 export function fromNumberWithCtx(value: number, ctx: FPContext): bigint {
   if (Number.isNaN(value) || !Number.isFinite(value)) {
@@ -19,5 +22,23 @@ export function fromNumberWithCtx(value: number, ctx: FPContext): bigint {
 }
 
 export function toNumberWithCtx(value: bigint, ctx: FPContext): number {
-  return Number(value) / ctx.SCALENUMBER;
+  if (value <= MAX_SAFE_BIGINT && value >= -MAX_SAFE_BIGINT) {
+    return Number(value) / ctx.SCALENUMBER;
+  }
+
+  if (ctx.places < 15) {
+    return toNumberByParts(value, ctx);
+  }
+
+  return Number(toStringWithCtx(value, ctx));
+}
+
+function toNumberByParts(value: bigint, ctx: FPContext): number {
+  const intPart = value / ctx.SCALE;
+  const fracPart = value % ctx.SCALE;
+  if (fracPart === 0n) {
+    return Number(intPart);
+  }
+
+  return Number(intPart) + Number(fracPart) / ctx.SCALENUMBER;
 }

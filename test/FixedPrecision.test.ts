@@ -36,6 +36,28 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("toNumber() method", () => {
+    test("toNumber() preserves rounded high-precision values above MAX_SAFE_INTEGER", () => {
+      const FP20 = FixedPrecision.create({ places: 20 });
+      const rounded = FP20(499.99999999999994).round(4);
+
+      expect(rounded.toString()).toBe("500.00000000000000000000");
+      expect(rounded.toNumber()).toBe(500);
+      expect(rounded.toNumber()).toBe(Number(rounded.toFixed(4)));
+    });
+
+    test("toNumber() handles lower-scale values above MAX_SAFE_INTEGER by parts", () => {
+      const FP8 = FixedPrecision.create({ places: 8 });
+      const positive = FP8("123456789.12345678");
+      const negative = FP8("-123456789.12345678");
+
+      expect(positive.raw() > BigInt(Number.MAX_SAFE_INTEGER)).toBe(true);
+      expect(negative.raw() < -BigInt(Number.MAX_SAFE_INTEGER)).toBe(true);
+      expect(positive.toNumber()).toBe(Number(positive.toString()));
+      expect(negative.toNumber()).toBe(Number(negative.toString()));
+    });
+  });
+
   // ––– Arithmetic Operations –––
   describe("Arithmetic Operations", () => {
     const a = new FixedPrecision("10.5");
