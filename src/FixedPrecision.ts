@@ -69,7 +69,11 @@ import {
   selectMin,
   sumRawValues,
 } from "./functions/statistics/aggregate";
-import { toFixedWithCtx, toStringWithCtx } from "./functions/string/format";
+import {
+  toBaseWithCtx,
+  toFixedWithCtx,
+  toStringWithCtx,
+} from "./functions/string/format";
 import { fromStringWithCtx } from "./functions/string/parse";
 import {
   acoshValue,
@@ -858,6 +862,22 @@ export default class FixedPrecision {
 
   public toFixed(places = 0, rm?: RoundingMode): string {
     return toFixedWithCtx(this.value, this.ctx, places, rm);
+  }
+
+  public toBinary(sd?: number, rm?: RoundingMode): string {
+    return toBaseWithCtx(this.value, this.ctx, 2, sd, rm);
+  }
+
+  public toOctal(sd?: number, rm?: RoundingMode): string {
+    return toBaseWithCtx(this.value, this.ctx, 8, sd, rm);
+  }
+
+  public toHex(sd?: number, rm?: RoundingMode): string {
+    return toBaseWithCtx(this.value, this.ctx, 16, sd, rm);
+  }
+
+  public toHexadecimal(sd?: number, rm?: RoundingMode): string {
+    return this.toHex(sd, rm);
   }
 
   public valueOf(): string {

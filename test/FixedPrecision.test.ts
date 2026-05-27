@@ -859,6 +859,39 @@ describe("FixedPrecision", () => {
         expect(a.toFixed(3)).toBe("123.457");
       });
     });
+
+    describe("base conversion methods", () => {
+      test("toBinary(), toOctal(), and toHex() convert finite fractions", () => {
+        const a = new FixedPrecision("10.625");
+
+        expect(a.toBinary()).toBe("1010.101");
+        expect(a.toOctal()).toBe("12.5");
+        expect(a.toHex()).toBe("a.a");
+        expect(a.toHexadecimal()).toBe("a.a");
+      });
+
+      test("base conversion methods keep the sign", () => {
+        const a = new FixedPrecision("-15.5");
+
+        expect(a.toBinary()).toBe("-1111.1");
+        expect(a.toOctal()).toBe("-17.4");
+        expect(a.toHex()).toBe("-f.8");
+      });
+
+      test("base conversion methods support significant-digit rounding", () => {
+        expect(new FixedPrecision("255").toHex(1)).toBe("100");
+        expect(new FixedPrecision("255").toHex(2)).toBe("ff");
+        expect(new FixedPrecision("0.1").toBinary(4)).toBe("0.0001101");
+      });
+
+      test("base conversion methods validate significant digits", () => {
+        const a = new FixedPrecision("10.625");
+
+        expect(() => a.toBinary(0)).toThrow("Invalid precision");
+        expect(() => a.toOctal(1.5)).toThrow("Invalid precision");
+        expect(() => a.toHex(1e6)).toThrow("Invalid precision");
+      });
+    });
   });
 
   describe("Bitwise Operations", () => {
