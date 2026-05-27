@@ -71,6 +71,7 @@ import {
 } from "./functions/statistics/aggregate";
 import { toFixedWithCtx, toStringWithCtx } from "./functions/string/format";
 import { fromStringWithCtx } from "./functions/string/parse";
+import { cosValue, sinValue, tanValue } from "./functions/trigonometry";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
@@ -363,6 +364,27 @@ export default class FixedPrecision {
     return instance;
   }
 
+  public static sin(value: FixedPrecisionValue): FixedPrecision {
+    const ctx = FixedPrecision.defaultContext;
+    const instance = new FixedPrecision(0n, ctx);
+    instance.value = sinValue(FixedPrecision.toScaled(value, ctx), ctx);
+    return instance;
+  }
+
+  public static cos(value: FixedPrecisionValue): FixedPrecision {
+    const ctx = FixedPrecision.defaultContext;
+    const instance = new FixedPrecision(0n, ctx);
+    instance.value = cosValue(FixedPrecision.toScaled(value, ctx), ctx);
+    return instance;
+  }
+
+  public static tan(value: FixedPrecisionValue): FixedPrecision {
+    const ctx = FixedPrecision.defaultContext;
+    const instance = new FixedPrecision(0n, ctx);
+    instance.value = tanValue(FixedPrecision.toScaled(value, ctx), ctx);
+    return instance;
+  }
+
   public static phi(): FixedPrecision {
     return new FixedPrecision(phiNumber());
   }
@@ -397,6 +419,18 @@ export default class FixedPrecision {
 
   public exp(): FixedPrecision {
     return this.fromRaw(expValue(this.value, this.ctx));
+  }
+
+  public sin(): FixedPrecision {
+    return this.fromRaw(sinValue(this.value, this.ctx));
+  }
+
+  public cos(): FixedPrecision {
+    return this.fromRaw(cosValue(this.value, this.ctx));
+  }
+
+  public tan(): FixedPrecision {
+    return this.fromRaw(tanValue(this.value, this.ctx));
   }
 
   public num(): FixedPrecision {

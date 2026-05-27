@@ -396,6 +396,64 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("trigonometry methods", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+    const PI = "3.14159265358979323846";
+    const HALF_PI = "1.57079632679489661923";
+
+    test("sin(), cos(), and tan() handle zero", () => {
+      const zero = FP20("0");
+
+      expect(zero.sin().toString()).toBe("0.00000000000000000000");
+      expect(zero.cos().toString()).toBe("1.00000000000000000000");
+      expect(zero.tan().toString()).toBe("0.00000000000000000000");
+    });
+
+    test("sin() and cos() handle common radian angles", () => {
+      expect(FP20(HALF_PI).sin().toNumber()).toBeCloseTo(1, 14);
+      expect(FP20(PI).sin().toNumber()).toBeCloseTo(0, 14);
+      expect(FP20(PI).cos().toNumber()).toBeCloseTo(-1, 14);
+    });
+
+    test("trigonometry methods match Math for non-trivial radians", () => {
+      const values = ["0.5", "0.75", "3.25"];
+
+      for (const value of values) {
+        const fixed = FP20(value);
+        const numeric = Number(value);
+
+        expect(fixed.sin().toNumber()).toBeCloseTo(Math.sin(numeric), 12);
+        expect(fixed.cos().toNumber()).toBeCloseTo(Math.cos(numeric), 12);
+        expect(fixed.tan().toNumber()).toBeCloseTo(Math.tan(numeric), 12);
+      }
+    });
+
+    test("trigonometry methods handle negative radians", () => {
+      const fixed = new FixedPrecision("-0.75");
+
+      expect(fixed.sin().toNumber()).toBeCloseTo(Math.sin(-0.75), 7);
+      expect(fixed.cos().toNumber()).toBeCloseTo(Math.cos(-0.75), 7);
+      expect(fixed.tan().toNumber()).toBeCloseTo(Math.tan(-0.75), 7);
+    });
+
+    test("static trigonometry methods use the default context", () => {
+      fixedconfig.configure({ places: 20, roundingMode: 4 });
+      try {
+        expect(FixedPrecision.sin("0.5").toString()).toBe(
+          FP20("0.5").sin().toString(),
+        );
+        expect(FixedPrecision.cos("0.5").toString()).toBe(
+          FP20("0.5").cos().toString(),
+        );
+        expect(FixedPrecision.tan("0.5").toString()).toBe(
+          FP20("0.5").tan().toString(),
+        );
+      } finally {
+        fixedconfig.configure({ places: 8, roundingMode: 4 });
+      }
+    });
+  });
+
   // ––– Rounding and Formatting Methods –––
   describe("Rounding Methods", () => {
     describe("ceil()", () => {
