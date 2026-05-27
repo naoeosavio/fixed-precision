@@ -566,6 +566,112 @@ export default class FixedPrecision {
     return instance;
   }
 
+  public static abs(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.normalized(value).abs();
+  }
+
+  public static add(
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
+  ): FixedPrecision {
+    return FixedPrecision.normalized(left).add(
+      FixedPrecision.normalized(right),
+    );
+  }
+
+  public static sub(
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
+  ): FixedPrecision {
+    return FixedPrecision.normalized(left).sub(
+      FixedPrecision.normalized(right),
+    );
+  }
+
+  public static mul(
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
+  ): FixedPrecision {
+    return FixedPrecision.normalized(left).mul(
+      FixedPrecision.normalized(right),
+    );
+  }
+
+  public static div(
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
+  ): FixedPrecision {
+    return FixedPrecision.normalized(left).div(
+      FixedPrecision.normalized(right),
+    );
+  }
+
+  public static mod(
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
+  ): FixedPrecision {
+    return FixedPrecision.normalized(left).mod(
+      FixedPrecision.normalized(right),
+    );
+  }
+
+  public static pow(value: FixedPrecisionValue, exp: number): FixedPrecision {
+    return FixedPrecision.normalized(value).pow(exp);
+  }
+
+  public static ceil(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.normalized(value).ceil();
+  }
+
+  public static floor(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.normalized(value).floor();
+  }
+
+  public static trunc(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.normalized(value).trunc();
+  }
+
+  public static round(
+    value: FixedPrecisionValue,
+    dp?: number,
+    rm?: RoundingMode,
+  ): FixedPrecision {
+    return FixedPrecision.normalized(value).round(dp, rm);
+  }
+
+  public static ln(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.normalized(value).ln();
+  }
+
+  public static log(
+    value: FixedPrecisionValue,
+    base?: FixedPrecisionValue,
+  ): FixedPrecision {
+    const normalizedValue = FixedPrecision.normalized(value);
+    return base === undefined
+      ? normalizedValue.log()
+      : normalizedValue.log(FixedPrecision.normalized(base));
+  }
+
+  public static log2(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.normalized(value).log2();
+  }
+
+  public static log10(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.normalized(value).log10();
+  }
+
+  public static clamp(
+    value: FixedPrecisionValue,
+    min: FixedPrecisionValue,
+    max: FixedPrecisionValue,
+  ): FixedPrecision {
+    return FixedPrecision.normalized(value).clamp(
+      FixedPrecision.normalized(min),
+      FixedPrecision.normalized(max),
+    );
+  }
+
   public static square(value: FixedPrecisionValue): FixedPrecision {
     return FixedPrecision.fromDefaultContextValue(value, (rawValue, ctx) =>
       power(rawValue, 2, ctx.SCALE),

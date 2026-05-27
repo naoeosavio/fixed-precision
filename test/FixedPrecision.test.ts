@@ -318,6 +318,41 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Static instance method wrappers", () => {
+    test("arithmetic wrappers call the matching instance methods", () => {
+      expect(FixedPrecision.abs("-2.5").toString()).toBe("2.50000000");
+      expect(FixedPrecision.add("1.5", "2.25").toString()).toBe(
+        "3.75000000",
+      );
+      expect(FixedPrecision.sub("5", "2.5").toString()).toBe("2.50000000");
+      expect(FixedPrecision.mul("2.5", "4").toString()).toBe("10.00000000");
+      expect(FixedPrecision.div("7.5", "2.5").toString()).toBe("3.00000000");
+      expect(FixedPrecision.mod("10", "3").toString()).toBe("1.00000000");
+      expect(FixedPrecision.pow("2", 3).toString()).toBe("8.00000000");
+    });
+
+    test("rounding wrappers call the matching instance methods", () => {
+      expect(FixedPrecision.ceil("1.1").toString()).toBe("2.00000000");
+      expect(FixedPrecision.floor("1.9").toString()).toBe("1.00000000");
+      expect(FixedPrecision.trunc("1.9").toString()).toBe("1.00000000");
+      expect(FixedPrecision.round("1.2345", 2).toString()).toBe("1.23000000");
+    });
+
+    test("logarithm wrappers call the matching instance methods", () => {
+      expect(FixedPrecision.ln("1").toString()).toBe("0.00000000");
+      expect(FixedPrecision.log("8", "2").toString()).toBe("3.00000000");
+      expect(FixedPrecision.log2("8").toString()).toBe("3.00000000");
+      expect(FixedPrecision.log10("100").toString()).toBe("2.00000000");
+    });
+
+    test("clamp wrapper normalizes FixedPrecision values to default context", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      expect(FixedPrecision.clamp(FP4("12"), "0", "10").toString()).toBe(
+        "10.00000000",
+      );
+    });
+  });
+
   describe("Inspection methods", () => {
     test("isInteger() checks whether there is a fractional remainder", () => {
       expect(new FixedPrecision("10.00000000").isInteger()).toBe(true);
