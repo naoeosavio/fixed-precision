@@ -318,6 +318,38 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Logical Functions", () => {
+    test("instance logical methods use zero and non-zero truthiness", () => {
+      const zero = new FixedPrecision(0);
+      const one = new FixedPrecision(1);
+      const negative = new FixedPrecision("-0.00000001");
+
+      expect(zero.not()).toBe(true);
+      expect(one.not()).toBe(false);
+      expect(one.and(negative)).toBe(true);
+      expect(one.and(0)).toBe(false);
+      expect(one.and(false)).toBe(false);
+      expect(zero.or(negative)).toBe(true);
+      expect(zero.or(0)).toBe(false);
+      expect(zero.or(true)).toBe(true);
+      expect(one.xor(0)).toBe(true);
+      expect(one.xor(negative)).toBe(false);
+    });
+
+    test("static logical methods accept primitives, booleans, and FixedPrecision", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+
+      expect(FixedPrecision.not(0)).toBe(true);
+      expect(FixedPrecision.not("0.00000001")).toBe(false);
+      expect(FixedPrecision.and("2", true)).toBe(true);
+      expect(FixedPrecision.and("0", true)).toBe(false);
+      expect(FixedPrecision.or(false, new FixedPrecision("-1"))).toBe(true);
+      expect(FixedPrecision.xor("0", "3")).toBe(true);
+      expect(FixedPrecision.xor(true, "3")).toBe(false);
+      expect(FixedPrecision.and(FP4("0.0001"), "1")).toBe(true);
+    });
+  });
+
   describe("Static instance method wrappers", () => {
     test("arithmetic wrappers call the matching instance methods", () => {
       expect(FixedPrecision.abs("-2.5").toString()).toBe("2.50000000");

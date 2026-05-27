@@ -1,8 +1,4 @@
-export function dotProduct(
-  a: bigint[],
-  b: bigint[],
-  scale: bigint,
-): bigint {
+export function dotProduct(a: bigint[], b: bigint[], scale: bigint): bigint {
   if (a.length !== b.length) {
     throw new Error("Vectors must have the same length");
   }

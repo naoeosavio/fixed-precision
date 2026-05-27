@@ -15,40 +15,33 @@ import {
   bitXor,
   leftShift,
   rightArithShift,
-} from "./bitwise";
+} from "./bitwise/operations";
 import {
   combinationsValue,
   factorialValue,
   permutationsValue,
-} from "./combinatorics";
+} from "./combinatorics/operations";
 import { collectValues } from "./construction/values";
 import {
   configureContext,
   makeContext,
   makeFactoryContext,
 } from "./core/context";
-import {
-  getNumeratorAndDenominator,
-  limitDenominator,
-} from "./fraction";
+import { getNumeratorAndDenominator, limitDenominator } from "./fraction/operations";
 import { cubeRoot, squareRoot } from "./geometry/sqrt";
 import {
   isNegativeValue,
   isPositiveValue,
   isZeroValue,
+  logicalAndValues,
+  logicalNotValue,
+  logicalOrValues,
+  logicalXorValues,
 } from "./logical/sign";
-import { crossProduct, dotProduct } from "./matrix";
-import {
-  eNumber,
-  phiNumber,
-  piNumber,
-  sqrt2Number,
-} from "./numeric/constants";
+import { crossProduct, dotProduct } from "./matrix/operations";
+import { eNumber, phiNumber, piNumber, sqrt2Number } from "./numeric/constants";
 import { fromNumberWithCtx, toNumberWithCtx } from "./numeric/number";
-import {
-  precisionValue,
-  significantDigitsValue,
-} from "./numeric/precision";
+import { precisionValue, significantDigitsValue } from "./numeric/precision";
 import {
   roundToScaleValue,
   roundValue,
@@ -71,11 +64,7 @@ import {
   lessThanOrEqualValue,
   lessThanValue,
 } from "./relational/compare";
-import {
-  selectMax,
-  selectMin,
-  sumRawValues,
-} from "./statistics/aggregate";
+import { selectMax, selectMin, sumRawValues } from "./statistics/aggregate";
 import {
   toBaseWithCtx,
   toFixedWithCtx,
@@ -114,6 +103,7 @@ export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
+export type FixedPrecisionLogicalValue = FixedPrecisionValue | boolean;
 
 export type FPContext = {
   places: number;
@@ -200,6 +190,40 @@ export default class FixedPrecision {
     return FixedPrecision.signString(value);
   }
 
+  public static not(value: FixedPrecisionLogicalValue): boolean {
+    return logicalNotValue(FixedPrecision.toDefaultLogicalRaw(value));
+  }
+
+  public static and(
+    left: FixedPrecisionLogicalValue,
+    right: FixedPrecisionLogicalValue,
+  ): boolean {
+    return logicalAndValues(
+      FixedPrecision.toDefaultLogicalRaw(left),
+      FixedPrecision.toDefaultLogicalRaw(right),
+    );
+  }
+
+  public static or(
+    left: FixedPrecisionLogicalValue,
+    right: FixedPrecisionLogicalValue,
+  ): boolean {
+    return logicalOrValues(
+      FixedPrecision.toDefaultLogicalRaw(left),
+      FixedPrecision.toDefaultLogicalRaw(right),
+    );
+  }
+
+  public static xor(
+    left: FixedPrecisionLogicalValue,
+    right: FixedPrecisionLogicalValue,
+  ): boolean {
+    return logicalXorValues(
+      FixedPrecision.toDefaultLogicalRaw(left),
+      FixedPrecision.toDefaultLogicalRaw(right),
+    );
+  }
+
   protected fromRaw(rawValue: bigint): FixedPrecision {
     const instance = new FixedPrecision(0n, this.ctx);
     instance.value = rawValue;
@@ -224,6 +248,16 @@ export default class FixedPrecision {
       operation(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
     );
+  }
+
+  private static toDefaultLogicalRaw(
+    value: FixedPrecisionLogicalValue,
+  ): bigint {
+    if (typeof value === "boolean") {
+      return value ? FixedPrecision.defaultContext.SCALE : 0n;
+    }
+
+    return FixedPrecision.normalized(value).value;
   }
 
   private static signRaw(value: bigint): -1 | 0 | 1 {
@@ -309,6 +343,14 @@ export default class FixedPrecision {
     return coerced.trunc().value / this.ctx.SCALE;
   }
 
+  private toLogicalRaw(value: FixedPrecisionLogicalValue): bigint {
+    if (typeof value === "boolean") {
+      return value ? this.ctx.SCALE : 0n;
+    }
+
+    return this.coerce(value).value;
+  }
+
   public toNumber(): number {
     return toNumberWithCtx(this.value, this.ctx);
   }
@@ -385,6 +427,22 @@ export default class FixedPrecision {
 
   public isNegative(): boolean {
     return isNegativeValue(this.value);
+  }
+
+  public not(): boolean {
+    return logicalNotValue(this.value);
+  }
+
+  public and(other: FixedPrecisionLogicalValue): boolean {
+    return logicalAndValues(this.value, this.toLogicalRaw(other));
+  }
+
+  public or(other: FixedPrecisionLogicalValue): boolean {
+    return logicalOrValues(this.value, this.toLogicalRaw(other));
+  }
+
+  public xor(other: FixedPrecisionLogicalValue): boolean {
+    return logicalXorValues(this.value, this.toLogicalRaw(other));
   }
 
   public isInteger(): boolean {
