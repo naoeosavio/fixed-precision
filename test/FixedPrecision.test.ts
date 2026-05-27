@@ -1188,6 +1188,27 @@ describe("FixedPrecision", () => {
       expect(x.num().toNumber()).toBe(-3);
       expect(x.den().toNumber()).toBe(2);
     });
+
+    test("toFraction() returns numerator and denominator", () => {
+      const [num, den] = new FixedPrecision("12.34").toFraction();
+
+      expect(num.toNumber()).toBe(617);
+      expect(den.toNumber()).toBe(50);
+      expect(num.div(den).toString()).toBe("12.34000000");
+    });
+
+    test("toFraction(maxDen) limits the denominator", () => {
+      const [num, den] = new FixedPrecision("0.33333333").toFraction(100);
+
+      expect(num.toNumber()).toBe(1);
+      expect(den.toNumber()).toBe(3);
+    });
+
+    test("toFraction(maxDen) validates maxDen", () => {
+      expect(() => new FixedPrecision("0.5").toFraction(0)).toThrow(
+        "maxDen must be a positive integer",
+      );
+    });
   });
 
   describe("Matrix/Vector Operations", () => {

@@ -27,7 +27,10 @@ import {
   makeContext,
   makeFactoryContext,
 } from "./functions/core/context";
-import { getNumeratorAndDenominator } from "./functions/fraction";
+import {
+  getNumeratorAndDenominator,
+  limitDenominator,
+} from "./functions/fraction";
 import { cubeRoot, squareRoot } from "./functions/geometry/sqrt";
 import {
   isNegativeValue,
@@ -296,6 +299,14 @@ export default class FixedPrecision {
 
   private toScaledValue(value: FixedPrecisionValue): bigint {
     return FixedPrecision.toScaled(value, this.ctx);
+  }
+
+  private toIntegerValue(value: FixedPrecisionValue): bigint {
+    const coerced =
+      value instanceof FixedPrecision
+        ? new FixedPrecision(value.toString(), this.ctx)
+        : new FixedPrecision(value, this.ctx);
+    return coerced.trunc().value / this.ctx.SCALE;
   }
 
   public toNumber(): number {
@@ -853,6 +864,25 @@ export default class FixedPrecision {
       this.ctx.SCALE,
     );
     return new FixedPrecision(denominator * this.ctx.SCALE, this.ctx);
+  }
+
+  public toFraction(
+    maxDen?: FixedPrecisionValue,
+  ): [FixedPrecision, FixedPrecision] {
+    const exact = getNumeratorAndDenominator(this.value, this.ctx.SCALE);
+    const fraction =
+      maxDen === undefined
+        ? exact
+        : limitDenominator(
+            exact.numerator,
+            exact.denominator,
+            this.toIntegerValue(maxDen),
+          );
+
+    return [
+      this.fromRaw(fraction.numerator * this.ctx.SCALE),
+      this.fromRaw(fraction.denominator * this.ctx.SCALE),
+    ];
   }
 
   public toJSON(): string {
