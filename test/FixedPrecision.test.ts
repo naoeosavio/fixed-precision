@@ -436,6 +436,94 @@ describe("FixedPrecision", () => {
       expect(fixed.tan().toNumber()).toBeCloseTo(Math.tan(-0.75), 7);
     });
 
+    test("reciprocal trigonometry methods match their definitions", () => {
+      const fixed = FP20("0.75");
+      const numeric = 0.75;
+
+      expect(fixed.sec().toNumber()).toBeCloseTo(1 / Math.cos(numeric), 12);
+      expect(fixed.csc().toNumber()).toBeCloseTo(1 / Math.sin(numeric), 12);
+      expect(fixed.cot().toNumber()).toBeCloseTo(1 / Math.tan(numeric), 12);
+    });
+
+    test("inverse trigonometry methods match Math", () => {
+      const half = FP20("0.5");
+      const two = FP20("2");
+
+      expect(half.asin().toNumber()).toBeCloseTo(Math.asin(0.5), 12);
+      expect(half.acos().toNumber()).toBeCloseTo(Math.acos(0.5), 12);
+      expect(half.atan().toNumber()).toBeCloseTo(Math.atan(0.5), 12);
+      expect(FP20("1").atan2(FP20("-1")).toNumber()).toBeCloseTo(
+        Math.atan2(1, -1),
+        12,
+      );
+      expect(two.acot().toNumber()).toBeCloseTo(Math.atan(1 / 2), 12);
+      expect(two.asec().toNumber()).toBeCloseTo(Math.acos(1 / 2), 12);
+      expect(two.acsc().toNumber()).toBeCloseTo(Math.asin(1 / 2), 12);
+    });
+
+    test("hyperbolic methods match Math", () => {
+      const fixed = FP20("0.5");
+      const numeric = 0.5;
+
+      expect(fixed.sinh().toNumber()).toBeCloseTo(Math.sinh(numeric), 12);
+      expect(fixed.cosh().toNumber()).toBeCloseTo(Math.cosh(numeric), 12);
+      expect(fixed.tanh().toNumber()).toBeCloseTo(Math.tanh(numeric), 12);
+      expect(fixed.sech().toNumber()).toBeCloseTo(1 / Math.cosh(numeric), 12);
+      expect(fixed.csch().toNumber()).toBeCloseTo(1 / Math.sinh(numeric), 12);
+      expect(fixed.coth().toNumber()).toBeCloseTo(1 / Math.tanh(numeric), 12);
+    });
+
+    test("inverse hyperbolic methods match Math", () => {
+      const half = FP20("0.5");
+      const onePointFive = FP20("1.5");
+      const two = FP20("2");
+
+      expect(onePointFive.asinh().toNumber()).toBeCloseTo(
+        Math.asinh(1.5),
+        12,
+      );
+      expect(onePointFive.acosh().toNumber()).toBeCloseTo(
+        Math.acosh(1.5),
+        12,
+      );
+      expect(half.atanh().toNumber()).toBeCloseTo(Math.atanh(0.5), 12);
+      expect(half.asech().toNumber()).toBeCloseTo(Math.acosh(1 / 0.5), 12);
+      expect(two.acsch().toNumber()).toBeCloseTo(Math.asinh(1 / 2), 12);
+      expect(two.acoth().toNumber()).toBeCloseTo(Math.atanh(1 / 2), 12);
+    });
+
+    test("trigonometry methods validate domains", () => {
+      expect(() => FP20("0").csc()).toThrow("Cosecant is undefined for zero");
+      expect(() => FP20("0").cot()).toThrow(
+        "Cotangent is undefined when sine is zero",
+      );
+      expect(() => FP20("2").asin()).toThrow("Arcsine is defined");
+      expect(() => FP20("2").acos()).toThrow("Arccosine is defined");
+      expect(() => FP20("0.5").asec()).toThrow("Arcsecant is defined");
+      expect(() => FP20("0.5").acsc()).toThrow("Arccosecant is defined");
+      expect(() => FP20("0.5").acosh()).toThrow(
+        "Hyperbolic arccosine is defined",
+      );
+      expect(() => FP20("1").atanh()).toThrow(
+        "Hyperbolic arctangent is defined",
+      );
+      expect(() => FP20("2").asech()).toThrow(
+        "Hyperbolic arcsecant is defined",
+      );
+      expect(() => FP20("0").acsch()).toThrow(
+        "Hyperbolic arccosecant is undefined for zero",
+      );
+      expect(() => FP20("1").acoth()).toThrow(
+        "Hyperbolic arccotangent is defined",
+      );
+      expect(() => FP20("0").csch()).toThrow(
+        "Hyperbolic cosecant is undefined for zero",
+      );
+      expect(() => FP20("0").coth()).toThrow(
+        "Hyperbolic cotangent is undefined for zero",
+      );
+    });
+
     test("static trigonometry methods use the default context", () => {
       fixedconfig.configure({ places: 20, roundingMode: 4 });
       try {
@@ -447,6 +535,12 @@ describe("FixedPrecision", () => {
         );
         expect(FixedPrecision.tan("0.5").toString()).toBe(
           FP20("0.5").tan().toString(),
+        );
+        expect(FixedPrecision.atan2("1", "-1").toString()).toBe(
+          FP20("1").atan2(FP20("-1")).toString(),
+        );
+        expect(FixedPrecision.acosh("1.5").toString()).toBe(
+          FP20("1.5").acosh().toString(),
         );
       } finally {
         fixedconfig.configure({ places: 8, roundingMode: 4 });

@@ -71,7 +71,33 @@ import {
 } from "./functions/statistics/aggregate";
 import { toFixedWithCtx, toStringWithCtx } from "./functions/string/format";
 import { fromStringWithCtx } from "./functions/string/parse";
-import { cosValue, sinValue, tanValue } from "./functions/trigonometry";
+import {
+  acoshValue,
+  acosValue,
+  acothValue,
+  acotValue,
+  acschValue,
+  acscValue,
+  asechValue,
+  asecValue,
+  asinhValue,
+  asinValue,
+  atan2Value,
+  atanhValue,
+  atanValue,
+  coshValue,
+  cosValue,
+  cothValue,
+  cotValue,
+  cschValue,
+  cscValue,
+  sechValue,
+  secValue,
+  sinhValue,
+  sinValue,
+  tanhValue,
+  tanValue,
+} from "./functions/trigonometry";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
@@ -147,6 +173,26 @@ export default class FixedPrecision {
     const instance = new FixedPrecision(0n, this.ctx);
     instance.value = rawValue;
     return instance;
+  }
+
+  private static fromRawWithContext(
+    rawValue: bigint,
+    ctx: FPContext,
+  ): FixedPrecision {
+    const instance = new FixedPrecision(0n, ctx);
+    instance.value = rawValue;
+    return instance;
+  }
+
+  private static fromDefaultContextValue(
+    value: FixedPrecisionValue,
+    operation: (value: bigint, ctx: FPContext) => bigint,
+  ): FixedPrecision {
+    const ctx = FixedPrecision.defaultContext;
+    return FixedPrecision.fromRawWithContext(
+      operation(FixedPrecision.toScaled(value, ctx), ctx),
+      ctx,
+    );
   }
 
   private assertSameConfig(other: FixedPrecision) {
@@ -365,24 +411,114 @@ export default class FixedPrecision {
   }
 
   public static sin(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.defaultContext;
-    const instance = new FixedPrecision(0n, ctx);
-    instance.value = sinValue(FixedPrecision.toScaled(value, ctx), ctx);
-    return instance;
+    return FixedPrecision.fromDefaultContextValue(value, sinValue);
   }
 
   public static cos(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.defaultContext;
-    const instance = new FixedPrecision(0n, ctx);
-    instance.value = cosValue(FixedPrecision.toScaled(value, ctx), ctx);
-    return instance;
+    return FixedPrecision.fromDefaultContextValue(value, cosValue);
   }
 
   public static tan(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, tanValue);
+  }
+
+  public static sec(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, secValue);
+  }
+
+  public static csc(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, cscValue);
+  }
+
+  public static cot(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, cotValue);
+  }
+
+  public static asin(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, asinValue);
+  }
+
+  public static acos(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, acosValue);
+  }
+
+  public static atan(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, atanValue);
+  }
+
+  public static atan2(
+    y: FixedPrecisionValue,
+    x: FixedPrecisionValue,
+  ): FixedPrecision {
     const ctx = FixedPrecision.defaultContext;
-    const instance = new FixedPrecision(0n, ctx);
-    instance.value = tanValue(FixedPrecision.toScaled(value, ctx), ctx);
-    return instance;
+    return FixedPrecision.fromRawWithContext(
+      atan2Value(
+        FixedPrecision.toScaled(y, ctx),
+        FixedPrecision.toScaled(x, ctx),
+        ctx,
+      ),
+      ctx,
+    );
+  }
+
+  public static acot(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, acotValue);
+  }
+
+  public static asec(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, asecValue);
+  }
+
+  public static acsc(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, acscValue);
+  }
+
+  public static sinh(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, sinhValue);
+  }
+
+  public static cosh(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, coshValue);
+  }
+
+  public static tanh(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, tanhValue);
+  }
+
+  public static sech(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, sechValue);
+  }
+
+  public static csch(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, cschValue);
+  }
+
+  public static coth(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, cothValue);
+  }
+
+  public static asinh(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, asinhValue);
+  }
+
+  public static acosh(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, acoshValue);
+  }
+
+  public static atanh(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, atanhValue);
+  }
+
+  public static asech(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, asechValue);
+  }
+
+  public static acsch(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, acschValue);
+  }
+
+  public static acoth(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, acothValue);
   }
 
   public static phi(): FixedPrecision {
@@ -431,6 +567,95 @@ export default class FixedPrecision {
 
   public tan(): FixedPrecision {
     return this.fromRaw(tanValue(this.value, this.ctx));
+  }
+
+  public sec(): FixedPrecision {
+    return this.fromRaw(secValue(this.value, this.ctx));
+  }
+
+  public csc(): FixedPrecision {
+    return this.fromRaw(cscValue(this.value, this.ctx));
+  }
+
+  public cot(): FixedPrecision {
+    return this.fromRaw(cotValue(this.value, this.ctx));
+  }
+
+  public asin(): FixedPrecision {
+    return this.fromRaw(asinValue(this.value, this.ctx));
+  }
+
+  public acos(): FixedPrecision {
+    return this.fromRaw(acosValue(this.value, this.ctx));
+  }
+
+  public atan(): FixedPrecision {
+    return this.fromRaw(atanValue(this.value, this.ctx));
+  }
+
+  public atan2(x: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(x);
+    return this.fromRaw(atan2Value(this.value, o.value, this.ctx));
+  }
+
+  public acot(): FixedPrecision {
+    return this.fromRaw(acotValue(this.value, this.ctx));
+  }
+
+  public asec(): FixedPrecision {
+    return this.fromRaw(asecValue(this.value, this.ctx));
+  }
+
+  public acsc(): FixedPrecision {
+    return this.fromRaw(acscValue(this.value, this.ctx));
+  }
+
+  public sinh(): FixedPrecision {
+    return this.fromRaw(sinhValue(this.value, this.ctx));
+  }
+
+  public cosh(): FixedPrecision {
+    return this.fromRaw(coshValue(this.value, this.ctx));
+  }
+
+  public tanh(): FixedPrecision {
+    return this.fromRaw(tanhValue(this.value, this.ctx));
+  }
+
+  public sech(): FixedPrecision {
+    return this.fromRaw(sechValue(this.value, this.ctx));
+  }
+
+  public csch(): FixedPrecision {
+    return this.fromRaw(cschValue(this.value, this.ctx));
+  }
+
+  public coth(): FixedPrecision {
+    return this.fromRaw(cothValue(this.value, this.ctx));
+  }
+
+  public asinh(): FixedPrecision {
+    return this.fromRaw(asinhValue(this.value, this.ctx));
+  }
+
+  public acosh(): FixedPrecision {
+    return this.fromRaw(acoshValue(this.value, this.ctx));
+  }
+
+  public atanh(): FixedPrecision {
+    return this.fromRaw(atanhValue(this.value, this.ctx));
+  }
+
+  public asech(): FixedPrecision {
+    return this.fromRaw(asechValue(this.value, this.ctx));
+  }
+
+  public acsch(): FixedPrecision {
+    return this.fromRaw(acschValue(this.value, this.ctx));
+  }
+
+  public acoth(): FixedPrecision {
+    return this.fromRaw(acothValue(this.value, this.ctx));
   }
 
   public num(): FixedPrecision {
