@@ -265,6 +265,51 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Inspection methods", () => {
+    test("isInteger() checks whether there is a fractional remainder", () => {
+      expect(new FixedPrecision("10.00000000").isInteger()).toBe(true);
+      expect(new FixedPrecision("10.00000001").isInteger()).toBe(false);
+    });
+
+    test("places() and decimalPlaces() return the instance scale", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      const value = FP4("1.23");
+
+      expect(value.places()).toBe(4);
+      expect(value.decimalPlaces()).toBe(4);
+    });
+
+    test("precision() returns significant digits", () => {
+      expect(new FixedPrecision("123.450000").precision()).toBe(5);
+      expect(new FixedPrecision("0.00123000").precision()).toBe(3);
+      expect(new FixedPrecision("1000").precision()).toBe(1);
+      expect(new FixedPrecision("0").precision()).toBe(1);
+    });
+
+    test("precision(true) includes integer trailing zeros", () => {
+      const value = new FixedPrecision("1000");
+
+      expect(value.precision(true)).toBe(4);
+      expect(value.sd(true)).toBe(4);
+    });
+
+    test("FixedPrecision.isFixedPrecision() identifies instances", () => {
+      const value = new FixedPrecision("1");
+
+      expect(FixedPrecision.isFixedPrecision(value)).toBe(true);
+      expect(FixedPrecision.isFixedPrecision("1")).toBe(false);
+    });
+
+    test("FixedPrecision.sign() returns numeric signs", () => {
+      expect(FixedPrecision.sign(new FixedPrecision("2"))).toBe(1);
+      expect(FixedPrecision.sign("-2")).toBe(-1);
+      expect(FixedPrecision.sign("0")).toBe(0);
+      expect(Object.is(FixedPrecision.sign(-0), -0)).toBe(true);
+      expect(Object.is(FixedPrecision.sign("-0.0"), -0)).toBe(true);
+      expect(Number.isNaN(FixedPrecision.sign(NaN))).toBe(true);
+    });
+  });
+
   describe("neg() method", () => {
     test("neg() negates positive number", () => {
       const a = new FixedPrecision("42.00000000");

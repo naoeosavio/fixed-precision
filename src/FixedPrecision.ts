@@ -42,7 +42,10 @@ import {
   sqrt2Number,
 } from "./functions/numeric/constants";
 import { fromNumberWithCtx, toNumberWithCtx } from "./functions/numeric/number";
-import { precisionValue } from "./functions/numeric/precision";
+import {
+  precisionValue,
+  significantDigitsValue,
+} from "./functions/numeric/precision";
 import {
   roundValue,
   scaleValue,
@@ -173,6 +176,26 @@ export default class FixedPrecision {
     return (val: FixedPrecisionValue) => new FixedPrecision(val, ctx);
   }
 
+  public static isFixedPrecision(value: unknown): value is FixedPrecision {
+    return value instanceof FixedPrecision;
+  }
+
+  public static sign(value: FixedPrecisionValue): number {
+    if (value instanceof FixedPrecision) {
+      return FixedPrecision.signRaw(value.value);
+    }
+
+    if (typeof value === "bigint") {
+      return FixedPrecision.signRaw(value);
+    }
+
+    if (typeof value === "number") {
+      return FixedPrecision.signNumber(value);
+    }
+
+    return FixedPrecision.signString(value);
+  }
+
   protected fromRaw(rawValue: bigint): FixedPrecision {
     const instance = new FixedPrecision(0n, this.ctx);
     instance.value = rawValue;
@@ -197,6 +220,45 @@ export default class FixedPrecision {
       operation(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
     );
+  }
+
+  private static signRaw(value: bigint): -1 | 0 | 1 {
+    if (value > 0n) {
+      return 1;
+    }
+
+    if (value < 0n) {
+      return -1;
+    }
+
+    return 0;
+  }
+
+  private static signNumber(value: number): number {
+    if (Number.isNaN(value)) {
+      return NaN;
+    }
+
+    return value === 0 ? value : value < 0 ? -1 : 1;
+  }
+
+  private static signString(value: string): number {
+    const numericValue = Number(value);
+    if (Number.isNaN(numericValue)) {
+      return NaN;
+    }
+
+    if (numericValue === 0) {
+      return value.trim().startsWith("-") ? -0 : 0;
+    }
+
+    try {
+      return FixedPrecision.signRaw(
+        FixedPrecision.toScaled(value, FixedPrecision.defaultContext),
+      );
+    } catch {
+      return numericValue < 0 ? -1 : 1;
+    }
   }
 
   private assertSameConfig(other: FixedPrecision) {
@@ -311,6 +373,26 @@ export default class FixedPrecision {
 
   public isNegative(): boolean {
     return isNegativeValue(this.value);
+  }
+
+  public isInteger(): boolean {
+    return this.value % this.ctx.SCALE === 0n;
+  }
+
+  public places(): number {
+    return this.ctx.places;
+  }
+
+  public decimalPlaces(): number {
+    return this.places();
+  }
+
+  public precision(includeZeros = false): number {
+    return significantDigitsValue(this.value, this.ctx, includeZeros);
+  }
+
+  public sd(includeZeros = false): number {
+    return this.precision(includeZeros);
   }
 
   public add(other: FixedPrecisionValue): FixedPrecision {
