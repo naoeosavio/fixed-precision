@@ -6,8 +6,8 @@ import {
   multiply,
   negate,
   subtract,
-} from "./functions/arithmetic/operations";
-import { power } from "./functions/arithmetic/power";
+} from "./arithmetic/operations";
+import { power } from "./arithmetic/power";
 import {
   bitAnd,
   bitNot,
@@ -15,54 +15,54 @@ import {
   bitXor,
   leftShift,
   rightArithShift,
-} from "./functions/bitwise";
+} from "./bitwise";
 import {
   combinationsValue,
   factorialValue,
   permutationsValue,
-} from "./functions/combinatorics";
-import { collectValues } from "./functions/construction/values";
+} from "./combinatorics";
+import { collectValues } from "./construction/values";
 import {
   configureContext,
   makeContext,
   makeFactoryContext,
-} from "./functions/core/context";
+} from "./core/context";
 import {
   getNumeratorAndDenominator,
   limitDenominator,
-} from "./functions/fraction";
-import { cubeRoot, squareRoot } from "./functions/geometry/sqrt";
+} from "./fraction";
+import { cubeRoot, squareRoot } from "./geometry/sqrt";
 import {
   isNegativeValue,
   isPositiveValue,
   isZeroValue,
-} from "./functions/logical/sign";
-import { crossProduct, dotProduct } from "./functions/matrix";
+} from "./logical/sign";
+import { crossProduct, dotProduct } from "./matrix";
 import {
   eNumber,
   phiNumber,
   piNumber,
   sqrt2Number,
-} from "./functions/numeric/constants";
-import { fromNumberWithCtx, toNumberWithCtx } from "./functions/numeric/number";
+} from "./numeric/constants";
+import { fromNumberWithCtx, toNumberWithCtx } from "./numeric/number";
 import {
   precisionValue,
   significantDigitsValue,
-} from "./functions/numeric/precision";
+} from "./numeric/precision";
 import {
   roundToScaleValue,
   roundValue,
   scaleValue,
   shiftedByValue,
-} from "./functions/numeric/rounding";
+} from "./numeric/rounding";
 import {
   expValue,
   log2Value,
   log10Value,
   logValue,
   naturalLogValue,
-} from "./functions/numeric/transcendental";
-import { randomDecimalString } from "./functions/probability/random";
+} from "./numeric/transcendental";
+import { randomDecimalString } from "./probability/random";
 import {
   compareValues,
   equalsValue,
@@ -70,18 +70,18 @@ import {
   greaterThanValue,
   lessThanOrEqualValue,
   lessThanValue,
-} from "./functions/relational/compare";
+} from "./relational/compare";
 import {
   selectMax,
   selectMin,
   sumRawValues,
-} from "./functions/statistics/aggregate";
+} from "./statistics/aggregate";
 import {
   toBaseWithCtx,
   toFixedWithCtx,
   toStringWithCtx,
-} from "./functions/string/format";
-import { fromStringWithCtx } from "./functions/string/parse";
+} from "./string/format";
+import { fromStringWithCtx } from "./string/parse";
 import {
   acoshValue,
   acosValue,
@@ -108,7 +108,7 @@ import {
   sinValue,
   tanhValue,
   tanValue,
-} from "./functions/trigonometry";
+} from "./trigonometry";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;

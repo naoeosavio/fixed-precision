@@ -1,4 +1,4 @@
-import type { FPContext } from "../../FixedPrecision";
+import type { FPContext } from "../FixedPrecision";
 
 const GUARD_SCALE = 1000n;
 const MAX_SERIES_ITERATIONS = 160n;

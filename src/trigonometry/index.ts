@@ -1,4 +1,4 @@
-import type { FPContext } from "../../FixedPrecision";
+import type { FPContext } from "../FixedPrecision";
 import { squareRoot } from "../geometry/sqrt";
 import { expValue, naturalLogValue } from "../numeric/transcendental";
 

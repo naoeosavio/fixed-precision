@@ -1,4 +1,4 @@
-import type { Comparison } from "../../FixedPrecision";
+import type { Comparison } from "../FixedPrecision";
 
 export function compareValues(left: bigint, right: bigint): Comparison {
   if (left < right) return -1;

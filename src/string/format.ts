@@ -1,4 +1,4 @@
-import type { FPContext, RoundingMode } from "../../FixedPrecision";
+import type { FPContext, RoundingMode } from "../FixedPrecision";
 import { roundToScaleValue } from "../numeric/rounding";
 import { powerOfTen } from "../utils";
 

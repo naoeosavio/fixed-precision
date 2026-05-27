@@ -1,4 +1,4 @@
-import type { FixedPrecisionValue } from "../../FixedPrecision";
+import type { FixedPrecisionValue } from "../FixedPrecision";
 
 export function collectValues(
   val: FixedPrecisionValue | FixedPrecisionValue[],

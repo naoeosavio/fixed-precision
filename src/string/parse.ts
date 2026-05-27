@@ -1,4 +1,4 @@
-import type { FPContext } from "../../FixedPrecision";
+import type { FPContext } from "../FixedPrecision";
 import { powerOfTen } from "../utils";
 
 export function fromStringWithCtx(str: string, ctx: FPContext): bigint {

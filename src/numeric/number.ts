@@ -1,4 +1,4 @@
-import type { FPContext } from "../../FixedPrecision";
+import type { FPContext } from "../FixedPrecision";
 import { toStringWithCtx } from "../string/format";
 
 const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
