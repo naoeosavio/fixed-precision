@@ -47,6 +47,7 @@ import {
   significantDigitsValue,
 } from "./functions/numeric/precision";
 import {
+  roundToScaleValue,
   roundValue,
   scaleValue,
   shiftedByValue,
@@ -438,6 +439,56 @@ export default class FixedPrecision {
 
   public leftover(other: FixedPrecisionValue): FixedPrecision {
     return this.fromRaw(modulo(this.value, this.toScaledValue(other)));
+  }
+
+  public divToInt(other: FixedPrecisionValue): FixedPrecision {
+    const o = this.coerce(other);
+    return this.fromRaw((this.value / o.value) * this.ctx.SCALE);
+  }
+
+  public dividedToIntegerBy(other: FixedPrecisionValue): FixedPrecision {
+    return this.divToInt(other);
+  }
+
+  public clamp(
+    min: FixedPrecisionValue,
+    max: FixedPrecisionValue,
+  ): FixedPrecision {
+    const lower = this.coerce(min);
+    const upper = this.coerce(max);
+
+    if (greaterThanValue(lower.value, upper.value)) {
+      throw new Error("min must be less than or equal to max");
+    }
+
+    if (lessThanValue(this.value, lower.value)) {
+      return this.fromRaw(lower.value);
+    }
+
+    if (greaterThanValue(this.value, upper.value)) {
+      return this.fromRaw(upper.value);
+    }
+
+    return this.fromRaw(this.value);
+  }
+
+  public clampedTo(
+    min: FixedPrecisionValue,
+    max: FixedPrecisionValue,
+  ): FixedPrecision {
+    return this.clamp(min, max);
+  }
+
+  public toNearest(
+    increment: FixedPrecisionValue,
+    rm: RoundingMode = this.ctx.roundingMode,
+  ): FixedPrecision {
+    const step = absolute(this.coerce(increment).value);
+    if (step === 0n) {
+      throw new Error("Increment must be non-zero");
+    }
+
+    return this.fromRaw(roundToScaleValue(this.value, step, rm) * step);
   }
 
   public bitAnd(other: FixedPrecisionValue): FixedPrecision {
@@ -900,6 +951,25 @@ export default class FixedPrecision {
     const instance = new FixedPrecision(0n, first.ctx);
     instance.value = total;
     return instance;
+  }
+
+  public static hypot(
+    val?: FixedPrecisionValue | FixedPrecisionValue[],
+    ...vals: FixedPrecisionValue[]
+  ): FixedPrecision {
+    const ctx = FixedPrecision.defaultContext;
+    if (val === undefined) {
+      return new FixedPrecision(0n, ctx);
+    }
+
+    const values = collectValues(val, vals);
+    let total = 0n;
+    for (const value of values) {
+      const rawValue = FixedPrecision.normalized(value).value;
+      total += (rawValue * rawValue) / ctx.SCALE;
+    }
+
+    return FixedPrecision.fromRawWithContext(squareRoot(total, ctx.SCALE), ctx);
   }
 
   public static factorial(n: number | FixedPrecision): FixedPrecision {

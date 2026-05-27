@@ -185,6 +185,59 @@ describe("FixedPrecision", () => {
       const one = new FixedPrecision(1);
       expect(a.product(one).toString()).toBe("1050000000.00000000");
     });
+
+    test("divToInt() truncates division toward zero", () => {
+      expect(new FixedPrecision("7.5").divToInt(2).toString()).toBe(
+        "3.00000000",
+      );
+      expect(new FixedPrecision("-7.5").divToInt(2).toString()).toBe(
+        "-3.00000000",
+      );
+    });
+
+    test("dividedToIntegerBy() aliases divToInt()", () => {
+      const value = new FixedPrecision("7.5");
+      expect(value.dividedToIntegerBy(2).toString()).toBe(
+        value.divToInt(2).toString(),
+      );
+    });
+
+    test("clamp() limits values to the provided interval", () => {
+      expect(new FixedPrecision("5").clamp(0, 10).toString()).toBe(
+        "5.00000000",
+      );
+      expect(new FixedPrecision("-1").clamp(0, 10).toString()).toBe(
+        "0.00000000",
+      );
+      expect(new FixedPrecision("11").clamp(0, 10).toString()).toBe(
+        "10.00000000",
+      );
+    });
+
+    test("clampedTo() aliases clamp() and validates interval order", () => {
+      const value = new FixedPrecision("5");
+      expect(value.clampedTo(0, 10).toString()).toBe(
+        value.clamp(0, 10).toString(),
+      );
+      expect(() => value.clamp(10, 0)).toThrow(
+        "min must be less than or equal to max",
+      );
+    });
+
+    test("toNearest() rounds to the nearest multiple", () => {
+      expect(new FixedPrecision("5.5").toNearest(2).toString()).toBe(
+        "6.00000000",
+      );
+      expect(new FixedPrecision("5").toNearest(2, 1).toString()).toBe(
+        "4.00000000",
+      );
+      expect(new FixedPrecision("-5").toNearest(2).toString()).toBe(
+        "-6.00000000",
+      );
+      expect(() => new FixedPrecision("5").toNearest(0)).toThrow(
+        "Increment must be non-zero",
+      );
+    });
   });
 
   // ––– Comparison and Sign Functions –––
@@ -876,6 +929,27 @@ describe("FixedPrecision", () => {
     test("sum() returns zero for empty array", () => {
       const result = FixedPrecision.sum([]);
       expect(result.toNumber()).toBe(0);
+    });
+  });
+
+  describe("Static hypot()", () => {
+    test("hypot() returns sqrt(sum(v^2))", () => {
+      expect(FixedPrecision.hypot(3, 4).toString()).toBe("5.00000000");
+      expect(FixedPrecision.hypot("1", "2", "2").toString()).toBe(
+        "3.00000000",
+      );
+    });
+
+    test("hypot() accepts arrays and returns zero with no values", () => {
+      expect(FixedPrecision.hypot([6, 8]).toString()).toBe("10.00000000");
+      expect(FixedPrecision.hypot().toString()).toBe("0.00000000");
+    });
+
+    test("hypot() normalizes values to the default context", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      expect(FixedPrecision.hypot(FP4("3"), "4").toString()).toBe(
+        "5.00000000",
+      );
     });
   });
 
