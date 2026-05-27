@@ -28,7 +28,7 @@ import {
   makeFactoryContext,
 } from "./functions/core/context";
 import { getNumeratorAndDenominator } from "./functions/fraction";
-import { squareRoot } from "./functions/geometry/sqrt";
+import { cubeRoot, squareRoot } from "./functions/geometry/sqrt";
 import {
   isNegativeValue,
   isPositiveValue,
@@ -399,6 +399,14 @@ export default class FixedPrecision {
     return this.fromRaw(power(this.value, exp, this.ctx.SCALE));
   }
 
+  public square(): FixedPrecision {
+    return this.fromRaw(power(this.value, 2, this.ctx.SCALE));
+  }
+
+  public cube(): FixedPrecision {
+    return this.fromRaw(power(this.value, 3, this.ctx.SCALE));
+  }
+
   public static PI(): FixedPrecision {
     return new FixedPrecision(piNumber());
   }
@@ -412,6 +420,34 @@ export default class FixedPrecision {
     const instance = new FixedPrecision(0n, ctx);
     instance.value = expValue(FixedPrecision.toScaled(value, ctx), ctx);
     return instance;
+  }
+
+  public static square(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, (rawValue, ctx) =>
+      power(rawValue, 2, ctx.SCALE),
+    );
+  }
+
+  public static cube(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, (rawValue, ctx) =>
+      power(rawValue, 3, ctx.SCALE),
+    );
+  }
+
+  public static sqrt(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, (rawValue, ctx) =>
+      squareRoot(rawValue, ctx.SCALE),
+    );
+  }
+
+  public static cbrt(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.fromDefaultContextValue(value, (rawValue, ctx) =>
+      cubeRoot(rawValue, ctx.SCALE),
+    );
+  }
+
+  public static cubeRoot(value: FixedPrecisionValue): FixedPrecision {
+    return FixedPrecision.cbrt(value);
   }
 
   public static sin(value: FixedPrecisionValue): FixedPrecision {
@@ -535,6 +571,14 @@ export default class FixedPrecision {
 
   public sqrt(): FixedPrecision {
     return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
+  }
+
+  public cbrt(): FixedPrecision {
+    return this.fromRaw(cubeRoot(this.value, this.ctx.SCALE));
+  }
+
+  public cubeRoot(): FixedPrecision {
+    return this.cbrt();
   }
 
   public ln(): FixedPrecision {

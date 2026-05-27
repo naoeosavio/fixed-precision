@@ -293,6 +293,23 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("square() and cube() methods", () => {
+    test("square() returns the value raised to the second power", () => {
+      const a = new FixedPrecision("3.50000000");
+      expect(a.square().toString()).toBe("12.25000000");
+    });
+
+    test("cube() returns the value raised to the third power", () => {
+      const a = new FixedPrecision("2.50000000");
+      expect(a.cube().toString()).toBe("15.62500000");
+    });
+
+    test("static square() and cube() use the default context", () => {
+      expect(FixedPrecision.square("3.5").toString()).toBe("12.25000000");
+      expect(FixedPrecision.cube("2.5").toString()).toBe("15.62500000");
+    });
+  });
+
   describe("sqrt() method", () => {
     test("sqrt() of a perfect square", () => {
       const a = new FixedPrecision("9.00000000");
@@ -310,6 +327,38 @@ describe("FixedPrecision", () => {
       const a = new FixedPrecision(0);
       const result = a.sqrt();
       expect(result.toString()).toBe("0.00000000");
+    });
+
+    test("FixedPrecision.sqrt() returns square root using default context", () => {
+      expect(FixedPrecision.sqrt("9").toString()).toBe("3.00000000");
+      expect(FixedPrecision.sqrt("2").toNumber()).toBeCloseTo(Math.sqrt(2), 7);
+    });
+  });
+
+  describe("cbrt() method", () => {
+    test("cbrt() of a perfect cube", () => {
+      const a = new FixedPrecision("27.00000000");
+      expect(a.cbrt().toFixed(8)).toBe("3.00000000");
+    });
+
+    test("cbrt() of a non-perfect cube approximates correctly", () => {
+      const a = new FixedPrecision("2.00000000");
+      expect(a.cbrt().toNumber()).toBeCloseTo(Math.cbrt(2), 7);
+    });
+
+    test("cbrt() handles negative values", () => {
+      const a = new FixedPrecision("-8.00000000");
+      expect(a.cbrt().toString()).toBe("-2.00000000");
+    });
+
+    test("cubeRoot() aliases cbrt()", () => {
+      const a = new FixedPrecision("125.00000000");
+      expect(a.cubeRoot().toString()).toBe(a.cbrt().toString());
+    });
+
+    test("FixedPrecision.cbrt() and cubeRoot() use default context", () => {
+      expect(FixedPrecision.cbrt("64").toString()).toBe("4.00000000");
+      expect(FixedPrecision.cubeRoot("64").toString()).toBe("4.00000000");
     });
   });
 
