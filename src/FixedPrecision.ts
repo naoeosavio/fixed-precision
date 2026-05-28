@@ -41,7 +41,6 @@ import {
   logValue,
   naturalLogValue,
 } from "./numeric/transcendental";
-import { randomDecimalString } from "./probability/random";
 import {
   compareValues,
   equalsValue,
@@ -1042,7 +1041,17 @@ export default class FixedPrecision {
 
   public static random(decimalPlaces?: number): FixedPrecision {
     const dec = decimalPlaces ?? FixedPrecision.defaultContext.places;
-    return new FixedPrecision(randomDecimalString(dec));
+    const rand = BigInt(Math.floor(Math.random() * 10 ** dec));
+
+    if (decimalPlaces === undefined) {
+      return new FixedPrecision(rand);
+    }
+
+    const defaultPlaces = FixedPrecision.defaultContext.places;
+    const diff = defaultPlaces - dec;
+    return new FixedPrecision(
+      diff >= 0 ? rand * 10n ** BigInt(diff) : rand / 10n ** BigInt(-diff),
+    );
   }
 
   public static dot(

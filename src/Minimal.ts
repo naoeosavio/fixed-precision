@@ -99,12 +99,17 @@ export default class FixedPrecision {
   }
 
   public static random(decimalPlaces?: number): FixedPrecision {
-    const places = decimalPlaces ?? FixedPrecision.defaultContext.places;
-    const max = 10 ** places;
+    const dec = decimalPlaces ?? FixedPrecision.defaultContext.places;
+    const rand = BigInt(Math.floor(Math.random() * 10 ** dec));
+
+    if (decimalPlaces === undefined) {
+      return new FixedPrecision(rand);
+    }
+
+    const defaultPlaces = FixedPrecision.defaultContext.places;
+    const diff = defaultPlaces - dec;
     return new FixedPrecision(
-      `0.${Math.floor(Math.random() * max)
-        .toString()
-        .padStart(places, "0")}`,
+      diff >= 0 ? rand * 10n ** BigInt(diff) : rand / 10n ** BigInt(-diff),
     );
   }
 
