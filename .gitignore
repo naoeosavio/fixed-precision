@@ -144,6 +144,7 @@ tsup.config.ts
 .prettier*
 .npm*
 .biome*
+.vscode
 biome.*
 
 # C implementation build files

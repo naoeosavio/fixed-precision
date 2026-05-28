@@ -279,9 +279,18 @@ export default class FixedPrecision {
   }
 
   private static normalized(value: FixedPrecisionValue): FixedPrecision {
-    return value instanceof FixedPrecision
-      ? new FixedPrecision(value.toString())
-      : new FixedPrecision(value);
+    if (value instanceof FixedPrecision) {
+      const ctx = FixedPrecision.defaultContext;
+      if (
+        value.ctx.places === ctx.places &&
+        value.ctx.roundingMode === ctx.roundingMode
+      ) {
+        return value;
+      }
+      return value.scale(ctx.places, ctx.roundingMode);
+    } else {
+      return new FixedPrecision(value);
+    }
   }
 
   public static min(
@@ -583,13 +592,13 @@ export default class FixedPrecision {
       [numerator, denominator] = limitFraction(
         numerator,
         denominator,
-        this.toIntegerValue(maxDen),
+        FixedPrecision.normalized(maxDen).scale(0, 1).value,
       );
     }
 
     return [
-      new FixedPrecision(numerator * this.ctx.SCALE, this.ctx),
-      new FixedPrecision(denominator * this.ctx.SCALE, this.ctx),
+      this.fromRaw(numerator * this.ctx.SCALE),
+      this.fromRaw(denominator * this.ctx.SCALE),
     ];
   }
 
