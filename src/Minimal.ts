@@ -37,54 +37,6 @@ function assertRoundingMode(rm: number): asserts rm is RoundingMode {
   }
 }
 
-function gcd(left: bigint, right: bigint): bigint {
-  let a = left < 0n ? -left : left;
-  let b = right < 0n ? -right : right;
-  while (b > 0n) {
-    const next = a % b;
-    a = b;
-    b = next;
-  }
-  return a;
-}
-
-function limitFraction(
-  numerator: bigint,
-  denominator: bigint,
-  maxDenominator: bigint,
-): [bigint, bigint] {
-  if (maxDenominator < 1n) {
-    throw new Error("maxDen must be a positive integer");
-  }
-  if (denominator <= maxDenominator) return [numerator, denominator];
-
-  const sign = numerator < 0n ? -1n : 1n;
-  let n = numerator < 0n ? -numerator : numerator;
-  let d = denominator;
-  let prevN = 0n;
-  let curN = 1n;
-  let prevD = 1n;
-  let curD = 0n;
-
-  while (d !== 0n) {
-    const q = n / d;
-    const nextD = prevD + q * curD;
-    if (nextD > maxDenominator) break;
-
-    const nextN = prevN + q * curN;
-    prevN = curN;
-    curN = nextN;
-    prevD = curD;
-    curD = nextD;
-
-    const remainder = n - q * d;
-    n = d;
-    d = remainder;
-  }
-
-  return [sign * curN, curD];
-}
-
 export default class FixedPrecision {
   private value: bigint;
   private readonly ctx: FPContext;
@@ -332,10 +284,6 @@ export default class FixedPrecision {
     return this.mul(this);
   }
 
-  public cube(): FixedPrecision {
-    return this.mul(this).mul(this);
-  }
-
   public sqrt(): FixedPrecision {
     return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
   }
@@ -420,27 +368,6 @@ export default class FixedPrecision {
     return `${sign}${head.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}${
       fraction === undefined ? "" : `.${fraction}`
     }`;
-  }
-
-  public toFraction(
-    maxDen?: FixedPrecisionValue,
-  ): [FixedPrecision, FixedPrecision] {
-    const common = gcd(this.value, this.ctx.SCALE);
-    let numerator = this.value / common;
-    let denominator = this.ctx.SCALE / common;
-
-    if (maxDen !== undefined) {
-      [numerator, denominator] = limitFraction(
-        numerator,
-        denominator,
-        FixedPrecision.normalized(maxDen).scale(0, 1).value,
-      );
-    }
-
-    return [
-      this.fromRaw(numerator * this.ctx.SCALE),
-      this.fromRaw(denominator * this.ctx.SCALE),
-    ];
   }
 
   public toJSON(): string {
