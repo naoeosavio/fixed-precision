@@ -51,11 +51,7 @@ import {
   lessThanValue,
 } from "./relational/compare";
 import { selectMax, selectMin, sumRawValues } from "./statistics/aggregate";
-import {
-  toBaseWithCtx,
-  toFixedWithCtx,
-  toStringWithCtx,
-} from "./string/format";
+import { toBaseWithCtx, toStringWithCtx } from "./string/format";
 import { fromStringWithCtx } from "./string/parse";
 import {
   acoshValue,
@@ -1209,7 +1205,7 @@ export default class FixedPrecision {
   }
 
   public toFixed(places = 0, rm?: RoundingMode): string {
-    return toFixedWithCtx(this.value, this.ctx, places, rm);
+    return this.scale(places, rm).toString();
   }
 
   public toBinary(sd?: number, rm?: RoundingMode): string {

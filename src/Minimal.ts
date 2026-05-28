@@ -546,21 +546,7 @@ export default class FixedPrecision {
   }
 
   public toFixed(places = 0, rm: RoundingMode = this.ctx.roundingMode): string {
-    if (!Number.isInteger(places) || places < 0 || places > this.ctx.places) {
-      throw new Error(`places must be between 0 and ${this.ctx.places}`);
-    }
-
-    const quotient = roundQuotient(
-      this.value,
-      powerOfTen(this.ctx.places - places),
-      rm,
-    );
-    const divisor = powerOfTen(places);
-    const sign = quotient < 0n ? "-" : "";
-    const absValue = quotient < 0n ? -quotient : quotient;
-    const integer = absValue / divisor;
-    const fraction = (absValue % divisor).toString().padStart(places, "0");
-    return places > 0 ? `${sign}${integer}.${fraction}` : `${sign}${integer}`;
+    return this.scale(places, rm).toString();
   }
 
   public toExponential(dp = this.ctx.places, rm?: RoundingMode): string {

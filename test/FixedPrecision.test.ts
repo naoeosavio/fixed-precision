@@ -1100,6 +1100,12 @@ describe("FixedPrecision", () => {
         const a = new FixedPrecision("123.456789");
         expect(a.toFixed(3)).toBe("123.457");
       });
+      test("toFixed() matches scale() output", () => {
+        const value = new FixedPrecision(499.99999999999994);
+
+        expect(value.toFixed(4)).toBe("500.0000");
+        expect(value.toFixed(4)).toBe(value.scale(4).toString());
+      });
     });
 
     describe("base conversion methods", () => {
