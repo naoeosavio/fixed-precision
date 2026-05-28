@@ -14,7 +14,7 @@ export interface FixedPrecisionConfig {
   roundingMode?: RoundingMode;
 }
 
-const pow10 = (n: number): bigint => 10n ** BigInt(n);
+const powerOfTen = (n: number): bigint => 10n ** BigInt(n);
 
 function assertPlaces(places: number, message: string): void {
   if (!Number.isInteger(places) || places < 0 || places > 20) {
@@ -34,20 +34,34 @@ function context(places: number, roundingMode: RoundingMode): FPContext {
   return {
     places,
     roundingMode,
-    SCALE: pow10(places),
+    SCALE: powerOfTen(places),
     SCALENUMBER: 10 ** places,
   };
 }
 
-function parseString(value: string, ctx: FPContext): bigint {
-  let text = value.trim();
-  if (/[eE]/.test(text)) {
-    const num = Number(text);
-    if (!Number.isFinite(num)) {
-      throw new Error("Invalid number: value must be a finite number.");
-    }
-    return BigInt(Math.trunc(num * ctx.SCALENUMBER));
+function fromNumberWithCtx(value: number, ctx: FPContext): bigint {
+  if (Number.isNaN(value) || !Number.isFinite(value)) {
+    throw new Error("Invalid number: value must be a finite number.");
   }
+
+  const scaled = value * ctx.SCALENUMBER;
+  if (Math.abs(scaled) <= Number.MAX_SAFE_INTEGER) {
+    return BigInt(Math.trunc(scaled));
+  }
+
+  if (Number.isInteger(value)) return BigInt(value) * ctx.SCALE;
+
+  const integer = Math.trunc(value);
+  const fraction = BigInt(
+    Math.trunc(Math.abs(value - integer) * ctx.SCALENUMBER),
+  );
+  const scaledInteger = BigInt(integer) * ctx.SCALE;
+  return value < 0 ? scaledInteger - fraction : scaledInteger + fraction;
+}
+
+function fromStringWithCtx(value: string, ctx: FPContext): bigint {
+  let text = value.trim();
+  if (/[eE]/.test(text)) return fromNumberWithCtx(Number(text), ctx);
 
   let sign = 1n;
   if (text[0] === "-" || text[0] === "+") {
@@ -56,9 +70,7 @@ function parseString(value: string, ctx: FPContext): bigint {
   }
 
   const parts = text.split(".");
-  if (parts.length > 2) {
-    throw new Error(`Invalid value type: string`);
-  }
+  if (parts.length > 2) throw new Error("Invalid value type: string");
 
   const integer = BigInt(parts[0] || "0") * ctx.SCALE;
   const fraction = BigInt(
@@ -219,20 +231,18 @@ export default class FixedPrecision {
     this.value = FixedPrecision.toScaled(value, this.ctx);
   }
 
-  protected fromRaw(value: bigint): FixedPrecision {
-    return new FixedPrecision(value, this.ctx);
+  protected fromRaw(rawValue: bigint): FixedPrecision {
+    // return new FixedPrecision(rawValue, this.ctx);
+    const instance = new FixedPrecision(0n, this.ctx);
+    instance.value = rawValue;
+    return instance;
   }
 
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
     if (value instanceof FixedPrecision) return value.value;
     if (typeof value === "bigint") return value;
-    if (typeof value === "number") {
-      if (!Number.isFinite(value)) {
-        throw new Error("Invalid number: value must be a finite number.");
-      }
-      return parseString(value.toString(), ctx);
-    }
-    if (typeof value === "string") return parseString(value, ctx);
+    if (typeof value === "number") return fromNumberWithCtx(value, ctx);
+    if (typeof value === "string") return fromStringWithCtx(value, ctx);
     throw new Error(`Invalid value type: ${typeof value}`);
   }
 
@@ -474,7 +484,7 @@ export default class FixedPrecision {
         `Decimal places (dp) must be between 0 and ${this.ctx.places}`,
       );
     }
-    const factor = pow10(this.ctx.places - dp);
+    const factor = powerOfTen(this.ctx.places - dp);
     return this.fromRaw(roundQuotient(this.value, factor, rm) * factor);
   }
 
@@ -485,8 +495,8 @@ export default class FixedPrecision {
     assertPlaces(newScale, "newScale must be an integer between 0 and 20");
     const nextValue =
       newScale > this.ctx.places
-        ? this.value * pow10(newScale - this.ctx.places)
-        : roundQuotient(this.value, pow10(this.ctx.places - newScale), rm);
+        ? this.value * powerOfTen(newScale - this.ctx.places)
+        : roundQuotient(this.value, powerOfTen(this.ctx.places - newScale), rm);
     return new FixedPrecision(
       nextValue,
       context(newScale, this.ctx.roundingMode),
@@ -506,7 +516,7 @@ export default class FixedPrecision {
       (this.value < 0n ? -this.value : this.value).toString().length - sd;
     if (exponent <= 0) return this.fromRaw(this.value);
 
-    const factor = pow10(exponent);
+    const factor = powerOfTen(exponent);
     return this.fromRaw(roundQuotient(this.value, factor, rm) * factor);
   }
 
@@ -523,7 +533,7 @@ export default class FixedPrecision {
   }
 
   public shiftedBy(n: number): FixedPrecision {
-    const factor = pow10(Math.abs(n));
+    const factor = powerOfTen(Math.abs(n));
     return this.fromRaw(n >= 0 ? this.value * factor : this.value / factor);
   }
 
@@ -542,10 +552,10 @@ export default class FixedPrecision {
 
     const quotient = roundQuotient(
       this.value,
-      pow10(this.ctx.places - places),
+      powerOfTen(this.ctx.places - places),
       rm,
     );
-    const divisor = pow10(places);
+    const divisor = powerOfTen(places);
     const sign = quotient < 0n ? "-" : "";
     const absValue = quotient < 0n ? -quotient : quotient;
     const integer = absValue / divisor;
