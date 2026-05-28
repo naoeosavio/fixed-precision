@@ -483,22 +483,24 @@ describe("FixedPrecision", () => {
   });
 
   describe("sqrt() method", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+
     test("sqrt() of a perfect square", () => {
-      const a = new FixedPrecision("9.00000000");
+      const a = FP20("9.00000000");
       const result = a.sqrt();
       expect(result.toFixed(8)).toBe("3.00000000");
     });
 
-    test("sqrt() of a non-perfect square approximates correctly", () => {
-      const a = new FixedPrecision("2.00000000");
+    test("sqrt() of an irrational input approximates correctly", () => {
+      const a = FP20(Math.PI);
       const result = a.sqrt();
-      expect(Number(result.toFixed(8))).toBeCloseTo(1.41421356, 7);
+      expect(result.toNumber()).toBeCloseTo(Math.sqrt(Math.PI), 12);
     });
 
     test("sqrt() of zero returns zero", () => {
-      const a = new FixedPrecision(0);
+      const a = FP20(0);
       const result = a.sqrt();
-      expect(result.toString()).toBe("0.00000000");
+      expect(result.toString()).toBe("0.00000000000000000000");
     });
 
     test("FixedPrecision.sqrt() returns square root using default context", () => {
@@ -508,23 +510,25 @@ describe("FixedPrecision", () => {
   });
 
   describe("cbrt() method", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+
     test("cbrt() of a perfect cube", () => {
-      const a = new FixedPrecision("27.00000000");
+      const a = FP20("27.00000000");
       expect(a.cbrt().toFixed(8)).toBe("3.00000000");
     });
 
-    test("cbrt() of a non-perfect cube approximates correctly", () => {
-      const a = new FixedPrecision("2.00000000");
-      expect(a.cbrt().toNumber()).toBeCloseTo(Math.cbrt(2), 7);
+    test("cbrt() of an irrational input approximates correctly", () => {
+      const a = FP20(Math.E);
+      expect(a.cbrt().toNumber()).toBeCloseTo(Math.cbrt(Math.E), 12);
     });
 
     test("cbrt() handles negative values", () => {
-      const a = new FixedPrecision("-8.00000000");
-      expect(a.cbrt().toString()).toBe("-2.00000000");
+      const a = FP20("-8.00000000");
+      expect(a.cbrt().toString()).toBe("-2.00000000000000000000");
     });
 
     test("cubeRoot() aliases cbrt()", () => {
-      const a = new FixedPrecision("125.00000000");
+      const a = FP20("125.00000000");
       expect(a.cubeRoot().toString()).toBe(a.cbrt().toString());
     });
 

@@ -1,3 +1,13 @@
+import { power } from "./arithmetic/power";
+import { makeContext } from "./core/context";
+import { squareRoot } from "./geometry/sqrt";
+import { fromNumberWithCtx, toNumberWithCtx } from "./numeric/number";
+import { precisionValue } from "./numeric/precision";
+import { roundValue, scaleValue } from "./numeric/rounding";
+import { toStringWithCtx } from "./string/format";
+import { fromStringWithCtx } from "./string/parse";
+import { precisionPowerOfTen } from "./utils";
+
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
@@ -13,9 +23,6 @@ export interface FixedPrecisionConfig {
   places: number;
   roundingMode?: RoundingMode;
 }
-
-const powerOfTen = (n: number): bigint => 10n ** BigInt(n);
-
 function assertPlaces(places: number, message: string): void {
   if (!Number.isInteger(places) || places < 0 || places > 20) {
     throw new Error(message);
@@ -28,126 +35,6 @@ function assertRoundingMode(rm: number): asserts rm is RoundingMode {
       "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8",
     );
   }
-}
-
-function context(places: number, roundingMode: RoundingMode): FPContext {
-  return {
-    places,
-    roundingMode,
-    SCALE: powerOfTen(places),
-    SCALENUMBER: 10 ** places,
-  };
-}
-
-function fromNumberWithCtx(value: number, ctx: FPContext): bigint {
-  if (Number.isNaN(value) || !Number.isFinite(value)) {
-    throw new Error("Invalid number: value must be a finite number.");
-  }
-
-  const scaled = value * ctx.SCALENUMBER;
-  if (Math.abs(scaled) <= Number.MAX_SAFE_INTEGER) {
-    return BigInt(Math.trunc(scaled));
-  }
-
-  if (Number.isInteger(value)) return BigInt(value) * ctx.SCALE;
-
-  const integer = Math.trunc(value);
-  const fraction = BigInt(
-    Math.trunc(Math.abs(value - integer) * ctx.SCALENUMBER),
-  );
-  const scaledInteger = BigInt(integer) * ctx.SCALE;
-  return value < 0 ? scaledInteger - fraction : scaledInteger + fraction;
-}
-
-function fromStringWithCtx(value: string, ctx: FPContext): bigint {
-  let text = value.trim();
-  if (/[eE]/.test(text)) return fromNumberWithCtx(Number(text), ctx);
-
-  let sign = 1n;
-  if (text[0] === "-" || text[0] === "+") {
-    sign = text[0] === "-" ? -1n : 1n;
-    text = text.slice(1);
-  }
-
-  const parts = text.split(".");
-  if (parts.length > 2) throw new Error("Invalid value type: string");
-
-  const integer = BigInt(parts[0] || "0") * ctx.SCALE;
-  const fraction = BigInt(
-    ((parts[1] ?? "") + "0".repeat(ctx.places)).slice(0, ctx.places) || "0",
-  );
-  return sign * (integer + fraction);
-}
-
-function toStringValue(value: bigint, ctx: FPContext): string {
-  if (ctx.places === 0) return value.toString();
-
-  const sign = value < 0n ? "-" : "";
-  const text = (value < 0n ? -value : value)
-    .toString()
-    .padStart(ctx.places + 1, "0");
-  return `${sign}${text.slice(0, -ctx.places)}.${text.slice(-ctx.places)}`;
-}
-
-function roundQuotient(
-  value: bigint,
-  factor: bigint,
-  rm: RoundingMode,
-): bigint {
-  const quotient = value / factor;
-  const remainder = value - quotient * factor;
-  if (remainder === 0n || rm === 1) return quotient;
-
-  const positive = value > 0n;
-  if (rm === 0) return awayFromZero(quotient, positive);
-  if (rm === 2) return positive ? quotient + 1n : quotient;
-  if (rm === 3) return positive ? quotient : quotient - 1n;
-  if (rm === 4 || rm === 5 || rm === 6 || rm === 7 || rm === 8) {
-    return roundHalf(quotient, remainder, factor, positive, rm);
-  }
-  throw new Error(`Rounding mode ${rm} is not supported.`);
-}
-
-function awayFromZero(quotient: bigint, positive: boolean): bigint {
-  return positive ? quotient + 1n : quotient - 1n;
-}
-
-function roundHalf(
-  quotient: bigint,
-  remainder: bigint,
-  factor: bigint,
-  positive: boolean,
-  rm: RoundingMode,
-): bigint {
-  const twice = (remainder < 0n ? -remainder : remainder) * 2n;
-  if (rm === 6) return roundHalfEven(quotient, twice, factor, positive);
-  if (rm === 7) return positive && twice >= factor ? quotient + 1n : quotient;
-  if (rm === 8) return roundHalfFloor(quotient, twice, factor, positive);
-
-  const shouldRound = rm === 4 ? twice >= factor : twice > factor;
-  return shouldRound ? awayFromZero(quotient, positive) : quotient;
-}
-
-function roundHalfEven(
-  quotient: bigint,
-  twice: bigint,
-  factor: bigint,
-  positive: boolean,
-): bigint {
-  if (twice === factor) {
-    return quotient % 2n === 0n ? quotient : awayFromZero(quotient, positive);
-  }
-  return twice > factor ? awayFromZero(quotient, positive) : quotient;
-}
-
-function roundHalfFloor(
-  quotient: bigint,
-  twice: bigint,
-  factor: bigint,
-  positive: boolean,
-): bigint {
-  if (positive) return twice > factor ? quotient + 1n : quotient;
-  return twice >= factor ? quotient - 1n : quotient;
 }
 
 function gcd(left: bigint, right: bigint): bigint {
@@ -201,7 +88,7 @@ function limitFraction(
 export default class FixedPrecision {
   private value: bigint;
   private readonly ctx: FPContext;
-  private static defaultContext = context(8, 4);
+  private static defaultContext = makeContext(8, 4);
 
   public static configure(config: FixedPrecisionConfig): void {
     const places = config.places ?? FixedPrecision.defaultContext.places;
@@ -210,7 +97,7 @@ export default class FixedPrecision {
 
     assertPlaces(places, "Decimal places must be an integer between 0 and 20");
     assertRoundingMode(roundingMode);
-    FixedPrecision.defaultContext = context(places, roundingMode);
+    FixedPrecision.defaultContext = makeContext(places, roundingMode);
   }
 
   public static create(
@@ -222,7 +109,7 @@ export default class FixedPrecision {
     );
     const roundingMode = config.roundingMode ?? 4;
     assertRoundingMode(roundingMode);
-    const ctx = context(config.places, roundingMode);
+    const ctx = makeContext(config.places, roundingMode);
     return (value: FixedPrecisionValue) => new FixedPrecision(value, ctx);
   }
 
@@ -232,7 +119,6 @@ export default class FixedPrecision {
   }
 
   protected fromRaw(rawValue: bigint): FixedPrecision {
-    // return new FixedPrecision(rawValue, this.ctx);
     const instance = new FixedPrecision(0n, this.ctx);
     instance.value = rawValue;
     return instance;
@@ -258,14 +144,6 @@ export default class FixedPrecision {
       return value;
     }
     return new FixedPrecision(value, this.ctx);
-  }
-
-  private toIntegerValue(value: FixedPrecisionValue): bigint {
-    const normalized =
-      value instanceof FixedPrecision
-        ? new FixedPrecision(value.toString(), this.ctx)
-        : new FixedPrecision(value, this.ctx);
-    return normalized.trunc().value / this.ctx.SCALE;
   }
 
   public static random(decimalPlaces?: number): FixedPrecision {
@@ -447,24 +325,7 @@ export default class FixedPrecision {
   }
 
   public pow(exp: number): FixedPrecision {
-    if (!Number.isInteger(exp)) throw new Error("Exponent must be an integer");
-    if (exp === 0) return this.fromRaw(this.ctx.SCALE);
-    if (this.value === 0n) {
-      if (exp < 0) throw new Error("0 ** negative is undefined");
-      return this.fromRaw(0n);
-    }
-
-    let power = Math.abs(exp);
-    let base = this.value;
-    let result = this.ctx.SCALE;
-    while (power > 0) {
-      if (power & 1) result = (result * base) / this.ctx.SCALE;
-      base = (base * base) / this.ctx.SCALE;
-      power >>= 1;
-    }
-    return exp < 0
-      ? this.fromRaw((this.ctx.SCALE * this.ctx.SCALE) / result)
-      : this.fromRaw(result);
+    return this.fromRaw(power(this.value, exp, this.ctx.SCALE));
   }
 
   public square(): FixedPrecision {
@@ -476,57 +337,32 @@ export default class FixedPrecision {
   }
 
   public sqrt(): FixedPrecision {
-    if (this.value < 0n) throw new Error("Square root of negative number");
-    return new FixedPrecision(Math.sqrt(this.toNumber()), this.ctx);
-  }
-
-  public cqrt(): FixedPrecision {
-    return new FixedPrecision(Math.cbrt(this.toNumber()), this.ctx);
+    return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
   }
 
   public round(
     dp = this.ctx.places,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    if (!Number.isInteger(dp) || dp < 0 || dp > this.ctx.places) {
-      throw new Error(
-        `Decimal places (dp) must be between 0 and ${this.ctx.places}`,
-      );
-    }
-    const factor = powerOfTen(this.ctx.places - dp);
-    return this.fromRaw(roundQuotient(this.value, factor, rm) * factor);
+    return this.fromRaw(roundValue(this.value, dp, rm, this.ctx));
   }
 
   public scale(
     newScale: number,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    assertPlaces(newScale, "newScale must be an integer between 0 and 20");
-    const nextValue =
-      newScale > this.ctx.places
-        ? this.value * powerOfTen(newScale - this.ctx.places)
-        : roundQuotient(this.value, powerOfTen(this.ctx.places - newScale), rm);
-    return new FixedPrecision(
-      nextValue,
-      context(newScale, this.ctx.roundingMode),
-    );
+    const nextValue = scaleValue(this.value, newScale, rm, this.ctx);
+    const nextCtx = makeContext(newScale, this.ctx.roundingMode);
+    const instance = new FixedPrecision(0n, nextCtx);
+    instance.value = nextValue;
+    return instance;
   }
 
   public prec(
     sd: number,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    if (!Number.isInteger(sd) || sd < 1 || sd >= 1e6) {
-      throw new Error("Precision must be a positive integer");
-    }
-    if (this.value === 0n) return this.fromRaw(0n);
-
-    const exponent =
-      (this.value < 0n ? -this.value : this.value).toString().length - sd;
-    if (exponent <= 0) return this.fromRaw(this.value);
-
-    const factor = powerOfTen(exponent);
-    return this.fromRaw(roundQuotient(this.value, factor, rm) * factor);
+    return this.fromRaw(precisionValue(this.value, sd, rm, this.ctx));
   }
 
   public trunc(): FixedPrecision {
@@ -542,16 +378,21 @@ export default class FixedPrecision {
   }
 
   public shiftedBy(n: number): FixedPrecision {
-    const factor = powerOfTen(Math.abs(n));
+    const factor = precisionPowerOfTen(Math.abs(n));
     return this.fromRaw(n >= 0 ? this.value * factor : this.value / factor);
   }
 
-  public toNumber(): number {
-    return Number(this.value) / this.ctx.SCALENUMBER;
+  public toNumber(places?: number): number {
+    if (places === undefined) {
+      return toNumberWithCtx(this.value, this.ctx);
+    }
+
+    const scaled = this.scale(places);
+    return toNumberWithCtx(scaled.value, scaled.ctx);
   }
 
   public toString(): string {
-    return toStringValue(this.value, this.ctx);
+    return toStringWithCtx(this.value, this.ctx);
   }
 
   public toFixed(places = 0, rm: RoundingMode = this.ctx.roundingMode): string {
