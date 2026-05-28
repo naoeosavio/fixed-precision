@@ -311,8 +311,13 @@ export default class FixedPrecision {
     return coerced.trunc().value / this.ctx.SCALE;
   }
 
-  public toNumber(): number {
-    return toNumberWithCtx(this.value, this.ctx);
+  public toNumber(places?: number): number {
+    if (places === undefined) {
+      return toNumberWithCtx(this.value, this.ctx);
+    }
+
+    const scaled = this.scale(places);
+    return toNumberWithCtx(scaled.value, scaled.ctx);
   }
 
   public toString(): string {

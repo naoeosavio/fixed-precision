@@ -113,6 +113,13 @@ describe("FixedPrecision", () => {
       expect(positive.toNumber()).toBe(Number(positive.toString()));
       expect(negative.toNumber()).toBe(Number(negative.toString()));
     });
+
+    test("toNumber(places) converts after scaling to the requested places", () => {
+      const value = new FixedPrecision("1.255");
+
+      expect(value.toNumber(2)).toBe(1.26);
+      expect(value.toString()).toBe("1.25500000");
+    });
   });
 
   // ––– Arithmetic Operations –––
