@@ -10,19 +10,17 @@ export function toStringWithCtx(value: bigint, ctx: FPContext): string {
 
   const str = value.toString();
   const isNegative = str[0] === "-";
-  const absStr = isNegative ? str.slice(1) : str;
-  const len = absStr.length;
+  const len = isNegative ? str.length - 1 : str.length;
 
-  if (len <= P) {
-    const padded = absStr.padStart(P + 1, "0");
-    const intPart = padded.slice(0, padded.length - P);
-    const fracPart = padded.slice(-P);
-    return `${(isNegative ? "-" : "") + intPart}.${fracPart}`;
+  if (len > P) {
+    return str.slice(0, -P) + "." + str.slice(-P);
   }
 
-  const intPart = absStr.slice(0, len - P);
-  const fracPart = absStr.slice(-P);
-  return `${(isNegative ? "-" : "") + intPart}.${fracPart}`;
+  if (isNegative) {
+    return "-0." + str.slice(1).padStart(P, "0");
+  }
+
+  return "0." + str.padStart(P, "0");
 }
 
 export function toBaseWithCtx(

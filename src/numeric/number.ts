@@ -22,23 +22,16 @@ export function fromNumberWithCtx(value: number, ctx: FPContext): bigint {
 }
 
 export function toNumberWithCtx(value: bigint, ctx: FPContext): number {
-  if (value <= MAX_SAFE_BIGINT && value >= -MAX_SAFE_BIGINT) {
+  const abs = value < 0n ? -value : value;
+  if (abs <= MAX_SAFE_BIGINT) {
     return Number(value) / ctx.SCALENUMBER;
   }
 
   if (ctx.places < 15) {
-    return toNumberByParts(value, ctx);
+    const intPart = value / ctx.SCALE;
+    const fracPart = value - intPart * ctx.SCALE;
+    return Number(intPart) + Number(fracPart) / ctx.SCALENUMBER;
   }
 
   return Number(toStringWithCtx(value, ctx));
-}
-
-function toNumberByParts(value: bigint, ctx: FPContext): number {
-  const intPart = value / ctx.SCALE;
-  const fracPart = value - intPart * ctx.SCALE;
-  if (fracPart === 0n) {
-    return Number(intPart);
-  }
-
-  return Number(intPart) + Number(fracPart) / ctx.SCALENUMBER;
 }
