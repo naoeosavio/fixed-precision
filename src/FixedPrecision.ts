@@ -1,21 +1,4 @@
-import {
-  absolute,
-  add,
-  divide,
-  modulo,
-  multiply,
-  negate,
-  subtract,
-} from "./arithmetic/operations";
 import { power } from "./arithmetic/power";
-import {
-  bitAnd,
-  bitNot,
-  bitOr,
-  bitXor,
-  leftShift,
-  rightArithShift,
-} from "./bitwise/operations";
 import {
   combinationsValue,
   factorialValue,
@@ -27,7 +10,10 @@ import {
   makeContext,
   makeFactoryContext,
 } from "./core/context";
-import { getNumeratorAndDenominator, limitDenominator } from "./fraction/operations";
+import {
+  getNumeratorAndDenominator,
+  limitDenominator,
+} from "./fraction/operations";
 import { cubeRoot, squareRoot } from "./geometry/sqrt";
 import {
   isNegativeValue,
@@ -103,7 +89,6 @@ export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
-export type FixedPrecisionLogicalValue = FixedPrecisionValue | boolean;
 
 export type FPContext = {
   places: number;
@@ -158,9 +143,9 @@ export default class FixedPrecision {
     );
   }
 
-  constructor(val: FixedPrecisionValue, ctx?: FPContext) {
+  constructor(value: FixedPrecisionValue, ctx?: FPContext) {
     this.ctx = ctx ?? FixedPrecision.defaultContext;
-    this.value = FixedPrecision.toScaled(val, this.ctx);
+    this.value = FixedPrecision.toScaled(value, this.ctx);
   }
 
   public static create(
@@ -176,11 +161,11 @@ export default class FixedPrecision {
 
   public static sign(value: FixedPrecisionValue): number {
     if (value instanceof FixedPrecision) {
-      return FixedPrecision.signRaw(value.value);
+      return compareValues(value.value, 0n);
     }
 
     if (typeof value === "bigint") {
-      return FixedPrecision.signRaw(value);
+      return compareValues(value, 0n);
     }
 
     if (typeof value === "number") {
@@ -190,37 +175,37 @@ export default class FixedPrecision {
     return FixedPrecision.signString(value);
   }
 
-  public static not(value: FixedPrecisionLogicalValue): boolean {
-    return logicalNotValue(FixedPrecision.toDefaultLogicalRaw(value));
+  public static not(value: FixedPrecisionValue): boolean {
+    return logicalNotValue(FixedPrecision.normalized(value).value);
   }
 
   public static and(
-    left: FixedPrecisionLogicalValue,
-    right: FixedPrecisionLogicalValue,
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
   ): boolean {
     return logicalAndValues(
-      FixedPrecision.toDefaultLogicalRaw(left),
-      FixedPrecision.toDefaultLogicalRaw(right),
+      FixedPrecision.normalized(left).value,
+      FixedPrecision.normalized(right).value,
     );
   }
 
   public static or(
-    left: FixedPrecisionLogicalValue,
-    right: FixedPrecisionLogicalValue,
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
   ): boolean {
     return logicalOrValues(
-      FixedPrecision.toDefaultLogicalRaw(left),
-      FixedPrecision.toDefaultLogicalRaw(right),
+      FixedPrecision.normalized(left).value,
+      FixedPrecision.normalized(right).value,
     );
   }
 
   public static xor(
-    left: FixedPrecisionLogicalValue,
-    right: FixedPrecisionLogicalValue,
+    left: FixedPrecisionValue,
+    right: FixedPrecisionValue,
   ): boolean {
     return logicalXorValues(
-      FixedPrecision.toDefaultLogicalRaw(left),
-      FixedPrecision.toDefaultLogicalRaw(right),
+      FixedPrecision.normalized(left).value,
+      FixedPrecision.normalized(right).value,
     );
   }
 
@@ -250,28 +235,6 @@ export default class FixedPrecision {
     );
   }
 
-  private static toDefaultLogicalRaw(
-    value: FixedPrecisionLogicalValue,
-  ): bigint {
-    if (typeof value === "boolean") {
-      return value ? FixedPrecision.defaultContext.SCALE : 0n;
-    }
-
-    return FixedPrecision.normalized(value).value;
-  }
-
-  private static signRaw(value: bigint): -1 | 0 | 1 {
-    if (value > 0n) {
-      return 1;
-    }
-
-    if (value < 0n) {
-      return -1;
-    }
-
-    return 0;
-  }
-
   private static signNumber(value: number): number {
     if (Number.isNaN(value)) {
       return NaN;
@@ -291,45 +254,50 @@ export default class FixedPrecision {
     }
 
     try {
-      return FixedPrecision.signRaw(
+      return compareValues(
         FixedPrecision.toScaled(value, FixedPrecision.defaultContext),
+        0n,
       );
     } catch {
       return numericValue < 0 ? -1 : 1;
     }
   }
 
-  private assertSameConfig(other: FixedPrecision) {
-    if (this.ctx.places === other.ctx.places) return;
-    if (this.ctx.places !== other.ctx.places) {
-      throw new Error("Cannot operate on different precisions");
-    }
-  }
-
   private coerce(value: FixedPrecisionValue): FixedPrecision {
     if (value instanceof FixedPrecision) {
-      this.assertSameConfig(value);
-      return value;
+      if (this.ctx.places !== value.ctx.places) {
+        throw new Error("Cannot operate on different precisions");
+      } else {
+        return value;
+      }
+    } else {
+      return new FixedPrecision(value, this.ctx);
     }
-
-    return new FixedPrecision(value, this.ctx);
   }
 
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
-    if (value instanceof FixedPrecision) {
-      return value.value;
-    }
-    if (typeof value === "bigint") {
-      return value;
-    }
-    if (typeof value === "number") {
-      return fromNumberWithCtx(value, ctx);
-    }
-    if (typeof value === "string") {
-      return fromStringWithCtx(value, ctx);
-    }
+    if (value instanceof FixedPrecision) return value.value;
+    if (typeof value === "bigint") return value;
+    if (typeof value === "number") return fromNumberWithCtx(value, ctx);
+    if (typeof value === "string") return fromStringWithCtx(value, ctx);
     throw new Error(`Invalid value type: ${typeof value}`);
   }
+
+  // private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
+  //   if (value instanceof FixedPrecision) {
+  //     return value.value;
+  //   }
+  //   if (typeof value === "bigint") {
+  //     return value;
+  //   }
+  //   if (typeof value === "number") {
+  //     return fromNumberWithCtx(value, ctx);
+  //   }
+  //   if (typeof value === "string") {
+  //     return fromStringWithCtx(value, ctx);
+  //   }
+  //   throw new Error(`Invalid value type: ${typeof value}`);
+  // }
 
   private toScaledValue(value: FixedPrecisionValue): bigint {
     return FixedPrecision.toScaled(value, this.ctx);
@@ -343,14 +311,6 @@ export default class FixedPrecision {
     return coerced.trunc().value / this.ctx.SCALE;
   }
 
-  private toLogicalRaw(value: FixedPrecisionLogicalValue): bigint {
-    if (typeof value === "boolean") {
-      return value ? this.ctx.SCALE : 0n;
-    }
-
-    return this.coerce(value).value;
-  }
-
   public toNumber(): number {
     return toNumberWithCtx(this.value, this.ctx);
   }
@@ -360,37 +320,31 @@ export default class FixedPrecision {
   }
 
   public abs(): FixedPrecision {
-    return this.fromRaw(absolute(this.value));
+    return this.fromRaw(this.value < 0n ? -this.value : this.value);
   }
 
   public cmp(other: FixedPrecisionValue): Comparison {
-    const o = this.coerce(other);
-    return compareValues(this.value, o.value);
+    return compareValues(this.value, this.coerce(other).value);
   }
 
   public eq(other: FixedPrecisionValue): boolean {
-    const o = this.coerce(other);
-    return equalsValue(this.value, o.value);
+    return equalsValue(this.value, this.coerce(other).value);
   }
 
   public gt(other: FixedPrecisionValue): boolean {
-    const o = this.coerce(other);
-    return greaterThanValue(this.value, o.value);
+    return greaterThanValue(this.value, this.coerce(other).value);
   }
 
   public gte(other: FixedPrecisionValue): boolean {
-    const o = this.coerce(other);
-    return greaterThanOrEqualValue(this.value, o.value);
+    return greaterThanOrEqualValue(this.value, this.coerce(other).value);
   }
 
   public lt(other: FixedPrecisionValue): boolean {
-    const o = this.coerce(other);
-    return lessThanValue(this.value, o.value);
+    return lessThanValue(this.value, this.coerce(other).value);
   }
 
   public lte(other: FixedPrecisionValue): boolean {
-    const o = this.coerce(other);
-    return lessThanOrEqualValue(this.value, o.value);
+    return lessThanOrEqualValue(this.value, this.coerce(other).value);
   }
 
   public cmpRaw(other: FixedPrecisionValue): Comparison {
@@ -433,16 +387,16 @@ export default class FixedPrecision {
     return logicalNotValue(this.value);
   }
 
-  public and(other: FixedPrecisionLogicalValue): boolean {
-    return logicalAndValues(this.value, this.toLogicalRaw(other));
+  public and(other: FixedPrecisionValue): boolean {
+    return logicalAndValues(this.value, this.coerce(other).value);
   }
 
-  public or(other: FixedPrecisionLogicalValue): boolean {
-    return logicalOrValues(this.value, this.toLogicalRaw(other));
+  public or(other: FixedPrecisionValue): boolean {
+    return logicalOrValues(this.value, this.coerce(other).value);
   }
 
-  public xor(other: FixedPrecisionLogicalValue): boolean {
-    return logicalXorValues(this.value, this.toLogicalRaw(other));
+  public xor(other: FixedPrecisionValue): boolean {
+    return logicalXorValues(this.value, this.coerce(other).value);
   }
 
   public isInteger(): boolean {
@@ -466,57 +420,59 @@ export default class FixedPrecision {
   }
 
   public add(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(add(this.value, o.value));
+    return this.fromRaw(this.value + this.coerce(other).value);
   }
 
   public plus(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(add(this.value, this.toScaledValue(other)));
+    return this.fromRaw(this.value - this.toScaledValue(other));
   }
 
   public sub(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(subtract(this.value, o.value));
+    return this.fromRaw(this.value - this.coerce(other).value);
   }
 
   public minus(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(subtract(this.value, this.toScaledValue(other)));
+    return this.fromRaw(this.value - this.toScaledValue(other));
   }
 
   public mul(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(divide(multiply(this.value, o.value), this.ctx.SCALE));
+    return this.fromRaw(
+      (this.value * this.coerce(other).value) / this.ctx.SCALE,
+    );
   }
 
   public product(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(multiply(this.value, this.toScaledValue(other)));
+    return this.fromRaw(this.value * this.toScaledValue(other));
   }
 
   public div(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(divide(multiply(this.value, this.ctx.SCALE), o.value));
+    return this.fromRaw(
+      (this.value * this.ctx.SCALE) / this.coerce(other).value,
+    );
   }
 
   public fraction(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(divide(this.value, this.toScaledValue(other)));
+    return this.fromRaw(this.value / this.toScaledValue(other));
   }
 
   public mod(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(modulo(multiply(this.value, this.ctx.SCALE), o.value));
+    return this.fromRaw(
+      (this.value * this.ctx.SCALE) % this.coerce(other).value,
+    );
   }
 
   public leftover(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(modulo(this.value, this.toScaledValue(other)));
+    return this.fromRaw(this.value % this.toScaledValue(other));
   }
 
-  public divToInt(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw((this.value / o.value) * this.ctx.SCALE);
+  public idiv(other: FixedPrecisionValue): FixedPrecision {
+    return this.fromRaw(
+      (this.value / this.coerce(other).value) * this.ctx.SCALE,
+    );
   }
 
   public dividedToIntegerBy(other: FixedPrecisionValue): FixedPrecision {
-    return this.divToInt(other);
+    return this.idiv(other);
   }
 
   public clamp(
@@ -552,7 +508,7 @@ export default class FixedPrecision {
     increment: FixedPrecisionValue,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    const step = absolute(this.coerce(increment).value);
+    const step = this.coerce(increment).abs().value;
     if (step === 0n) {
       throw new Error("Increment must be non-zero");
     }
@@ -561,40 +517,37 @@ export default class FixedPrecision {
   }
 
   public bitAnd(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(bitAnd(this.value, o.value));
+    return this.fromRaw(this.value & this.coerce(other).value);
   }
 
   public bitOr(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(bitOr(this.value, o.value));
+    return this.fromRaw(this.value | this.coerce(other).value);
   }
 
   public bitXor(other: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(other);
-    return this.fromRaw(bitXor(this.value, o.value));
+    return this.fromRaw(this.value ^ this.coerce(other).value);
   }
 
   public bitNot(): FixedPrecision {
-    return this.fromRaw(bitNot(this.value));
+    return this.fromRaw(~this.value);
   }
 
   public leftShift(n: number): FixedPrecision {
     if (!Number.isInteger(n) || n < 0) {
       throw new Error("Shift amount must be a non-negative integer");
     }
-    return this.fromRaw(leftShift(this.value, n));
+    return this.fromRaw(this.value << BigInt(n));
   }
 
   public rightArithShift(n: number): FixedPrecision {
     if (!Number.isInteger(n) || n < 0) {
       throw new Error("Shift amount must be a non-negative integer");
     }
-    return this.fromRaw(rightArithShift(this.value, n));
+    return this.fromRaw(this.value >> BigInt(n));
   }
 
   public neg(): FixedPrecision {
-    return this.fromRaw(negate(this.value));
+    return this.fromRaw(-this.value);
   }
 
   public pow(exp: number): FixedPrecision {
@@ -897,8 +850,9 @@ export default class FixedPrecision {
     if (base === undefined) {
       return this.ln();
     }
-    const o = this.coerce(base);
-    return this.fromRaw(logValue(this.value, o.value, this.ctx));
+    return this.fromRaw(
+      logValue(this.value, this.coerce(base).value, this.ctx),
+    );
   }
 
   public log10(): FixedPrecision {
@@ -950,8 +904,7 @@ export default class FixedPrecision {
   }
 
   public atan2(x: FixedPrecisionValue): FixedPrecision {
-    const o = this.coerce(x);
-    return this.fromRaw(atan2Value(this.value, o.value, this.ctx));
+    return this.fromRaw(atan2Value(this.value, this.coerce(x).value, this.ctx));
   }
 
   public acot(): FixedPrecision {

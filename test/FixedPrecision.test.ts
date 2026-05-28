@@ -186,19 +186,19 @@ describe("FixedPrecision", () => {
       expect(a.product(one).toString()).toBe("1050000000.00000000");
     });
 
-    test("divToInt() truncates division toward zero", () => {
-      expect(new FixedPrecision("7.5").divToInt(2).toString()).toBe(
+    test("idiv() truncates division toward zero", () => {
+      expect(new FixedPrecision("7.5").idiv(2).toString()).toBe(
         "3.00000000",
       );
-      expect(new FixedPrecision("-7.5").divToInt(2).toString()).toBe(
+      expect(new FixedPrecision("-7.5").idiv(2).toString()).toBe(
         "-3.00000000",
       );
     });
 
-    test("dividedToIntegerBy() aliases divToInt()", () => {
+    test("dividedToIntegerBy() aliases idiv()", () => {
       const value = new FixedPrecision("7.5");
       expect(value.dividedToIntegerBy(2).toString()).toBe(
-        value.divToInt(2).toString(),
+        value.idiv(2).toString(),
       );
     });
 
@@ -328,10 +328,10 @@ describe("FixedPrecision", () => {
       expect(one.not()).toBe(false);
       expect(one.and(negative)).toBe(true);
       expect(one.and(0)).toBe(false);
-      expect(one.and(false)).toBe(false);
+      expect(one.and(zero)).toBe(false);
       expect(zero.or(negative)).toBe(true);
       expect(zero.or(0)).toBe(false);
-      expect(zero.or(true)).toBe(true);
+      expect(zero.or(one)).toBe(true);
       expect(one.xor(0)).toBe(true);
       expect(one.xor(negative)).toBe(false);
     });
@@ -341,11 +341,11 @@ describe("FixedPrecision", () => {
 
       expect(FixedPrecision.not(0)).toBe(true);
       expect(FixedPrecision.not("0.00000001")).toBe(false);
-      expect(FixedPrecision.and("2", true)).toBe(true);
-      expect(FixedPrecision.and("0", true)).toBe(false);
-      expect(FixedPrecision.or(false, new FixedPrecision("-1"))).toBe(true);
+      expect(FixedPrecision.and("2", `2`)).toBe(true);
+      expect(FixedPrecision.and("0", `1`)).toBe(false);
+      expect(FixedPrecision.or('0', new FixedPrecision("-1"))).toBe(true);
       expect(FixedPrecision.xor("0", "3")).toBe(true);
-      expect(FixedPrecision.xor(true, "3")).toBe(false);
+      expect(FixedPrecision.xor('1', "3")).toBe(false);
       expect(FixedPrecision.and(FP4("0.0001"), "1")).toBe(true);
     });
   });
