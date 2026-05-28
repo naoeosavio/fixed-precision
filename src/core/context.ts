@@ -3,8 +3,7 @@ import type {
   FPContext,
   RoundingMode,
 } from "../FixedPrecision";
-
-const ROUNDING_MODES = [0, 1, 2, 3, 4, 5, 6, 7, 8] as const;
+import { powerOfTen } from "../utils";
 
 export function makeContext(
   places: number,
@@ -13,21 +12,19 @@ export function makeContext(
   return {
     places,
     roundingMode,
-    SCALE: 10n ** BigInt(places),
+    SCALE: powerOfTen(places),
     SCALENUMBER: 10 ** places,
   };
 }
 
-export function assertPlaces(places: number): void {
+function assertPlaces(places: number): void {
   if (!Number.isInteger(places) || places < 0 || places > 20) {
     throw new Error("Decimal places must be an integer between 0 and 20");
   }
 }
 
-export function assertRoundingMode(
-  value: number,
-): asserts value is RoundingMode {
-  if (!ROUNDING_MODES.includes(value as RoundingMode)) {
+function assertRoundingMode(value: number): asserts value is RoundingMode {
+  if (!Number.isInteger(value) || value < 0 || value > 8) {
     throw new Error(
       "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8",
     );
