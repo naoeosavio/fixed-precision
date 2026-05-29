@@ -2,8 +2,59 @@
 
 All notable changes to the fixed-precision library will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+## [1.5.0] — 2026-05-28
+
+## Features
+
+- Arithmetic and comparison method chaining: `add`, `sub`, `mul`, `div`, `mod`, `pow`, and comparison methods now accept raw numbers, strings, and bigints for fluent chaining.
+- Raw operations (`plus`, `minus`, `product`, `fraction`, `leftover`) accept bigints and work across different precision contexts.
+- Raw comparison methods (`cmpRaw`, `eqRaw`, `gtRaw`, `gteRaw`, `ltRaw`, `lteRaw`) for direct scaled-value comparison without coercion.
+- Logical operations (`not`, `and`, `or`, `xor`) treat values numerically (zero as `false`, non-zero as `true`).
+- Advanced arithmetic: `clamp`, `toNearest`, `hypot`, integer division (`idiv`).
+- Trigonometric functions: `sin`, `cos`, `tan`, `sec`, `csc`, `cot`, `asin`, `acos`, `atan`, `atan2`, `acot`, `asec`, `acsc`, plus hyperbolic variants (`sinh`, `cosh`, `tanh`, etc.).
+- Transcendental functions: `ln`, `log`, `log2`, `log10`, `exp`.
+- Combinatorics: `factorial`, `permutations`, `combinations`.
+- Sign and precision inspection: `sign()`, `isInteger()`, `places()`, `decimalPlaces()`, `precision()`, `sd()`, `isFixedPrecision()`.
+- Data access and formatting: `num()` and `den()` for raw numerator/denominator, base conversion (`toBinary`, `toOctal`, `toHex`, `toHexadecimal`), `prec()` for significant-digit rounding, `toNumber()` with optional decimal places parameter.
+- `scale()` now returns a new instance with the target decimal places, supporting both downscaling and upscaling.
+- `sum()` static method to aggregate values (returns zero for empty input).
+- `min()` and `max()` now accept array input.
+- `FixedPrecision.create()` factory produces context-bound constructors with custom precision and rounding mode.
+- `notEqualsValue` utility for inequality comparisons.
+- `shiftedBy()` performs decimal shift.
+- `dot()` and `cross()` vector product methods.
+- Bitwise operations: `and`, `or`, `xor`, `not`, left and right shift.
+
+## Fixes
+
+- Fixed `pow()` exponentiation logic to correctly handle large exponents with BigInt.
+- Corrected bigint constructor and `sqrt` calculations to properly account for scaling.
+- Improved `toNumber()` accuracy for large values and reduced internal guard scale.
+- Reverted `shiftedBy` to perform decimal shift instead of bitwise.
+- Alias methods (`plus`, `minus`, `product`, `fraction`, `leftover`) now correctly enforce configuration validation.
+
+## Performance
+
+- Random generation now uses direct BigInt arithmetic, removing string conversion overhead.
+- Instance creation optimized by reusing normalized instances when no scaling change is required.
+- Rounding operations accelerated via precomputed power-of-ten lookup tables and fast paths.
+- `pow()` optimized with specialized paths for exponents 0, 1, 2, and 3.
+- `toString()` early return for zero decimal places for better performance.
+- Number conversion and string formatting streamlined for improved throughput.
+
+## Breaking Changes
+
+- Removed `cube()` and `toFraction()` methods.
+- Logical operations no longer accept boolean arguments; only numeric input is supported.
+- `divToInt` renamed to `idiv`.
+- Comparisons between different precision contexts now throw an error.
+- Arithmetic operations now require all operands to share the same precision configuration.
+
+## Documentation
+
+- Added comprehensive documentation website: quick-start, core concepts, arithmetic guide, raw operations, bigint warnings, performance guide, API reference, and domain-specific examples (finance, gaming, scientific).
+- Added precision factories guide.
+- Updated README with detailed usage, examples, and method chaining documentation.
 
 ## [1.4.1] - 2026-05-17
 
@@ -156,6 +207,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Fixed**: for any bug fixes
 - **Security**: in case of vulnerabilities
 
+[1.5.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/naoeosavio/fixed-precision/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.3.0...v1.4.0
 [1.3.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.2.0...v1.3.0
