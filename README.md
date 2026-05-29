@@ -272,8 +272,12 @@ FixedPrecision provides two sets of arithmetic operations:
 **Other operations:**
 - **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
 - **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
-- **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
-- **`sqrt(): FixedPrecision`**: Computes the square root of the current value (throws an error for negative numbers).
+- **`ln(): FixedPrecision`**: Computes the natural logarithm of the current value using bigint fixed-point arithmetic.
+- **`log(base?: FixedPrecisionValue): FixedPrecision`**: Computes the natural logarithm, or logarithm in the supplied base.
+- **`log10(): FixedPrecision`**: Computes the base-10 logarithm.
+- **`log2(): FixedPrecision`**: Computes the base-2 logarithm.
+- **`exp(): FixedPrecision`**: Computes `e` raised to the current value.
+- **`FixedPrecision.exp(value: FixedPrecisionValue): FixedPrecision`**: Computes `e` raised to the supplied value.
 
 ### Comparison Methods
 
@@ -301,6 +305,10 @@ FixedPrecision provides two sets of comparison methods:
   Rounds the value to the specified number of decimal places (`dp`) using the rounding mode (`rm`).  
   _Example:_ `value.round(2)` rounds the value to 2 decimal places.
 
+- **`prec(sd: number, rm?: RoundingMode): FixedPrecision`**  
+  Rounds the value to the specified number of significant digits (`sd`) using the rounding mode (`rm`). The returned instance keeps the original context scale.  
+  _Example:_ `new FixedPrecision("9876.54321").prec(2).toString()` returns `"9900.00000000"`.
+
 - **`ceil(): FixedPrecision`**  
   Returns the ceiling of the value (rounds upward for positive numbers).
 
@@ -311,10 +319,10 @@ FixedPrecision provides two sets of comparison methods:
   Truncates the value, effectively removing the fractional part (rounds toward zero).
 
 - **`scale(newScale: number): FixedPrecision`**  
-  Adjusts the value to a new number of decimal places by scaling and rounding as necessary.
+  Adjusts the value to a new number of decimal places by scaling and rounding as necessary. The returned instance uses `newScale` as its context scale.
 
 - **`shiftedBy(n: number): FixedPrecision`**  
-  Shifts the value by `n` decimal places. A positive `n` multiplies the value by 10ⁿ; a negative `n` divides it (throws an error if the division is inexact).
+  Shifts the raw scaled value by powers of ten. A positive `n` multiplies by `10 ** n`; a negative `n` divides by `10 ** abs(n)` and truncates toward zero when the division is not exact.
 
 ### Random Number Generation
 

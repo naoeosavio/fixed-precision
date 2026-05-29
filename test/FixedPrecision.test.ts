@@ -36,6 +36,92 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("toNumber() method", () => {
+    test("toNumber() converts zero forms to positive zero", () => {
+      const positiveZeroInputs = [
+        "0",
+        "0.0",
+        "0.000000000000",
+      ];
+      const negativeZeroInputs = [
+        "-0",
+        "-0.0",
+        "-0.000000000000",
+      ];
+
+      for (const input of [...positiveZeroInputs, ...negativeZeroInputs]) {
+        const result = new FixedPrecision(input).toNumber();
+        expect(result).toBe(0);
+        expect(Object.is(result, -0)).toBe(false);
+      }
+    });
+
+    test("toNumber() rejects non-finite numeric inputs", () => {
+      const unsupportedInputs = [
+        Infinity,
+        "Infinity",
+        -Infinity,
+        "-Infinity",
+        NaN,
+        "NaN",
+      ];
+
+      for (const input of unsupportedInputs) {
+        expect(() => new FixedPrecision(input).toNumber()).toThrow();
+      }
+    });
+
+    test("toNumber() converts one forms and safe integer bounds", () => {
+      const cases: Array<[string | number, number]> = [
+        [1, 1],
+        ["1", 1],
+        ["1.0", 1],
+        [-1, -1],
+        ["-1", -1],
+        ["-1.0", -1],
+        ["9007199254740991", 9007199254740991],
+        ["-9007199254740991", -9007199254740991],
+      ];
+
+      for (const [input, expected] of cases) {
+        expect(new FixedPrecision(input).toNumber()).toBe(expected);
+      }
+    });
+
+    test("toNumber() converts high precision finite decimal strings", () => {
+      const FP15 = FixedPrecision.create({ places: 15 });
+      expect(FP15("123.456789876543").toNumber()).toBe(123.456789876543);
+      expect(FP15("-123.456789876543").toNumber()).toBe(-123.456789876543);
+    });
+
+    test("toNumber() preserves rounded high-precision values above MAX_SAFE_INTEGER", () => {
+      const FP20 = FixedPrecision.create({ places: 20 });
+      const rounded = FP20("499.99999999999994").round(4);
+
+      expect(rounded.toString()).toBe("500.00000000000000000000");
+      expect(rounded.toNumber()).toBe(500);
+      expect(rounded.toNumber()).toBe(Number(rounded.toFixed(4)));
+    });
+
+    test("toNumber() handles lower-scale values above MAX_SAFE_INTEGER by parts", () => {
+      const FP8 = FixedPrecision.create({ places: 8 });
+      const positive = FP8("123456789.12345678");
+      const negative = FP8("-123456789.12345678");
+
+      expect(positive.raw() > BigInt(Number.MAX_SAFE_INTEGER)).toBe(true);
+      expect(negative.raw() < -BigInt(Number.MAX_SAFE_INTEGER)).toBe(true);
+      expect(positive.toNumber()).toBe(Number(positive.toString()));
+      expect(negative.toNumber()).toBe(Number(negative.toString()));
+    });
+
+    test("toNumber(places) converts after scaling to the requested places", () => {
+      const value = new FixedPrecision("1.255");
+
+      expect(value.toNumber(2)).toBe(1.26);
+      expect(value.toString()).toBe("1.25500000");
+    });
+  });
+
   // ––– Arithmetic Operations –––
   describe("Arithmetic Operations", () => {
     const a = new FixedPrecision("10.5");
@@ -104,7 +190,60 @@ describe("FixedPrecision", () => {
 
     test("product() - product with one", () => {
       const one = new FixedPrecision(1);
-      expect(a.product(one).toString()).toBe(a.shiftedBy(8).toString());
+      expect(a.product(one).toString()).toBe("1050000000.00000000");
+    });
+
+    test("idiv() truncates division toward zero", () => {
+      expect(new FixedPrecision("7.5").idiv(2).toString()).toBe(
+        "3.00000000",
+      );
+      expect(new FixedPrecision("-7.5").idiv(2).toString()).toBe(
+        "-3.00000000",
+      );
+    });
+
+    test("dividedToIntegerBy() aliases idiv()", () => {
+      const value = new FixedPrecision("7.5");
+      expect(value.dividedToIntegerBy(2).toString()).toBe(
+        value.idiv(2).toString(),
+      );
+    });
+
+    test("clamp() limits values to the provided interval", () => {
+      expect(new FixedPrecision("5").clamp(0, 10).toString()).toBe(
+        "5.00000000",
+      );
+      expect(new FixedPrecision("-1").clamp(0, 10).toString()).toBe(
+        "0.00000000",
+      );
+      expect(new FixedPrecision("11").clamp(0, 10).toString()).toBe(
+        "10.00000000",
+      );
+    });
+
+    test("clampedTo() aliases clamp() and validates interval order", () => {
+      const value = new FixedPrecision("5");
+      expect(value.clampedTo(0, 10).toString()).toBe(
+        value.clamp(0, 10).toString(),
+      );
+      expect(() => value.clamp(10, 0)).toThrow(
+        "min must be less than or equal to max",
+      );
+    });
+
+    test("toNearest() rounds to the nearest multiple", () => {
+      expect(new FixedPrecision("5.5").toNearest(2).toString()).toBe(
+        "6.00000000",
+      );
+      expect(new FixedPrecision("5").toNearest(2, 1).toString()).toBe(
+        "4.00000000",
+      );
+      expect(new FixedPrecision("-5").toNearest(2).toString()).toBe(
+        "-6.00000000",
+      );
+      expect(() => new FixedPrecision("5").toNearest(0)).toThrow(
+        "Increment must be non-zero",
+      );
     });
   });
 
@@ -186,6 +325,118 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Logical Functions", () => {
+    test("instance logical methods use zero and non-zero truthiness", () => {
+      const zero = new FixedPrecision(0);
+      const one = new FixedPrecision(1);
+      const negative = new FixedPrecision("-0.00000001");
+
+      expect(zero.not()).toBe(true);
+      expect(one.not()).toBe(false);
+      expect(one.and(negative)).toBe(true);
+      expect(one.and(0)).toBe(false);
+      expect(one.and(zero)).toBe(false);
+      expect(zero.or(negative)).toBe(true);
+      expect(zero.or(0)).toBe(false);
+      expect(zero.or(one)).toBe(true);
+      expect(one.xor(0)).toBe(true);
+      expect(one.xor(negative)).toBe(false);
+    });
+
+    test("static logical methods accept primitives, booleans, and FixedPrecision", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+
+      expect(FixedPrecision.not(0)).toBe(true);
+      expect(FixedPrecision.not("0.00000001")).toBe(false);
+      expect(FixedPrecision.and("2", `2`)).toBe(true);
+      expect(FixedPrecision.and("0", `1`)).toBe(false);
+      expect(FixedPrecision.or('0', new FixedPrecision("-1"))).toBe(true);
+      expect(FixedPrecision.xor("0", "3")).toBe(true);
+      expect(FixedPrecision.xor('1', "3")).toBe(false);
+      expect(FixedPrecision.and(FP4("0.0001"), "1")).toBe(true);
+    });
+  });
+
+  describe("Static instance method wrappers", () => {
+    test("arithmetic wrappers call the matching instance methods", () => {
+      expect(FixedPrecision.abs("-2.5").toString()).toBe("2.50000000");
+      expect(FixedPrecision.add("1.5", "2.25").toString()).toBe(
+        "3.75000000",
+      );
+      expect(FixedPrecision.sub("5", "2.5").toString()).toBe("2.50000000");
+      expect(FixedPrecision.mul("2.5", "4").toString()).toBe("10.00000000");
+      expect(FixedPrecision.div("7.5", "2.5").toString()).toBe("3.00000000");
+      expect(FixedPrecision.mod("10", "3").toString()).toBe("1.00000000");
+      expect(FixedPrecision.pow("2", 3).toString()).toBe("8.00000000");
+    });
+
+    test("rounding wrappers call the matching instance methods", () => {
+      expect(FixedPrecision.ceil("1.1").toString()).toBe("2.00000000");
+      expect(FixedPrecision.floor("1.9").toString()).toBe("1.00000000");
+      expect(FixedPrecision.trunc("1.9").toString()).toBe("1.00000000");
+      expect(FixedPrecision.round("1.2345", 2).toString()).toBe("1.23000000");
+    });
+
+    test("logarithm wrappers call the matching instance methods", () => {
+      expect(FixedPrecision.ln("1").toString()).toBe("0.00000000");
+      expect(FixedPrecision.log("8", "2").toString()).toBe("3.00000000");
+      expect(FixedPrecision.log2("8").toString()).toBe("3.00000000");
+      expect(FixedPrecision.log10("100").toString()).toBe("2.00000000");
+    });
+
+    test("clamp wrapper normalizes FixedPrecision values to default context", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      expect(FixedPrecision.clamp(FP4("12"), "0", "10").toString()).toBe(
+        "10.00000000",
+      );
+    });
+  });
+
+  describe("Inspection methods", () => {
+    test("isInteger() checks whether there is a fractional remainder", () => {
+      expect(new FixedPrecision("10.00000000").isInteger()).toBe(true);
+      expect(new FixedPrecision("10.00000001").isInteger()).toBe(false);
+    });
+
+    test("places() and decimalPlaces() return the instance scale", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      const value = FP4("1.23");
+
+      expect(value.places()).toBe(4);
+      expect(value.decimalPlaces()).toBe(4);
+    });
+
+    test("precision() returns significant digits", () => {
+      expect(new FixedPrecision("123.450000").precision()).toBe(5);
+      expect(new FixedPrecision("0.00123000").precision()).toBe(3);
+      expect(new FixedPrecision("1000").precision()).toBe(1);
+      expect(new FixedPrecision("0").precision()).toBe(1);
+    });
+
+    test("precision(true) includes integer trailing zeros", () => {
+      const value = new FixedPrecision("1000");
+
+      expect(value.precision(true)).toBe(4);
+      expect(value.sd(true)).toBe(4);
+    });
+
+    test("FixedPrecision.isFixedPrecision() identifies instances", () => {
+      const value = new FixedPrecision("1");
+
+      expect(FixedPrecision.isFixedPrecision(value)).toBe(true);
+      expect(FixedPrecision.isFixedPrecision("1")).toBe(false);
+    });
+
+    test("FixedPrecision.sign() returns numeric signs", () => {
+      expect(FixedPrecision.sign(new FixedPrecision("2"))).toBe(1);
+      expect(FixedPrecision.sign("-2")).toBe(-1);
+      expect(FixedPrecision.sign("0")).toBe(0);
+      expect(Object.is(FixedPrecision.sign(-0), -0)).toBe(true);
+      expect(Object.is(FixedPrecision.sign("-0.0"), -0)).toBe(true);
+      expect(Number.isNaN(FixedPrecision.sign(NaN))).toBe(true);
+    });
+  });
+
   describe("neg() method", () => {
     test("neg() negates positive number", () => {
       const a = new FixedPrecision("42.00000000");
@@ -214,23 +465,311 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("square() and cube() methods", () => {
+    test("square() returns the value raised to the second power", () => {
+      const a = new FixedPrecision("3.50000000");
+      expect(a.square().toString()).toBe("12.25000000");
+    });
+
+    test("cube() returns the value raised to the third power", () => {
+      const a = new FixedPrecision("2.50000000");
+      expect(a.cube().toString()).toBe("15.62500000");
+    });
+
+    test("static square() and cube() use the default context", () => {
+      expect(FixedPrecision.square("3.5").toString()).toBe("12.25000000");
+      expect(FixedPrecision.cube("2.5").toString()).toBe("15.62500000");
+    });
+  });
+
   describe("sqrt() method", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+
     test("sqrt() of a perfect square", () => {
-      const a = new FixedPrecision("9.00000000");
+      const a = FP20("9.00000000");
       const result = a.sqrt();
       expect(result.toFixed(8)).toBe("3.00000000");
     });
 
-    test("sqrt() of a non-perfect square approximates correctly", () => {
-      const a = new FixedPrecision("2.00000000");
+    test("sqrt() of an irrational input approximates correctly", () => {
+      const a = FP20(Math.PI);
       const result = a.sqrt();
-      expect(Number(result.toFixed(8))).toBeCloseTo(1.41421356, 7);
+      expect(result.toNumber()).toBeCloseTo(Math.sqrt(Math.PI), 12);
     });
 
     test("sqrt() of zero returns zero", () => {
-      const a = new FixedPrecision(0);
+      const a = FP20(0);
       const result = a.sqrt();
-      expect(result.toString()).toBe("0.00000000");
+      expect(result.toString()).toBe("0.00000000000000000000");
+    });
+
+    test("FixedPrecision.sqrt() returns square root using default context", () => {
+      expect(FixedPrecision.sqrt("9").toString()).toBe("3.00000000");
+      expect(FixedPrecision.sqrt("2").toNumber()).toBeCloseTo(Math.sqrt(2), 7);
+    });
+  });
+
+  describe("cbrt() method", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+
+    test("cbrt() of a perfect cube", () => {
+      const a = FP20("27.00000000");
+      expect(a.cbrt().toFixed(8)).toBe("3.00000000");
+    });
+
+    test("cbrt() of an irrational input approximates correctly", () => {
+      const a = FP20(Math.E);
+      expect(a.cbrt().toNumber()).toBeCloseTo(Math.cbrt(Math.E), 12);
+    });
+
+    test("cbrt() handles negative values", () => {
+      const a = FP20("-8.00000000");
+      expect(a.cbrt().toString()).toBe("-2.00000000000000000000");
+    });
+
+    test("cubeRoot() aliases cbrt()", () => {
+      const a = FP20("125.00000000");
+      expect(a.cubeRoot().toString()).toBe(a.cbrt().toString());
+    });
+
+    test("FixedPrecision.cbrt() and cubeRoot() use default context", () => {
+      expect(FixedPrecision.cbrt("64").toString()).toBe("4.00000000");
+      expect(FixedPrecision.cubeRoot("64").toString()).toBe("4.00000000");
+    });
+  });
+
+  describe("transcendental methods", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+
+    test("ln() returns natural logarithm", () => {
+      const result = FP20("2.71828182845904523536").ln();
+      expect(result.toNumber()).toBeCloseTo(1, 14);
+      expect(result.toString()).toBe("0.99999999999999999999");
+    });
+
+    test("ln() keeps guard-digit precision for non-trivial values", () => {
+      expect(FP20("10").ln().toString()).toBe("2.30258509299404568401");
+      expect(FP20("123.456789").ln().toString()).toBe("4.81589120820374401402");
+    });
+
+    test("log() defaults to natural logarithm", () => {
+      const value = FP20("2");
+      expect(value.log().toNumber()).toBeCloseTo(Math.log(2), 14);
+      expect(value.log().toString()).toBe(value.ln().toString());
+      expect(value.log().toString()).toBe("0.69314718055994530941");
+    });
+
+    test("log() accepts an explicit base", () => {
+      const result = FP20("16").log(2);
+      expect(result.toNumber()).toBeCloseTo(4, 14);
+      expect(result.toString()).toBe("4.00000000000000000000");
+    });
+
+    test("log() keeps guard-digit precision for exact integer results", () => {
+      expect(FP20("81").log(3).toString()).toBe("4.00000000000000000000");
+    });
+
+    test("log10() returns base-10 logarithm", () => {
+      expect(FP20("100").log10().toNumber()).toBeCloseTo(2, 14);
+      expect(FP20("100").log10().toString()).toBe("2.00000000000000000000");
+      expect(FP20("0.01").log10().toString()).toBe("-2.00000000000000000000");
+    });
+
+    test("log2() returns base-2 logarithm", () => {
+      const result = FP20("8").log2();
+      expect(result.toNumber()).toBeCloseTo(3, 14);
+      expect(result.toString()).toBe("3.00000000000000000000");
+    });
+
+    test("log2() keeps guard-digit precision for non-powers of two", () => {
+      expect(FP20("10").log2().toString()).toBe("3.32192809488736234787");
+    });
+
+    test("exp() returns e raised to the value", () => {
+      expect(FP20("1").exp().toNumber()).toBeCloseTo(Math.E, 14);
+      expect(FP20("1").exp().toString()).toBe("2.71828182845904523536");
+      expect(FP20("-1").exp().toNumber()).toBeCloseTo(Math.exp(-1), 14);
+      expect(FP20("-1").exp().toString()).toBe("0.36787944117144232159");
+    });
+
+    test("FixedPrecision.exp() returns e raised to the argument", () => {
+      fixedconfig.configure({ places: 20, roundingMode: 4 });
+      try {
+        expect(FixedPrecision.exp(2).toNumber()).toBeCloseTo(Math.exp(2), 14);
+        expect(FixedPrecision.exp(2).toString()).toBe("7.38905609893065022723");
+        expect(FixedPrecision.exp("2").toString()).toBe(
+          FP20("2").exp().toString(),
+        );
+      } finally {
+        fixedconfig.configure({ places: 8, roundingMode: 4 });
+      }
+    });
+
+    test("log methods validate domain and base", () => {
+      expect(() => FP20("0").ln()).toThrow(
+        "Logarithm is undefined for non-positive values",
+      );
+      expect(() => FP20("-1").log10()).toThrow(
+        "Logarithm is undefined for non-positive values",
+      );
+      expect(() => FP20("10").log(1)).toThrow(
+        "Logarithm base must be positive and not equal to 1",
+      );
+      expect(() => FP20("10").log(0)).toThrow(
+        "Logarithm base must be positive and not equal to 1",
+      );
+    });
+  });
+
+  describe("trigonometry methods", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+    const PI = "3.14159265358979323846";
+    const HALF_PI = "1.57079632679489661923";
+
+    test("sin(), cos(), and tan() handle zero", () => {
+      const zero = FP20("0");
+
+      expect(zero.sin().toString()).toBe("0.00000000000000000000");
+      expect(zero.cos().toString()).toBe("1.00000000000000000000");
+      expect(zero.tan().toString()).toBe("0.00000000000000000000");
+    });
+
+    test("sin() and cos() handle common radian angles", () => {
+      expect(FP20(HALF_PI).sin().toNumber()).toBeCloseTo(1, 14);
+      expect(FP20(PI).sin().toNumber()).toBeCloseTo(0, 14);
+      expect(FP20(PI).cos().toNumber()).toBeCloseTo(-1, 14);
+    });
+
+    test("trigonometry methods match Math for non-trivial radians", () => {
+      const values = ["0.5", "0.75", "3.25"];
+
+      for (const value of values) {
+        const fixed = FP20(value);
+        const numeric = Number(value);
+
+        expect(fixed.sin().toNumber()).toBeCloseTo(Math.sin(numeric), 12);
+        expect(fixed.cos().toNumber()).toBeCloseTo(Math.cos(numeric), 12);
+        expect(fixed.tan().toNumber()).toBeCloseTo(Math.tan(numeric), 12);
+      }
+    });
+
+    test("trigonometry methods handle negative radians", () => {
+      const fixed = new FixedPrecision("-0.75");
+
+      expect(fixed.sin().toNumber()).toBeCloseTo(Math.sin(-0.75), 7);
+      expect(fixed.cos().toNumber()).toBeCloseTo(Math.cos(-0.75), 7);
+      expect(fixed.tan().toNumber()).toBeCloseTo(Math.tan(-0.75), 7);
+    });
+
+    test("reciprocal trigonometry methods match their definitions", () => {
+      const fixed = FP20("0.75");
+      const numeric = 0.75;
+
+      expect(fixed.sec().toNumber()).toBeCloseTo(1 / Math.cos(numeric), 12);
+      expect(fixed.csc().toNumber()).toBeCloseTo(1 / Math.sin(numeric), 12);
+      expect(fixed.cot().toNumber()).toBeCloseTo(1 / Math.tan(numeric), 12);
+    });
+
+    test("inverse trigonometry methods match Math", () => {
+      const half = FP20("0.5");
+      const two = FP20("2");
+
+      expect(half.asin().toNumber()).toBeCloseTo(Math.asin(0.5), 12);
+      expect(half.acos().toNumber()).toBeCloseTo(Math.acos(0.5), 12);
+      expect(half.atan().toNumber()).toBeCloseTo(Math.atan(0.5), 12);
+      expect(FP20("1").atan2(FP20("-1")).toNumber()).toBeCloseTo(
+        Math.atan2(1, -1),
+        12,
+      );
+      expect(two.acot().toNumber()).toBeCloseTo(Math.atan(1 / 2), 12);
+      expect(two.asec().toNumber()).toBeCloseTo(Math.acos(1 / 2), 12);
+      expect(two.acsc().toNumber()).toBeCloseTo(Math.asin(1 / 2), 12);
+    });
+
+    test("hyperbolic methods match Math", () => {
+      const fixed = FP20("0.5");
+      const numeric = 0.5;
+
+      expect(fixed.sinh().toNumber()).toBeCloseTo(Math.sinh(numeric), 12);
+      expect(fixed.cosh().toNumber()).toBeCloseTo(Math.cosh(numeric), 12);
+      expect(fixed.tanh().toNumber()).toBeCloseTo(Math.tanh(numeric), 12);
+      expect(fixed.sech().toNumber()).toBeCloseTo(1 / Math.cosh(numeric), 12);
+      expect(fixed.csch().toNumber()).toBeCloseTo(1 / Math.sinh(numeric), 12);
+      expect(fixed.coth().toNumber()).toBeCloseTo(1 / Math.tanh(numeric), 12);
+    });
+
+    test("inverse hyperbolic methods match Math", () => {
+      const half = FP20("0.5");
+      const onePointFive = FP20("1.5");
+      const two = FP20("2");
+
+      expect(onePointFive.asinh().toNumber()).toBeCloseTo(
+        Math.asinh(1.5),
+        12,
+      );
+      expect(onePointFive.acosh().toNumber()).toBeCloseTo(
+        Math.acosh(1.5),
+        12,
+      );
+      expect(half.atanh().toNumber()).toBeCloseTo(Math.atanh(0.5), 12);
+      expect(half.asech().toNumber()).toBeCloseTo(Math.acosh(1 / 0.5), 12);
+      expect(two.acsch().toNumber()).toBeCloseTo(Math.asinh(1 / 2), 12);
+      expect(two.acoth().toNumber()).toBeCloseTo(Math.atanh(1 / 2), 12);
+    });
+
+    test("trigonometry methods validate domains", () => {
+      expect(() => FP20("0").csc()).toThrow("Cosecant is undefined for zero");
+      expect(() => FP20("0").cot()).toThrow(
+        "Cotangent is undefined when sine is zero",
+      );
+      expect(() => FP20("2").asin()).toThrow("Arcsine is defined");
+      expect(() => FP20("2").acos()).toThrow("Arccosine is defined");
+      expect(() => FP20("0.5").asec()).toThrow("Arcsecant is defined");
+      expect(() => FP20("0.5").acsc()).toThrow("Arccosecant is defined");
+      expect(() => FP20("0.5").acosh()).toThrow(
+        "Hyperbolic arccosine is defined",
+      );
+      expect(() => FP20("1").atanh()).toThrow(
+        "Hyperbolic arctangent is defined",
+      );
+      expect(() => FP20("2").asech()).toThrow(
+        "Hyperbolic arcsecant is defined",
+      );
+      expect(() => FP20("0").acsch()).toThrow(
+        "Hyperbolic arccosecant is undefined for zero",
+      );
+      expect(() => FP20("1").acoth()).toThrow(
+        "Hyperbolic arccotangent is defined",
+      );
+      expect(() => FP20("0").csch()).toThrow(
+        "Hyperbolic cosecant is undefined for zero",
+      );
+      expect(() => FP20("0").coth()).toThrow(
+        "Hyperbolic cotangent is undefined for zero",
+      );
+    });
+
+    test("static trigonometry methods use the default context", () => {
+      fixedconfig.configure({ places: 20, roundingMode: 4 });
+      try {
+        expect(FixedPrecision.sin("0.5").toString()).toBe(
+          FP20("0.5").sin().toString(),
+        );
+        expect(FixedPrecision.cos("0.5").toString()).toBe(
+          FP20("0.5").cos().toString(),
+        );
+        expect(FixedPrecision.tan("0.5").toString()).toBe(
+          FP20("0.5").tan().toString(),
+        );
+        expect(FixedPrecision.atan2("1", "-1").toString()).toBe(
+          FP20("1").atan2(FP20("-1")).toString(),
+        );
+        expect(FixedPrecision.acosh("1.5").toString()).toBe(
+          FP20("1.5").acosh().toString(),
+        );
+      } finally {
+        fixedconfig.configure({ places: 8, roundingMode: 4 });
+      }
     });
   });
 
@@ -279,23 +818,33 @@ describe("FixedPrecision", () => {
         const a = new FixedPrecision("1.23456789");
         expect(a.round(4, 1).toString()).toBe("1.23450000");
       });
+      test("round() handles half-up positive and negative ties", () => {
+        expect(new FixedPrecision("1.23455000").round(4, 4).toString()).toBe(
+          "1.23460000",
+        );
+        expect(new FixedPrecision("-1.23455000").round(4, 4).toString()).toBe(
+          "-1.23460000",
+        );
+      });
+      test("round() keeps the original context scale", () => {
+        const rounded = new FixedPrecision("1.23456789").round(2);
+        expect(rounded.toString()).toBe("1.23000000");
+      });
     });
   });
 
   describe("shiftedBy() method", () => {
-    test("shiftedBy() shifts left (positive n)", () => {
-      const a = new FixedPrecision("1.23456789");
-      const shifted = a.shiftedBy(2);
-      expect(shifted.toString()).toBe("123.45678900");
+    test("shiftedBy() multiplies raw bigint by powers of ten with positive n", () => {
+      const shifted = new FixedPrecision(1000n).shiftedBy(1);
+      expect(shifted.raw()).toBe(10000n);
     });
-    test("shiftedBy() shifts right (negative n) exactly", () => {
-      const a = new FixedPrecision("123.45678900");
-      const shifted = a.shiftedBy(-2);
-      expect(shifted.toString()).toBe("1.23456789");
+    test("shiftedBy() divides raw bigint by powers of ten with negative n", () => {
+      const shifted = new FixedPrecision(1000n).shiftedBy(-1);
+      expect(shifted.raw()).toBe(100n);
     });
-    test("shiftedBy() throws error on inexact shift", () => {
-      const a = new FixedPrecision("123.45678900");
-      expect(() => a.shiftedBy(-3)).toThrow("Inexact shift");
+    test("shiftedBy() accepts inexact negative shift", () => {
+      const a = new FixedPrecision(1001n);
+      expect(a.shiftedBy(-1).raw()).toBe(100n);
     });
   });
 
@@ -461,6 +1010,27 @@ describe("FixedPrecision", () => {
     });
   });
 
+  describe("Static hypot()", () => {
+    test("hypot() returns sqrt(sum(v^2))", () => {
+      expect(FixedPrecision.hypot(3, 4).toString()).toBe("5.00000000");
+      expect(FixedPrecision.hypot("1", "2", "2").toString()).toBe(
+        "3.00000000",
+      );
+    });
+
+    test("hypot() accepts arrays and returns zero with no values", () => {
+      expect(FixedPrecision.hypot([6, 8]).toString()).toBe("10.00000000");
+      expect(FixedPrecision.hypot().toString()).toBe("0.00000000");
+    });
+
+    test("hypot() normalizes values to the default context", () => {
+      const FP4 = FixedPrecision.create({ places: 4 });
+      expect(FixedPrecision.hypot(FP4("3"), "4").toString()).toBe(
+        "5.00000000",
+      );
+    });
+  });
+
   describe("Formatting Methods", () => {
     describe("toExponential()", () => {
       test("toExponential() produces correct format for a small number", () => {
@@ -488,6 +1058,43 @@ describe("FixedPrecision", () => {
       });
     });
 
+    describe("prec()", () => {
+      const down = 1;
+      const halfUp = 4;
+
+      test("prec() rounds to significant digits with half-up by default", () => {
+        const x = new FixedPrecision("9876.54321");
+        expect(x.prec(2).toString()).toBe("9900.00000000");
+        expect(x.prec(7).toString()).toBe("9876.54300000");
+        expect(x.prec(20).toString()).toBe("9876.54321000");
+      });
+      test("prec() supports down and half-up modes", () => {
+        const x = new FixedPrecision("9876.54321");
+        expect(x.prec(1, down).toString()).toBe("9000.00000000");
+        expect(x.prec(1, halfUp).toString()).toBe("10000.00000000");
+      });
+      test("prec() does not mutate the original value", () => {
+        const x = new FixedPrecision("9876.54321");
+        x.prec(2);
+        expect(x.toString()).toBe("9876.54321000");
+      });
+      test("prec() handles small and negative values", () => {
+        expect(new FixedPrecision("0.00123456").prec(2).toString()).toBe(
+          "0.00120000",
+        );
+        expect(new FixedPrecision("-9876.54321").prec(2).toString()).toBe(
+          "-9900.00000000",
+        );
+      });
+      test("prec() validates significant digits and rounding mode", () => {
+        const x = new FixedPrecision("9876.54321");
+        expect(() => x.prec(0)).toThrow("Precision must be a positive integer");
+        expect(() => x.prec(2, 9 as RoundingMode)).toThrow(
+          "Rounding mode 9 is not supported.",
+        );
+      });
+    });
+
     describe("toFixed()", () => {
       test("toFixed() produces correct output with 0 places", () => {
         const a = new FixedPrecision("123.456789");
@@ -497,17 +1104,137 @@ describe("FixedPrecision", () => {
         const a = new FixedPrecision("123.456789");
         expect(a.toFixed(3)).toBe("123.457");
       });
+      test("toFixed() matches scale() output", () => {
+        const value = new FixedPrecision(499.99999999999994);
+
+        expect(value.toFixed(4)).toBe("500.0000");
+        expect(value.toFixed(4)).toBe(value.scale(4).toString());
+      });
+    });
+
+    describe("base conversion methods", () => {
+      test("toBinary(), toOctal(), and toHex() convert finite fractions", () => {
+        const a = new FixedPrecision("10.625");
+
+        expect(a.toBinary()).toBe("1010.101");
+        expect(a.toOctal()).toBe("12.5");
+        expect(a.toHex()).toBe("a.a");
+        expect(a.toHexadecimal()).toBe("a.a");
+      });
+
+      test("base conversion methods keep the sign", () => {
+        const a = new FixedPrecision("-15.5");
+
+        expect(a.toBinary()).toBe("-1111.1");
+        expect(a.toOctal()).toBe("-17.4");
+        expect(a.toHex()).toBe("-f.8");
+      });
+
+      test("base conversion methods support significant-digit rounding", () => {
+        expect(new FixedPrecision("255").toHex(1)).toBe("100");
+        expect(new FixedPrecision("255").toHex(2)).toBe("ff");
+        expect(new FixedPrecision("0.1").toBinary(4)).toBe("0.0001101");
+      });
+
+      test("base conversion methods validate significant digits", () => {
+        const a = new FixedPrecision("10.625");
+
+        expect(() => a.toBinary(0)).toThrow("Invalid precision");
+        expect(() => a.toOctal(1.5)).toThrow("Invalid precision");
+        expect(() => a.toHex(1e6)).toThrow("Invalid precision");
+      });
+    });
+  });
+
+  describe("Bitwise Operations", () => {
+    const FP0 = FixedPrecision.create({ places: 0 });
+
+    test("bitAnd", () => {
+      const a = FP0(12);
+      const b = FP0(5);
+      expect(a.bitAnd(b).toString()).toBe("4");
+    });
+
+    test("bitOr", () => {
+      const a = FP0(12);
+      const b = FP0(5);
+      expect(a.bitOr(b).toString()).toBe("13");
+    });
+
+    test("bitXor", () => {
+      const a = FP0(12);
+      const b = FP0(5);
+      expect(a.bitXor(b).toString()).toBe("9");
+    });
+
+    test("bitNot", () => {
+      const a = FP0(12);
+      expect(a.bitNot().toString()).toBe("-13");
+    });
+
+    test("leftShift", () => {
+      const a = FP0(12);
+      expect(a.leftShift(2).toString()).toBe("48");
+      expect(() => a.leftShift(-1)).toThrow();
+    });
+
+    test("rightArithShift", () => {
+      const a = FP0(12);
+      expect(a.rightArithShift(2).toString()).toBe("3");
+      expect(() => a.rightArithShift(-1)).toThrow();
+    });
+  });
+
+  describe("Combinatorics Operations", () => {
+    test("factorial", () => {
+      expect(FixedPrecision.factorial(5).toNumber()).toBe(120);
+      expect(FixedPrecision.factorial(0).toNumber()).toBe(1);
+      expect(() => FixedPrecision.factorial(-1)).toThrow();
+    });
+
+    test("permutations", () => {
+      expect(FixedPrecision.permutations(5, 2).toNumber()).toBe(20);
+      expect(FixedPrecision.permutations(5, 5).toNumber()).toBe(120);
+      expect(FixedPrecision.permutations(5, 6).toNumber()).toBe(0);
+      expect(() => FixedPrecision.permutations(-1, 2)).toThrow();
+    });
+
+    test("combinations", () => {
+      expect(FixedPrecision.combinations(5, 2).toNumber()).toBe(10);
+      expect(FixedPrecision.combinations(5, 3).toNumber()).toBe(10);
+      expect(FixedPrecision.combinations(5, 5).toNumber()).toBe(1);
+      expect(FixedPrecision.combinations(5, 6).toNumber()).toBe(0);
+      expect(() => FixedPrecision.combinations(-1, 2)).toThrow();
     });
   });
 
   describe("scale() method", () => {
-    test("scale() rounds correctly to 4 decimals", () => {
+    test("scale() changes context and rounds correctly to 4 decimals", () => {
       const a = new FixedPrecision("123.456789");
-      expect(a.scale(4).toString()).toBe("123.45680000");
+      expect(a.scale(4).toString()).toBe("123.4568");
     });
-    test("scale() rounds correctly to 0 decimals", () => {
+    test("scale() changes context and rounds correctly to 0 decimals", () => {
       const a = new FixedPrecision("99.99999999");
-      expect(a.scale(0, 4).toString()).toBe("100.00000000");
+      expect(a.scale(0, 4).toString()).toBe("100");
+    });
+    test("scale() can increase decimal places", () => {
+      const FP2 = FixedPrecision.create({ places: 2 });
+      const a = FP2("1.23");
+      expect(a.scale(4).toString()).toBe("1.2300");
+    });
+    test("scale() does not mutate the original value", () => {
+      const a = new FixedPrecision("123.456789");
+      a.scale(2);
+      expect(a.toString()).toBe("123.45678900");
+    });
+    test("scale() validates the target scale", () => {
+      const a = new FixedPrecision("123.456789");
+      expect(() => a.scale(-1)).toThrow(
+        "newScale must be an integer between 0 and 20",
+      );
+      expect(() => a.scale(21)).toThrow(
+        "newScale must be an integer between 0 and 20",
+      );
     });
   });
 
@@ -523,6 +1250,79 @@ describe("FixedPrecision", () => {
       const b = new FixedPrecision("3.00000000");
       const result = a.leftover(b);
       expect(result.toString()).toBe("1.50000000");
+    });
+  });
+
+  describe("Fraction Operations", () => {
+    test("numerator and denominator", () => {
+      const x = new FixedPrecision("12.34"); // Places = 8, SCALE = 10^8
+      const num = x.num();
+      const den = x.den();
+
+      // 12.34 = 1234 / 100 = 617 / 50
+      expect(num.toNumber()).toBe(617);
+      expect(den.toNumber()).toBe(50);
+
+      // Verify that num / den reconstructs the original value
+      expect(num.div(den).toString()).toBe("12.34000000");
+    });
+
+    test("negative numerator", () => {
+      const x = new FixedPrecision("-1.5");
+      expect(x.num().toNumber()).toBe(-3);
+      expect(x.den().toNumber()).toBe(2);
+    });
+
+    test("toFraction() returns numerator and denominator", () => {
+      const [num, den] = new FixedPrecision("12.34").toFraction();
+
+      expect(num.toNumber()).toBe(617);
+      expect(den.toNumber()).toBe(50);
+      expect(num.div(den).toString()).toBe("12.34000000");
+    });
+
+    test("toFraction(maxDen) limits the denominator", () => {
+      const [num, den] = new FixedPrecision("0.33333333").toFraction(100);
+
+      expect(num.toNumber()).toBe(1);
+      expect(den.toNumber()).toBe(3);
+    });
+
+    test("toFraction(maxDen) validates maxDen", () => {
+      expect(() => new FixedPrecision("0.5").toFraction(0)).toThrow(
+        "maxDen must be a positive integer",
+      );
+    });
+  });
+
+  describe("Matrix/Vector Operations", () => {
+    test("dot product", () => {
+      const a = [1, 2, 3];
+      const b = [4, 5, 6];
+      expect(FixedPrecision.dot(a, b).toNumber()).toBe(32); // 1*4 + 2*5 + 3*6 = 32
+    });
+
+    test("cross product", () => {
+      const a = [1, 2, 3];
+      const b = [4, 5, 6];
+      const result = FixedPrecision.cross(a, b);
+
+      expect(result.length).toBe(3);
+      expect(result[0]?.toNumber()).toBe(-3);
+      expect(result[1]?.toNumber()).toBe(6);
+      expect(result[2]?.toNumber()).toBe(-3);
+    });
+
+    test("dot product vector length mismatch", () => {
+      const a = [1, 2];
+      const b = [4, 5, 6];
+      expect(() => FixedPrecision.dot(a, b)).toThrow();
+    });
+
+    test("cross product vector length mismatch", () => {
+      const a = [1, 2];
+      const b = [4, 5, 6];
+      expect(() => FixedPrecision.cross(a, b)).toThrow();
     });
   });
 

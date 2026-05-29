@@ -85,6 +85,20 @@ Generates a random FixedPrecision value between 0 (inclusive) and 1 (exclusive).
 const random = FixedPrecision.random(4); // Random value with 4 decimals
 ```
 
+### `FixedPrecision.exp(value: FixedPrecisionValue)`
+
+Computes `e` raised to the supplied value using the global default context.
+
+**Parameters:**
+- `value`: `FixedPrecisionValue` - Exponent value
+
+**Returns:** `FixedPrecision`
+
+**Example:**
+```typescript
+FixedPrecision.exp(2).toNumber(); // 7.38905609
+```
+
 ### `FixedPrecision.min(val, ...vals)`
 
 Returns the smallest value among the given arguments. Accepts both variadic arguments and a single array.
@@ -341,6 +355,85 @@ Computes the square root of this value.
 ```typescript
 const value = new FixedPrecision("16.00");
 value.sqrt(); // "4.00000000"
+```
+
+#### `ln(): FixedPrecision`
+
+Computes the natural logarithm of this value.
+Transcendental functions use bigint fixed-point arithmetic and return values in
+the current context scale.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative
+
+**Example:**
+```typescript
+new FixedPrecision("2").ln(); // "0.69314718"
+```
+
+**Precision note:** With a 20-place factory,
+`FP20("2.71828182845904523536").ln().toString()` returns
+`"0.99999999999999999999"`, not exactly `"1.00000000000000000000"`, because the
+input is the 20-decimal-place truncation of `e`. The true value starts with
+`2.718281828459045235360287471352662497757...`, so
+`2.71828182845904523536` is slightly smaller than `e`.
+
+#### `log(base?: FixedPrecisionValue): FixedPrecision`
+
+Computes the natural logarithm of this value, or the logarithm in the supplied
+base.
+
+**Parameters:**
+- `base`: `FixedPrecisionValue` (optional) - Logarithm base
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative, or if base is not positive or
+is equal to 1
+
+**Example:**
+```typescript
+new FixedPrecision("2").log(); // "0.69314718"
+new FixedPrecision("16").log(2); // "4.00000000"
+```
+
+#### `log10(): FixedPrecision`
+
+Computes the base-10 logarithm of this value.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative
+
+**Example:**
+```typescript
+new FixedPrecision("100").log10(); // "2.00000000"
+```
+
+#### `log2(): FixedPrecision`
+
+Computes the base-2 logarithm of this value.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Throws:** `Error` if value is zero or negative
+
+**Example:**
+```typescript
+new FixedPrecision("8").log2(); // "3.00000000"
+```
+
+#### `exp(): FixedPrecision`
+
+Computes `e` raised to this value.
+Use `FixedPrecision.exp(value)` to pass the exponent directly.
+
+**Returns:** `FixedPrecision` - New instance with result
+
+**Example:**
+```typescript
+new FixedPrecision("1").exp(); // "2.71828182"
 ```
 
 #### `neg(): FixedPrecision`
@@ -655,6 +748,31 @@ value.round(2); // "123.46"
 value.round(4, 1); // "123.4567" (ROUND_DOWN)
 ```
 
+#### `prec(sd: number, rm?: RoundingMode): FixedPrecision`
+
+Rounds the value to the specified number of significant digits. The returned
+instance keeps the original context scale and the original instance is not
+mutated.
+
+**Parameters:**
+- `sd`: `number` - Significant digits
+- `rm`: `RoundingMode` (optional) - Rounding mode (defaults to context rounding mode)
+
+**Returns:** `FixedPrecision` - New instance rounded to significant digits
+
+**Example:**
+```typescript
+const down = 1; // ROUND_DOWN
+const halfUp = 4; // ROUND_HALF_UP
+const value = new FixedPrecision("9876.54321");
+
+value.prec(2).toString(); // "9900.00000000"
+value.prec(7).toString(); // "9876.54300000"
+value.prec(20).toString(); // "9876.54321000"
+value.prec(1, down).toString(); // "9000.00000000"
+value.prec(1, halfUp).toString(); // "10000.00000000"
+```
+
 #### `ceil(): FixedPrecision`
 
 Returns the ceiling of the value (rounds upward for positive numbers).
@@ -693,13 +811,14 @@ value.trunc(); // "123.00000000"
 
 #### `scale(newScale: number, rm?: RoundingMode): FixedPrecision`
 
-Adjusts the value to a new number of decimal places.
+Adjusts the value to a new number of decimal places. The returned instance uses
+`newScale` as its context `places`, so string output reflects the new scale.
 
 **Parameters:**
 - `newScale`: `number` - New number of decimal places (0-20)
 - `rm`: `RoundingMode` (optional) - Rounding mode for adjustment
 
-**Returns:** `FixedPrecision` - New instance with adjusted scale
+**Returns:** `FixedPrecision` - New instance with the adjusted value and context scale
 
 **Example:**
 ```typescript
@@ -710,22 +829,22 @@ value.scale(4); // "123.4568"
 
 #### `shiftedBy(n: number): FixedPrecision`
 
-Shifts the value by `n` decimal places.
+Shifts the raw scaled value by powers of ten. A positive `n` multiplies by
+`10 ** n`; a negative `n` divides by `10 ** abs(n)` and truncates toward zero
+when the division is not exact.
 
 **Parameters:**
-- `n`: `number` - Number of decimal places to shift
-  - Positive: multiplies by 10ⁿ
-  - Negative: divides by 10ⁿ (must be exact)
+- `n`: `number` - Integer decimal shift amount
+  - Positive: multiplies by powers of ten
+  - Negative: divides by powers of ten
 
 **Returns:** `FixedPrecision` - New instance with shifted value
 
-**Throws:** `Error` if negative shift is inexact
-
 **Example:**
 ```typescript
-const value = new FixedPrecision("123.45");
-value.shiftedBy(2); // "12345.00" (×100)
-value.shiftedBy(-1); // "12.345" (÷10)
+new FixedPrecision(1000n).shiftedBy(1).raw(); // 10000n
+new FixedPrecision(1000n).shiftedBy(-1).raw(); // 100n
+new FixedPrecision(1001n).shiftedBy(-1).raw(); // 100n
 ```
 
 ### Utility Methods
