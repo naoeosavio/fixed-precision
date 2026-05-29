@@ -79,7 +79,25 @@ For complete documentation, see the [docs/](docs/) directory:
 - [Basic Concepts](docs/concepts.md) - Understanding scaled representation
 - [Arithmetic Operations](docs/arithmetic.md) - Complete guide to calculations
 - [Raw Operations](docs/raw-operations.md) - Working with scaled values directly
+- [Minimal Build](docs/minimal.md) - Smaller entry point for core decimal operations
 - [⚠️ BigInt Warning](docs/bigint-warning.md) - Critical: BigInt values are pre-scaled
+
+## Minimal Build
+
+Use the minimal entry point when you need the core decimal API with a smaller bundle surface:
+
+```ts
+import FixedPrecision, { fixedconfig } from "fixed-precision/minimal";
+
+fixedconfig.configure({ places: 8, roundingMode: 4 });
+
+const price = new FixedPrecision("499.99999999999994");
+
+console.log(price.toFixed(4)); // "500.0000"
+console.log(price.scale(4).toString()); // "500.0000"
+```
+
+The minimal build keeps creation, arithmetic, comparison, rounding/scaling, sqrt, random/min/max/sum, and common formatting/conversion methods. It intentionally omits the larger extended APIs such as trigonometry, logarithms, matrix/vector helpers, bitwise operations, and combinatorics.
 
 ## Method Chaining with Raw Values
 

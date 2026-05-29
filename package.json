@@ -5,10 +5,33 @@
   "main": "dist/FixedPrecision.js",
   "type": "module",
   "module": "dist/FixedPrecision.js",
+  "files": [
+    "dist",
+    "minimal.js",
+    "minimal.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
   "exports": {
     ".": {
-      "import": "./dist/FixedPrecision.js",
-      "require": "./dist/FixedPrecision.cjs"
+      "import": {
+        "types": "./dist/FixedPrecision.d.ts",
+        "default": "./dist/FixedPrecision.js"
+      },
+      "require": {
+        "types": "./dist/FixedPrecision.d.cts",
+        "default": "./dist/FixedPrecision.cjs"
+      }
+    },
+    "./minimal": {
+      "import": {
+        "types": "./dist/Minimal.d.ts",
+        "default": "./dist/Minimal.js"
+      },
+      "require": {
+        "types": "./dist/Minimal.d.cts",
+        "default": "./dist/Minimal.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
