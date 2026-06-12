@@ -49,11 +49,11 @@ export function cubeRoot(value: bigint, scale: bigint): bigint {
 
   const target = value * scale * scale;
   let current = initialCubeRootGuess(target);
-  let next = (2n * current + target / (current * current)) / 3n;
+  let next = ((current << 1n) + target / (current * current)) / 3n;
 
   while (next < current) {
     current = next;
-    next = (2n * current + target / (current * current)) / 3n;
+    next = ((current << 1n) + target / (current * current)) / 3n;
   }
 
   while (current * current * current > target) {

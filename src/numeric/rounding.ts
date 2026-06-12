@@ -94,7 +94,7 @@ function roundHalfUpScaledValue(value: bigint, factor: bigint): bigint {
     return value;
   }
 
-  const twiceAbsRem = rem < 0n ? -rem * 2n : rem * 2n;
+  const twiceAbsRem = rem < 0n ? -rem << 1n : rem << 1n;
   if (twiceAbsRem < factor) {
     return base;
   }
@@ -108,7 +108,7 @@ function roundHalf(
   isPositive: boolean,
   rm: RoundingMode,
 ): bigint {
-  const twiceAbsRem = 2n * (rem < 0n ? -rem : rem);
+  const twiceAbsRem = (rem < 0n ? -rem : rem) << 1n;
 
   if (rm === 7) {
     return isPositive && twiceAbsRem >= factor ? q + 1n : q;
@@ -124,7 +124,7 @@ function roundHalfEven(
   factor: bigint,
   isPositive: boolean,
 ): bigint {
-  const twiceAbsRem = 2n * (rem < 0n ? -rem : rem);
+  const twiceAbsRem = (rem < 0n ? -rem : rem) << 1n;
   if (twiceAbsRem === factor) {
     return q % 2n === 0n ? q : isPositive ? q + 1n : q - 1n;
   }
@@ -137,7 +137,7 @@ function roundHalfFloor(
   factor: bigint,
   isPositive: boolean,
 ): bigint {
-  const twiceAbsRem = 2n * (rem < 0n ? -rem : rem);
+  const twiceAbsRem = (rem < 0n ? -rem : rem) << 1n;
   if (isPositive) {
     return twiceAbsRem > factor ? q + 1n : q;
   }

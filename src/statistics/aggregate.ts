@@ -10,8 +10,8 @@ export function selectMin<T>(
     throw new Error("FixedPrecision.min requires at least one argument");
   }
   let result = normalize(first);
-  for (const value of values.slice(1)) {
-    const current = normalize(value);
+  for (let i = 1; i < values.length; i++) {
+    const current = normalize(values[i]!);
     if (isLess(current, result)) result = current;
   }
   return result;
@@ -27,8 +27,8 @@ export function selectMax<T>(
     throw new Error("FixedPrecision.max requires at least one argument");
   }
   let result = normalize(first);
-  for (const value of values.slice(1)) {
-    const current = normalize(value);
+  for (let i = 1; i < values.length; i++) {
+    const current = normalize(values[i]!);
     if (isGreater(current, result)) result = current;
   }
   return result;
