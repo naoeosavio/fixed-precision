@@ -7,8 +7,10 @@ const MAX_SERIES_ITERATIONS = 80;
 const PI =
   "3.14159265358979323846264338327950288419716939937510582097494459230781640628620899";
 
+const workContextCache = new Map<bigint, WorkContext>();
+
 export function sinValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const reduced = reduceAngle(toWorkScale(value), work);
   return fromWorkScale(
     clampUnit(sinWork(reduced.angle, work.scale), work.scale),
@@ -16,14 +18,14 @@ export function sinValue(value: bigint, ctx: FPContext): bigint {
 }
 
 export function cosValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const reduced = reduceAngle(toWorkScale(value), work);
   const result = reduced.cosSign * cosWork(reduced.angle, work.scale);
   return fromWorkScale(clampUnit(result, work.scale));
 }
 
 export function tanValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const reduced = reduceAngle(toWorkScale(value), work);
   const cosine = reduced.cosSign * cosWork(reduced.angle, work.scale);
 
@@ -34,21 +36,21 @@ export function tanValue(value: bigint, ctx: FPContext): bigint {
 }
 
 export function secValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const reduced = reduceAngle(toWorkScale(value), work);
   const cosine = reduced.cosSign * cosWork(reduced.angle, work.scale);
   return fromWorkScale(reciprocalWork(cosine, work.scale, "Secant"));
 }
 
 export function cscValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const reduced = reduceAngle(toWorkScale(value), work);
   const sine = sinWork(reduced.angle, work.scale);
   return fromWorkScale(reciprocalWork(sine, work.scale, "Cosecant"));
 }
 
 export function cotValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const reduced = reduceAngle(toWorkScale(value), work);
   const sine = sinWork(reduced.angle, work.scale);
 
@@ -61,7 +63,7 @@ export function cotValue(value: bigint, ctx: FPContext): bigint {
 export function asinValue(value: bigint, ctx: FPContext): bigint {
   assertBetweenMinusOneAndOne(value, ctx, "Arcsine");
 
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const input = toWorkScale(value);
   const companion = sqrtOneMinusSquared(input, work.scale);
   return fromWorkScale(atan2Work(input, companion, work));
@@ -70,24 +72,24 @@ export function asinValue(value: bigint, ctx: FPContext): bigint {
 export function acosValue(value: bigint, ctx: FPContext): bigint {
   assertBetweenMinusOneAndOne(value, ctx, "Arccosine");
 
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const input = toWorkScale(value);
   const companion = sqrtOneMinusSquared(input, work.scale);
   return fromWorkScale(atan2Work(companion, input, work));
 }
 
 export function atanValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   return fromWorkScale(atanWork(toWorkScale(value), work));
 }
 
 export function atan2Value(y: bigint, x: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   return fromWorkScale(atan2Work(toWorkScale(y), toWorkScale(x), work));
 }
 
 export function acotValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
 
   if (value === 0n) {
     return fromWorkScale(work.halfPi);
@@ -117,9 +119,8 @@ export function sinhValue(value: bigint, ctx: FPContext): bigint {
 export function coshValue(value: bigint, ctx: FPContext): bigint {
   const positive = expValue(value, ctx);
   const negative = expValue(-value, ctx);
-  return (positive + negative) / 2n;
+  return (positive + negative) >> 1n;
 }
-
 export function tanhValue(value: bigint, ctx: FPContext): bigint {
   const doubled = value * 2n;
   const exponent = expValue(doubled, ctx);
@@ -289,9 +290,8 @@ function atanReducedWork(value: bigint, scale: bigint): bigint {
   const valueSquared = (value * value) / scale;
   const root = squareRoot(scale + valueSquared, scale);
   const reduced = (value * scale) / (scale + root);
-  return 2n * atanSeriesWork(reduced, scale);
+  return atanSeriesWork(reduced, scale) << 1n;
 }
-
 function atanSeriesWork(value: bigint, scale: bigint): bigint {
   const valueSquared = (value * value) / scale;
   let term = value;
@@ -339,6 +339,16 @@ function reduceAngle(value: bigint, work: WorkContext): ReducedAngle {
   };
 }
 
+function getWorkContext(ctx: FPContext): WorkContext {
+  const existing = workContextCache.get(ctx.SCALE);
+  if (existing !== undefined) {
+    return existing;
+  }
+  const work = makeWorkContext(ctx);
+  workContextCache.set(ctx.SCALE, work);
+  return work;
+}
+
 function makeWorkContext(ctx: FPContext): WorkContext {
   const scale = ctx.SCALE * GUARD_SCALE;
   const pi = scaledDecimal(PI, scale);
@@ -346,8 +356,8 @@ function makeWorkContext(ctx: FPContext): WorkContext {
   return {
     scale,
     pi,
-    halfPi: pi / 2n,
-    twoPi: pi * 2n,
+    halfPi: pi >> 1n,
+    twoPi: pi << 1n,
   };
 }
 
