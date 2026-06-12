@@ -7,9 +7,11 @@ const LN2 =
 const LN10 =
   "2.30258509299404568401799145468436420760110148862877297603332790096757260967735248";
 
+const workContextCache = new Map<bigint, WorkContext>();
+
 export function naturalLogValue(value: bigint, ctx: FPContext): bigint {
   assertPositive(value);
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   return fromWorkScale(naturalLogWork(toWorkScale(value), work));
 }
 
@@ -17,7 +19,7 @@ export function logValue(value: bigint, base: bigint, ctx: FPContext): bigint {
   assertPositive(value);
   assertValidBase(base, ctx);
 
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const numerator = naturalLogWork(toWorkScale(value), work);
   const denominator = naturalLogWork(toWorkScale(base), work);
   if (denominator === 0n) {
@@ -34,7 +36,7 @@ export function log10Value(value: bigint, ctx: FPContext): bigint {
     return exact;
   }
 
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const result =
     (naturalLogWork(toWorkScale(value), work) * work.scale) / work.ln10;
   return fromWorkScale(result);
@@ -42,29 +44,28 @@ export function log10Value(value: bigint, ctx: FPContext): bigint {
 
 export function log2Value(value: bigint, ctx: FPContext): bigint {
   assertPositive(value);
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   const result =
     (naturalLogWork(toWorkScale(value), work) * work.scale) / work.ln2;
   return fromWorkScale(result);
 }
 
 export function expValue(value: bigint, ctx: FPContext): bigint {
-  const work = makeWorkContext(ctx);
+  const work = getWorkContext(ctx);
   return fromWorkScale(expWork(toWorkScale(value), work));
 }
 
 function naturalLogWork(value: bigint, work: WorkContext): bigint {
   let normalized = value;
   let exponent = 0n;
-  const upperBound = work.scale * 2n;
 
-  while (normalized >= upperBound) {
-    normalized /= 2n;
+  while (normalized >= work.upperBound) {
+    normalized >>= 1n;
     exponent += 1n;
   }
 
   while (normalized < work.scale) {
-    normalized *= 2n;
+    normalized <<= 1n;
     exponent -= 1n;
   }
 
@@ -88,7 +89,7 @@ function naturalLogOneToTwo(value: bigint, scale: bigint): bigint {
     divisor += 2n;
   }
 
-  return sum * 2n;
+  return sum << 1n;
 }
 
 function expWork(value: bigint, work: WorkContext): bigint {
@@ -127,10 +128,21 @@ function divideRounded(value: bigint, divisor: bigint): bigint {
   return -((-value + divisor / 2n) / divisor);
 }
 
+function getWorkContext(ctx: FPContext): WorkContext {
+  const existing = workContextCache.get(ctx.SCALE);
+  if (existing !== undefined) {
+    return existing;
+  }
+  const work = makeWorkContext(ctx);
+  workContextCache.set(ctx.SCALE, work);
+  return work;
+}
+
 function makeWorkContext(ctx: FPContext): WorkContext {
   const scale = ctx.SCALE * GUARD_SCALE;
   return {
     scale,
+    upperBound: scale << 1n,
     ln2: scaledDecimal(LN2, scale),
     ln10: scaledDecimal(LN10, scale),
   };
@@ -201,6 +213,7 @@ function countPowerOfTen(value: bigint): bigint | undefined {
 
 type WorkContext = {
   scale: bigint;
+  upperBound: bigint;
   ln2: bigint;
   ln10: bigint;
 };
