@@ -53,32 +53,32 @@ import { selectMax, selectMin, sumRawValues } from "./statistics/aggregate";
 import { toBaseWithCtx, toStringWithCtx } from "./string/format";
 import { fromStringWithCtx } from "./string/parse";
 import {
-  acoshValue,
-  acosValue,
-  acothValue,
-  acotValue,
-  acschValue,
-  acscValue,
-  asechValue,
-  asecValue,
-  asinhValue,
-  asinValue,
-  atan2Value,
-  atanhValue,
-  atanValue,
-  coshValue,
-  cosValue,
-  cothValue,
-  cotValue,
-  cschValue,
-  cscValue,
-  sechValue,
-  secValue,
-  sinhValue,
-  sinValue,
-  tanhValue,
-  tanValue,
-} from "./trigonometry";
+  acos_value,
+  acosh_value,
+  acot_value,
+  acoth_value,
+  acsc_value,
+  acsch_value,
+  asec_value,
+  asech_value,
+  asin_value,
+  asinh_value,
+  atan_value,
+  atan2_value,
+  atanh_value,
+  cos_value,
+  cosh_value,
+  cot_value,
+  coth_value,
+  csc_value,
+  csch_value,
+  sec_value,
+  sech_value,
+  sin_value,
+  sinh_value,
+  tan_value,
+  tanh_value,
+} from "./trigonometry/index.js";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
@@ -503,103 +503,105 @@ export default class FixedPrecision {
   }
 
   public sin(): FixedPrecision {
-    return this.fromRaw(sinValue(this.value, this.ctx));
+    return this.fromRaw(sin_value(this.value, this.ctx));
   }
 
   public cos(): FixedPrecision {
-    return this.fromRaw(cosValue(this.value, this.ctx));
+    return this.fromRaw(cos_value(this.value, this.ctx));
   }
 
   public tan(): FixedPrecision {
-    return this.fromRaw(tanValue(this.value, this.ctx));
+    return this.fromRaw(tan_value(this.value, this.ctx));
   }
 
   public sec(): FixedPrecision {
-    return this.fromRaw(secValue(this.value, this.ctx));
+    return this.fromRaw(sec_value(this.value, this.ctx));
   }
 
   public csc(): FixedPrecision {
-    return this.fromRaw(cscValue(this.value, this.ctx));
+    return this.fromRaw(csc_value(this.value, this.ctx));
   }
 
   public cot(): FixedPrecision {
-    return this.fromRaw(cotValue(this.value, this.ctx));
+    return this.fromRaw(cot_value(this.value, this.ctx));
   }
 
   public asin(): FixedPrecision {
-    return this.fromRaw(asinValue(this.value, this.ctx));
+    return this.fromRaw(asin_value(this.value, this.ctx));
   }
 
   public acos(): FixedPrecision {
-    return this.fromRaw(acosValue(this.value, this.ctx));
+    return this.fromRaw(acos_value(this.value, this.ctx));
   }
 
   public atan(): FixedPrecision {
-    return this.fromRaw(atanValue(this.value, this.ctx));
+    return this.fromRaw(atan_value(this.value, this.ctx));
   }
 
   public atan2(x: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(atan2Value(this.value, this.coerce(x).value, this.ctx));
+    return this.fromRaw(
+      atan2_value(this.value, this.coerce(x).value, this.ctx),
+    );
   }
 
   public acot(): FixedPrecision {
-    return this.fromRaw(acotValue(this.value, this.ctx));
+    return this.fromRaw(acot_value(this.value, this.ctx));
   }
 
   public asec(): FixedPrecision {
-    return this.fromRaw(asecValue(this.value, this.ctx));
+    return this.fromRaw(asec_value(this.value, this.ctx));
   }
 
   public acsc(): FixedPrecision {
-    return this.fromRaw(acscValue(this.value, this.ctx));
+    return this.fromRaw(acsc_value(this.value, this.ctx));
   }
 
   public sinh(): FixedPrecision {
-    return this.fromRaw(sinhValue(this.value, this.ctx));
+    return this.fromRaw(sinh_value(this.value, this.ctx));
   }
 
   public cosh(): FixedPrecision {
-    return this.fromRaw(coshValue(this.value, this.ctx));
+    return this.fromRaw(cosh_value(this.value, this.ctx));
   }
 
   public tanh(): FixedPrecision {
-    return this.fromRaw(tanhValue(this.value, this.ctx));
+    return this.fromRaw(tanh_value(this.value, this.ctx));
   }
 
   public sech(): FixedPrecision {
-    return this.fromRaw(sechValue(this.value, this.ctx));
+    return this.fromRaw(sech_value(this.value, this.ctx));
   }
 
   public csch(): FixedPrecision {
-    return this.fromRaw(cschValue(this.value, this.ctx));
+    return this.fromRaw(csch_value(this.value, this.ctx));
   }
 
   public coth(): FixedPrecision {
-    return this.fromRaw(cothValue(this.value, this.ctx));
+    return this.fromRaw(coth_value(this.value, this.ctx));
   }
 
   public asinh(): FixedPrecision {
-    return this.fromRaw(asinhValue(this.value, this.ctx));
+    return this.fromRaw(asinh_value(this.value, this.ctx));
   }
 
   public acosh(): FixedPrecision {
-    return this.fromRaw(acoshValue(this.value, this.ctx));
+    return this.fromRaw(acosh_value(this.value, this.ctx));
   }
 
   public atanh(): FixedPrecision {
-    return this.fromRaw(atanhValue(this.value, this.ctx));
+    return this.fromRaw(atanh_value(this.value, this.ctx));
   }
 
   public asech(): FixedPrecision {
-    return this.fromRaw(asechValue(this.value, this.ctx));
+    return this.fromRaw(asech_value(this.value, this.ctx));
   }
 
   public acsch(): FixedPrecision {
-    return this.fromRaw(acschValue(this.value, this.ctx));
+    return this.fromRaw(acsch_value(this.value, this.ctx));
   }
 
   public acoth(): FixedPrecision {
-    return this.fromRaw(acothValue(this.value, this.ctx));
+    return this.fromRaw(acoth_value(this.value, this.ctx));
   }
 
   public num(): FixedPrecision {
@@ -921,39 +923,39 @@ export default class FixedPrecision {
   }
 
   public static sin(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, sinValue);
+    return FixedPrecision.fromDefaultContextValue(value, sin_value);
   }
 
   public static cos(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, cosValue);
+    return FixedPrecision.fromDefaultContextValue(value, cos_value);
   }
 
   public static tan(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, tanValue);
+    return FixedPrecision.fromDefaultContextValue(value, tan_value);
   }
 
   public static sec(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, secValue);
+    return FixedPrecision.fromDefaultContextValue(value, sec_value);
   }
 
   public static csc(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, cscValue);
+    return FixedPrecision.fromDefaultContextValue(value, csc_value);
   }
 
   public static cot(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, cotValue);
+    return FixedPrecision.fromDefaultContextValue(value, cot_value);
   }
 
   public static asin(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, asinValue);
+    return FixedPrecision.fromDefaultContextValue(value, asin_value);
   }
 
   public static acos(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, acosValue);
+    return FixedPrecision.fromDefaultContextValue(value, acos_value);
   }
 
   public static atan(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, atanValue);
+    return FixedPrecision.fromDefaultContextValue(value, atan_value);
   }
 
   public static atan2(
@@ -962,7 +964,7 @@ export default class FixedPrecision {
   ): FixedPrecision {
     const ctx = FixedPrecision.defaultContext;
     return FixedPrecision.fromRawWithContext(
-      atan2Value(
+      atan2_value(
         FixedPrecision.toScaled(y, ctx),
         FixedPrecision.toScaled(x, ctx),
         ctx,
@@ -972,63 +974,63 @@ export default class FixedPrecision {
   }
 
   public static acot(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, acotValue);
+    return FixedPrecision.fromDefaultContextValue(value, acot_value);
   }
 
   public static asec(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, asecValue);
+    return FixedPrecision.fromDefaultContextValue(value, asec_value);
   }
 
   public static acsc(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, acscValue);
+    return FixedPrecision.fromDefaultContextValue(value, acsc_value);
   }
 
   public static sinh(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, sinhValue);
+    return FixedPrecision.fromDefaultContextValue(value, sinh_value);
   }
 
   public static cosh(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, coshValue);
+    return FixedPrecision.fromDefaultContextValue(value, cosh_value);
   }
 
   public static tanh(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, tanhValue);
+    return FixedPrecision.fromDefaultContextValue(value, tanh_value);
   }
 
   public static sech(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, sechValue);
+    return FixedPrecision.fromDefaultContextValue(value, sech_value);
   }
 
   public static csch(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, cschValue);
+    return FixedPrecision.fromDefaultContextValue(value, csch_value);
   }
 
   public static coth(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, cothValue);
+    return FixedPrecision.fromDefaultContextValue(value, coth_value);
   }
 
   public static asinh(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, asinhValue);
+    return FixedPrecision.fromDefaultContextValue(value, asinh_value);
   }
 
   public static acosh(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, acoshValue);
+    return FixedPrecision.fromDefaultContextValue(value, acosh_value);
   }
 
   public static atanh(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, atanhValue);
+    return FixedPrecision.fromDefaultContextValue(value, atanh_value);
   }
 
   public static asech(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, asechValue);
+    return FixedPrecision.fromDefaultContextValue(value, asech_value);
   }
 
   public static acsch(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, acschValue);
+    return FixedPrecision.fromDefaultContextValue(value, acsch_value);
   }
 
   public static acoth(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.fromDefaultContextValue(value, acothValue);
+    return FixedPrecision.fromDefaultContextValue(value, acoth_value);
   }
 
   public static phi(): FixedPrecision {
