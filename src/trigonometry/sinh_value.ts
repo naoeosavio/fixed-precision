@@ -1,8 +1,8 @@
 import type { FPContext } from "../FixedPrecision";
-import { expValue } from "../numeric/transcendental";
+import { exp_value } from "../numeric/index.js";
 
 export function sinh_value(value: bigint, ctx: FPContext): bigint {
-  const positive = expValue(value, ctx);
-  const negative = expValue(-value, ctx);
+  const positive = exp_value(value, ctx);
+  const negative = exp_value(-value, ctx);
   return (positive - negative) / 2n;
 }

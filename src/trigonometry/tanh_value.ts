@@ -1,8 +1,8 @@
 import type { FPContext } from "../FixedPrecision";
-import { expValue } from "../numeric/transcendental";
+import { exp_value } from "../numeric/index.js";
 
 export function tanh_value(value: bigint, ctx: FPContext): bigint {
   const doubled = value * 2n;
-  const exponent = expValue(doubled, ctx);
+  const exponent = exp_value(doubled, ctx);
   return ((exponent - ctx.SCALE) * ctx.SCALE) / (exponent + ctx.SCALE);
 }

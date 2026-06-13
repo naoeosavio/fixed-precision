@@ -25,22 +25,21 @@ import {
   logicalXorValues,
 } from "./logical/sign";
 import { crossProduct, dotProduct } from "./matrix/operations";
-import { eNumber, phiNumber, piNumber, sqrt2Number } from "./numeric/constants";
-import { fromNumberWithCtx, toNumberWithCtx } from "./numeric/number";
-import { precisionValue, significantDigitsValue } from "./numeric/precision";
 import {
-  roundToScaleValue,
-  roundValue,
-  scaleValue,
-  shiftedByValue,
-} from "./numeric/rounding";
-import {
-  expValue,
-  log2Value,
-  log10Value,
-  logValue,
-  naturalLogValue,
-} from "./numeric/transcendental";
+  exp_value,
+  from_number_with_ctx,
+  log_value,
+  log2_value,
+  log10_value,
+  natural_log_value,
+  precision_value,
+  round_to_scale_value,
+  round_value,
+  scale_value,
+  shifted_by_value,
+  significant_digits_value,
+  to_number_with_ctx,
+} from "./numeric/index.js";
 import {
   compareValues,
   equalsValue,
@@ -184,7 +183,7 @@ export default class FixedPrecision {
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
     if (value instanceof FixedPrecision) return value.value;
     if (typeof value === "bigint") return value;
-    if (typeof value === "number") return fromNumberWithCtx(value, ctx);
+    if (typeof value === "number") return from_number_with_ctx(value, ctx);
     if (typeof value === "string") return fromStringWithCtx(value, ctx);
     throw new Error(`Invalid value type: ${typeof value}`);
   }
@@ -197,7 +196,7 @@ export default class FixedPrecision {
   //     return value;
   //   }
   //   if (typeof value === "number") {
-  //     return fromNumberWithCtx(value, ctx);
+  //     return from_number_with_ctx(value, ctx);
   //   }
   //   if (typeof value === "string") {
   //     return fromStringWithCtx(value, ctx);
@@ -211,11 +210,11 @@ export default class FixedPrecision {
 
   public toNumber(places?: number): number {
     if (places === undefined) {
-      return toNumberWithCtx(this.value, this.ctx);
+      return to_number_with_ctx(this.value, this.ctx);
     }
 
     const scaled = this.scale(places);
-    return toNumberWithCtx(scaled.value, scaled.ctx);
+    return to_number_with_ctx(scaled.value, scaled.ctx);
   }
 
   public toString(): string {
@@ -315,7 +314,7 @@ export default class FixedPrecision {
   }
 
   public precision(includeZeros = false): number {
-    return significantDigitsValue(this.value, this.ctx, includeZeros);
+    return significant_digits_value(this.value, this.ctx, includeZeros);
   }
 
   public sd(includeZeros = false): number {
@@ -416,7 +415,7 @@ export default class FixedPrecision {
       throw new Error("Increment must be non-zero");
     }
 
-    return this.fromRaw(roundToScaleValue(this.value, step, rm) * step);
+    return this.fromRaw(round_to_scale_value(this.value, step, rm) * step);
   }
 
   public bitAnd(other: FixedPrecisionValue): FixedPrecision {
@@ -478,7 +477,7 @@ export default class FixedPrecision {
   }
 
   public ln(): FixedPrecision {
-    return this.fromRaw(naturalLogValue(this.value, this.ctx));
+    return this.fromRaw(natural_log_value(this.value, this.ctx));
   }
 
   public log(base?: FixedPrecisionValue): FixedPrecision {
@@ -486,20 +485,20 @@ export default class FixedPrecision {
       return this.ln();
     }
     return this.fromRaw(
-      logValue(this.value, this.coerce(base).value, this.ctx),
+      log_value(this.value, this.coerce(base).value, this.ctx),
     );
   }
 
   public log10(): FixedPrecision {
-    return this.fromRaw(log10Value(this.value, this.ctx));
+    return this.fromRaw(log10_value(this.value, this.ctx));
   }
 
   public log2(): FixedPrecision {
-    return this.fromRaw(log2Value(this.value, this.ctx));
+    return this.fromRaw(log2_value(this.value, this.ctx));
   }
 
   public exp(): FixedPrecision {
-    return this.fromRaw(expValue(this.value, this.ctx));
+    return this.fromRaw(exp_value(this.value, this.ctx));
   }
 
   public sin(): FixedPrecision {
@@ -643,14 +642,14 @@ export default class FixedPrecision {
     dp: number = this.ctx.places,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    return this.fromRaw(roundValue(this.value, dp, rm, this.ctx));
+    return this.fromRaw(round_value(this.value, dp, rm, this.ctx));
   }
 
   public scale(
     newScale: number,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    const nextValue = scaleValue(this.value, newScale, rm, this.ctx);
+    const nextValue = scale_value(this.value, newScale, rm, this.ctx);
     const nextCtx = FixedPrecision.makeContext(newScale, this.ctx.roundingMode);
     const instance = new FixedPrecision(0n, nextCtx);
     instance.value = nextValue;
@@ -661,7 +660,7 @@ export default class FixedPrecision {
     sd: number,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    return this.fromRaw(precisionValue(this.value, sd, rm, this.ctx));
+    return this.fromRaw(precision_value(this.value, sd, rm, this.ctx));
   }
 
   public toJSON(): string {
@@ -681,7 +680,7 @@ export default class FixedPrecision {
   }
 
   public shiftedBy(n: number): FixedPrecision {
-    return this.fromRaw(shiftedByValue(this.value, n));
+    return this.fromRaw(shifted_by_value(this.value, n));
   }
 
   public static sign(value: FixedPrecisionValue): number {
@@ -774,17 +773,17 @@ export default class FixedPrecision {
   }
 
   public static PI(): FixedPrecision {
-    return new FixedPrecision(piNumber());
+    return new FixedPrecision(Math.PI);
   }
 
   public static e(): FixedPrecision {
-    return new FixedPrecision(eNumber());
+    return new FixedPrecision(Math.E);
   }
 
   public static exp(value: FixedPrecisionValue): FixedPrecision {
     const ctx = FixedPrecision.defaultContext;
     const instance = new FixedPrecision(0n, ctx);
-    instance.value = expValue(FixedPrecision.toScaled(value, ctx), ctx);
+    instance.value = exp_value(FixedPrecision.toScaled(value, ctx), ctx);
     return instance;
   }
 
@@ -1034,11 +1033,11 @@ export default class FixedPrecision {
   }
 
   public static phi(): FixedPrecision {
-    return new FixedPrecision(phiNumber());
+    return new FixedPrecision((1 + Math.sqrt(5)) / 2);
   }
 
   public static sqrt2(): FixedPrecision {
-    return new FixedPrecision(sqrt2Number());
+    return new FixedPrecision(Math.sqrt(2));
   }
 
   public static random(decimalPlaces?: number): FixedPrecision {

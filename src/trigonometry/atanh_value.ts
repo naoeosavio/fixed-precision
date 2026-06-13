@@ -1,5 +1,5 @@
 import type { FPContext } from "../FixedPrecision";
-import { naturalLogValue } from "../numeric/transcendental";
+import { natural_log_value } from "../numeric/index.js";
 
 export function atanh_value(value: bigint, ctx: FPContext): bigint {
   if (value <= -ctx.SCALE || value >= ctx.SCALE) {
@@ -11,5 +11,5 @@ export function atanh_value(value: bigint, ctx: FPContext): bigint {
   const numerator = ctx.SCALE + value;
   const denominator = ctx.SCALE - value;
   const ratio = (numerator * ctx.SCALE) / denominator;
-  return naturalLogValue(ratio, ctx) / 2n;
+  return natural_log_value(ratio, ctx) / 2n;
 }

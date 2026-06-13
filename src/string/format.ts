@@ -1,5 +1,5 @@
 import type { FPContext, RoundingMode } from "../FixedPrecision";
-import { roundToScaleValue } from "../numeric/rounding";
+import { round_to_scale_value } from "../numeric/index.js";
 
 const BASE_DIGITS = "0123456789abcdefghijklmnopqrstuvwxyz";
 
@@ -89,13 +89,13 @@ function toBaseWithSignificantDigits(
 
   if (unitExponent >= 0) {
     const unit = ctx.SCALE * basePower(radix, unitExponent);
-    const quotient = roundToScaleValue(value, unit, roundingMode);
+    const quotient = round_to_scale_value(value, unit, roundingMode);
     return ((quotient * unit) / ctx.SCALE).toString(radix);
   }
 
   const fractionalPlaces = -unitExponent;
   const baseScale = basePower(radix, fractionalPlaces);
-  const quotient = roundToScaleValue(
+  const quotient = round_to_scale_value(
     value * baseScale,
     ctx.SCALE,
     roundingMode,

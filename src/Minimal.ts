@@ -1,9 +1,13 @@
 import { power } from "./arithmetic/power";
 import { makeContext } from "./core/context";
 import { squareRoot } from "./geometry/sqrt";
-import { fromNumberWithCtx, toNumberWithCtx } from "./numeric/number";
-import { precisionValue } from "./numeric/precision";
-import { roundValue, scaleValue } from "./numeric/rounding";
+import {
+  from_number_with_ctx,
+  precision_value,
+  round_value,
+  scale_value,
+  to_number_with_ctx,
+} from "./numeric/index.js";
 import { toStringWithCtx } from "./string/format";
 import { fromStringWithCtx } from "./string/parse";
 import { precisionPowerOfTen } from "./utils";
@@ -79,7 +83,7 @@ export default class FixedPrecision {
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
     if (value instanceof FixedPrecision) return value.value;
     if (typeof value === "bigint") return value;
-    if (typeof value === "number") return fromNumberWithCtx(value, ctx);
+    if (typeof value === "number") return from_number_with_ctx(value, ctx);
     if (typeof value === "string") return fromStringWithCtx(value, ctx);
     throw new Error(`Invalid value type: ${typeof value}`);
   }
@@ -297,14 +301,14 @@ export default class FixedPrecision {
     dp = this.ctx.places,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    return this.fromRaw(roundValue(this.value, dp, rm, this.ctx));
+    return this.fromRaw(round_value(this.value, dp, rm, this.ctx));
   }
 
   public scale(
     newScale: number,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    const nextValue = scaleValue(this.value, newScale, rm, this.ctx);
+    const nextValue = scale_value(this.value, newScale, rm, this.ctx);
     const nextCtx = makeContext(newScale, this.ctx.roundingMode);
     const instance = new FixedPrecision(0n, nextCtx);
     instance.value = nextValue;
@@ -315,7 +319,7 @@ export default class FixedPrecision {
     sd: number,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    return this.fromRaw(precisionValue(this.value, sd, rm, this.ctx));
+    return this.fromRaw(precision_value(this.value, sd, rm, this.ctx));
   }
 
   public trunc(): FixedPrecision {
@@ -337,11 +341,11 @@ export default class FixedPrecision {
 
   public toNumber(places?: number): number {
     if (places === undefined) {
-      return toNumberWithCtx(this.value, this.ctx);
+      return to_number_with_ctx(this.value, this.ctx);
     }
 
     const scaled = this.scale(places);
-    return toNumberWithCtx(scaled.value, scaled.ctx);
+    return to_number_with_ctx(scaled.value, scaled.ctx);
   }
 
   public toString(): string {
