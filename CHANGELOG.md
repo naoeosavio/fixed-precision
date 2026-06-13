@@ -224,6 +224,7 @@ All notable changes to the fixed-precision library will be documented in this fi
 - **Fixed**: for any bug fixes
 - **Security**: in case of vulnerabilities
 
+[1.6.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/naoeosavio/fixed-precision/compare/v1.4.0...v1.4.1
 [1.4.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.3.0...v1.4.0
