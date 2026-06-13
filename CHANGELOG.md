@@ -2,6 +2,23 @@
 
 All notable changes to the fixed-precision library will be documented in this file.
 
+## [1.6.0] — 2026-06-12
+
+### Fixes
+- Use `Math.trunc` instead of `Math.floor` in `FixedPrecision.random` to align truncation semantics.
+
+### Refactors
+- Remove unused `fraction/raw.ts` module (including `plusRaw`, `minusRaw`, `productRaw`, `fractionRaw`, `leftoverRaw`).
+
+### Performance
+- **Trigonometry**: Cache `WorkContext` objects by scale to avoid redundant allocations and angle reduction; replace multiplications/divisions by powers of two with bitwise shifts across all trigonometric functions. (Speedups up to 32.36× in benchmarks)
+- **Transcendental**: Cache `WorkContext` by scale for `log`, `log2`, `log10`, and `exp`; replace `*2n`/`/2n` with `<<1n`/`>>1n`; precompute `upperBound`. (Up to 13.7× speedup)
+- **General**: Micro-optimizations across geometry, numeric, and statistics modules — replace power‑of‑two multiplications/divisions with bitwise shifts, and eliminate an unnecessary array allocation in `statistics/aggregate.ts` by switching from `slice` to an index‑based loop.
+
+### Chores
+- Remove empty file `src/expression/primitive.ts`.
+- Bump version to 1.6.0.
+
 ## [1.5.0] — 2026-05-28
 
 ## Features
