@@ -10,10 +10,7 @@ import {
   makeContext,
   makeFactoryContext,
 } from "./core/context";
-import {
-  getNumeratorAndDenominator,
-  limitDenominator,
-} from "./fraction/operations";
+import { get_denominator, get_numerator, to_fraction } from "./fraction/index";
 import { cubeRoot, squareRoot } from "./geometry/sqrt";
 import {
   isNegativeValue,
@@ -591,31 +588,24 @@ export default class FixedPrecision {
   }
 
   public num(): FixedPrecision {
-    const { numerator } = getNumeratorAndDenominator(
-      this.value,
-      this.ctx.SCALE,
-    );
+    const numerator = get_numerator(this.value, this.ctx.SCALE);
     return new FixedPrecision(numerator * this.ctx.SCALE, this.ctx);
   }
 
   public den(): FixedPrecision {
-    const { denominator } = getNumeratorAndDenominator(
-      this.value,
-      this.ctx.SCALE,
-    );
+    const denominator = get_denominator(this.value, this.ctx.SCALE);
     return new FixedPrecision(denominator * this.ctx.SCALE, this.ctx);
   }
 
   public toFraction(
     maxDen?: FixedPrecisionValue,
   ): [FixedPrecision, FixedPrecision] {
-    const exact = getNumeratorAndDenominator(this.value, this.ctx.SCALE);
     const fraction =
       maxDen === undefined
-        ? exact
-        : limitDenominator(
-            exact.numerator,
-            exact.denominator,
+        ? to_fraction(this.value, this.ctx.SCALE)
+        : to_fraction(
+            this.value,
+            this.ctx.SCALE,
             FixedPrecision.normalized(maxDen).scale(0, 1).value,
           );
 
