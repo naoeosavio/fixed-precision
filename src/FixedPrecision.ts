@@ -10,7 +10,7 @@ import {
   makeContext,
   makeFactoryContext,
 } from "./core/context";
-import { get_denominator, get_numerator, to_fraction } from "./fraction/index";
+import { get_denominator, get_numerator, to_fraction } from "./fraction";
 import { cubeRoot, squareRoot } from "./geometry/sqrt";
 import {
   isNegativeValue,
@@ -21,7 +21,7 @@ import {
   logicalOrValues,
   logicalXorValues,
 } from "./logical/sign";
-import { crossProduct, dotProduct } from "./matrix/operations";
+import { cross_product, dot_product } from "./matrix";
 import {
   exp_value,
   from_number_with_ctx,
@@ -36,7 +36,7 @@ import {
   shifted_by_value,
   significant_digits_value,
   to_number_with_ctx,
-} from "./numeric/index";
+} from "./numeric";
 import {
   compareValues,
   equalsValue,
@@ -50,7 +50,7 @@ import {
   from_string_with_ctx,
   to_base_with_ctx,
   to_string_with_ctx,
-} from "./string/index";
+} from "./string";
 import {
   acos_value,
   acosh_value,
@@ -77,7 +77,7 @@ import {
   sinh_value,
   tan_value,
   tanh_value,
-} from "./trigonometry/index";
+} from "./trigonometry";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
@@ -1039,7 +1039,7 @@ export default class FixedPrecision {
     const ctx = FixedPrecision.defaultContext;
     const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
     const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
-    const result = dotProduct(rawA, rawB, ctx.SCALE);
+    const result = dot_product(rawA, rawB, ctx.SCALE);
     return new FixedPrecision(result, ctx);
   }
 
@@ -1050,7 +1050,7 @@ export default class FixedPrecision {
     const ctx = FixedPrecision.defaultContext;
     const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
     const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
-    const result = crossProduct(rawA, rawB, ctx.SCALE);
+    const result = cross_product(rawA, rawB, ctx.SCALE);
     return result.map((v) => FixedPrecision.fromRawWithContext(v, ctx));
   }
 
