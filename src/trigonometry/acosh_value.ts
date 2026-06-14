@@ -1,6 +1,6 @@
 import type { FPContext } from "../FixedPrecision";
 import { squareRoot } from "../geometry/sqrt";
-import { natural_log_value } from "../numeric/index.js";
+import { natural_log_value } from "../numeric/index";
 
 export function acosh_value(value: bigint, ctx: FPContext): bigint {
   if (value < ctx.SCALE) {

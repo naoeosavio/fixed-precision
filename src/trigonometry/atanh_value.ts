@@ -1,5 +1,5 @@
 import type { FPContext } from "../FixedPrecision";
-import { natural_log_value } from "../numeric/index.js";
+import { natural_log_value } from "../numeric/index";
 
 export function atanh_value(value: bigint, ctx: FPContext): bigint {
   if (value <= -ctx.SCALE || value >= ctx.SCALE) {

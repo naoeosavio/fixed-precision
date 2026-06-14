@@ -11,7 +11,7 @@ export function selectMin<T>(
   }
   let result = normalize(first);
   for (let i = 1; i < values.length; i++) {
-    const current = normalize(values[i]!);
+    const current = normalize(values[i]);
     if (isLess(current, result)) result = current;
   }
   return result;
@@ -28,7 +28,7 @@ export function selectMax<T>(
   }
   let result = normalize(first);
   for (let i = 1; i < values.length; i++) {
-    const current = normalize(values[i]!);
+    const current = normalize(values[i]);
     if (isGreater(current, result)) result = current;
   }
   return result;

@@ -1,5 +1,5 @@
 import type { FPContext } from "../../FixedPrecision";
-import { exp_value } from "../../numeric/index.js";
+import { exp_value } from "../../numeric/index";
 
 export function cosh_difference(value: bigint, ctx: FPContext): bigint {
   const positive = exp_value(value, ctx);

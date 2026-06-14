@@ -1,6 +1,6 @@
 import type { FPContext } from "../FixedPrecision";
 import { squareRoot } from "../geometry/sqrt";
-import { natural_log_value } from "../numeric/index.js";
+import { natural_log_value } from "../numeric/index";
 
 export function asinh_value(value: bigint, ctx: FPContext): bigint {
   const x_squared = (value * value) / ctx.SCALE;
