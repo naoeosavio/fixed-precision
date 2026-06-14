@@ -1,9 +1,9 @@
 import { power } from "./arithmetic/power";
 import {
-  combinationsValue,
-  factorialValue,
-  permutationsValue,
-} from "./combinatorics/operations";
+  combinations_value,
+  factorial_value,
+  permutations_value,
+} from "./combinatorics";
 import { collectValues } from "./construction/values";
 import {
   configureContext,
@@ -1136,7 +1136,7 @@ export default class FixedPrecision {
     const val =
       n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
     return FixedPrecision.fromRawWithContext(
-      factorialValue(val) * ctx.SCALE,
+      factorial_value(val) * ctx.SCALE,
       ctx,
     );
   }
@@ -1152,7 +1152,7 @@ export default class FixedPrecision {
     const valK =
       k instanceof FixedPrecision ? k.trunc().toNumber() : Math.trunc(k);
     return FixedPrecision.fromRawWithContext(
-      permutationsValue(valN, valK) * ctx.SCALE,
+      permutations_value(valN, valK) * ctx.SCALE,
       ctx,
     );
   }
@@ -1168,7 +1168,7 @@ export default class FixedPrecision {
     const valK =
       k instanceof FixedPrecision ? k.trunc().toNumber() : Math.trunc(k);
     return FixedPrecision.fromRawWithContext(
-      combinationsValue(valN, valK) * ctx.SCALE,
+      combinations_value(valN, valK) * ctx.SCALE,
       ctx,
     );
   }
