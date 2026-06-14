@@ -1,3 +1,5 @@
+import { power_by_squaring } from "./internal/power_by_squaring";
+
 export function power(value: bigint, exp: number, scale: bigint): bigint {
   if (!Number.isInteger(exp)) throw new Error("Exponent must be an integer");
   if (exp === 0) return scale;
@@ -18,27 +20,11 @@ export function power(value: bigint, exp: number, scale: bigint): bigint {
   } else if (absExp === 3) {
     result = (((value * value) / scale) * value) / scale;
   } else {
-    result = powerBySquaring(value, absExp, scale);
+    result = power_by_squaring(value, absExp, scale);
   }
 
   if (isNegativeExponent) {
     return (scale * scale) / result;
   }
   return result;
-}
-
-function powerBySquaring(value: bigint, exp: number, scale: bigint): bigint {
-  let e = exp;
-  let base = value;
-  let acc = scale;
-
-  while (e > 0) {
-    if (e & 1) acc = (acc * base) / scale;
-    e = e >> 1;
-    if (e > 0) {
-      base = (base * base) / scale;
-    }
-  }
-
-  return acc;
 }
