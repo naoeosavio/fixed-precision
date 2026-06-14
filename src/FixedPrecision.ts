@@ -44,7 +44,7 @@ import {
   greaterThanValue,
   lessThanOrEqualValue,
   lessThanValue,
-} from "./relational/compare";
+} from "./relational";
 import { selectMax, selectMin, sumRawValues } from "./statistics/aggregate";
 import {
   from_string_with_ctx,
