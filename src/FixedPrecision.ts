@@ -45,7 +45,7 @@ import {
   lessThanOrEqualValue,
   lessThanValue,
 } from "./relational";
-import { selectMax, selectMin, sumRawValues } from "./statistics/aggregate";
+import { max_values, min_values, sum_values } from "./statistics";
 import {
   from_string_with_ctx,
   to_base_with_ctx,
@@ -1074,7 +1074,7 @@ export default class FixedPrecision {
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
     const values = collectValues(val, vals);
-    return selectMin(
+    return min_values(
       values,
       (value) => FixedPrecision.normalized(value),
       (left, right) => left.lt(right),
@@ -1086,7 +1086,7 @@ export default class FixedPrecision {
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
     const values = collectValues(val, vals);
-    return selectMax(
+    return max_values(
       values,
       (value) => FixedPrecision.normalized(value),
       (left, right) => left.gt(right),
@@ -1104,7 +1104,7 @@ export default class FixedPrecision {
     }
 
     const first = FixedPrecision.normalized(firstValue);
-    const total = sumRawValues(
+    const total = sum_values(
       values.slice(1),
       first.value,
       (value) => FixedPrecision.normalized(value).value,
