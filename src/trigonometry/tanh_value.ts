@@ -1,5 +1,5 @@
+import { exp_value } from "../arithmetic/index";
 import type { FPContext } from "../FixedPrecision";
-import { exp_value } from "../numeric/index";
 
 export function tanh_value(value: bigint, ctx: FPContext): bigint {
   const doubled = value * 2n;

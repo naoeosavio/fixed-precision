@@ -1,4 +1,4 @@
-import { squareRoot } from "../../geometry/sqrt";
+import { sqrt_value } from "../../arithmetic";
 import { atan_series_work } from "./atan_series_work";
 
 export function atan_reduced_work(value: bigint, scale: bigint): bigint {
@@ -7,7 +7,7 @@ export function atan_reduced_work(value: bigint, scale: bigint): bigint {
   }
 
   const value_squared = (value * value) / scale;
-  const root = squareRoot(scale + value_squared, scale);
+  const root = sqrt_value(scale + value_squared, scale);
   const reduced = (value * scale) / (scale + root);
   return atan_series_work(reduced, scale) << 1n;
 }

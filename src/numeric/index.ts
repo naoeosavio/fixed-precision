@@ -1,13 +1,2 @@
-export { exp_value } from "./exp_value";
-export { from_number_with_ctx } from "./from_number_with_ctx";
-export { log_value } from "./log_value";
-export { log2_value } from "./log2_value";
-export { log10_value } from "./log10_value";
-export { natural_log_value } from "./natural_log_value";
-export { precision_value } from "./precision_value";
-export { round_to_scale_value } from "./round_to_scale_value";
-export { round_value } from "./round_value";
-export { scale_value } from "./scale_value";
-export { shifted_by_value } from "./shifted_by_value";
-export { significant_digits_value } from "./significant_digits_value";
-export { to_number_with_ctx } from "./to_number_with_ctx";
+export { from_number_with_ctx } from "./from_number_with_ctx.js";
+export { to_number_with_ctx } from "./to_number_with_ctx.js";

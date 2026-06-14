@@ -1,5 +1,5 @@
+import { exp_value } from "../arithmetic/index";
 import type { FPContext } from "../FixedPrecision";
-import { exp_value } from "../numeric/index";
 
 export function sinh_value(value: bigint, ctx: FPContext): bigint {
   const positive = exp_value(value, ctx);

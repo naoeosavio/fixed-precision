@@ -1,13 +1,12 @@
-import { power } from "./arithmetic/power";
-import { makeContext } from "./core/context";
-import { squareRoot } from "./geometry/sqrt";
 import {
-  from_number_with_ctx,
+  power,
   precision_value,
   round_value,
   scale_value,
-  to_number_with_ctx,
-} from "./numeric/index";
+  sqrt_value,
+} from "./arithmetic/index";
+import { makeContext } from "./core/context";
+import { from_number_with_ctx, to_number_with_ctx } from "./numeric/index";
 import { from_string_with_ctx, to_string_with_ctx } from "./string/index";
 import { precisionPowerOfTen } from "./utils";
 
@@ -293,7 +292,7 @@ export default class FixedPrecision {
   }
 
   public sqrt(): FixedPrecision {
-    return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
+    return this.fromRaw(sqrt_value(this.value, this.ctx.SCALE));
   }
 
   public round(

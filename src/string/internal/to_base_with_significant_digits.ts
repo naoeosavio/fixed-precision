@@ -1,5 +1,5 @@
+import { round_to_scale_value } from "../../arithmetic";
 import type { FPContext, RoundingMode } from "../../FixedPrecision";
-import { round_to_scale_value } from "../../numeric/index";
 import { assert_significant_digits } from "./assert_significant_digits";
 import { base_exponent } from "./base_exponent";
 import { base_power } from "./base_power";

@@ -1,4 +1,19 @@
-import { power } from "./arithmetic/power";
+import {
+  cbrt_value,
+  exp_value,
+  log_value,
+  log2_value,
+  log10_value,
+  natural_log_value,
+  power,
+  precision_value,
+  round_to_scale_value,
+  round_value,
+  scale_value,
+  shifted_by_value,
+  significant_digits_value,
+  sqrt_value,
+} from "./arithmetic";
 import {
   combinations_value,
   factorial_value,
@@ -11,7 +26,6 @@ import {
   makeFactoryContext,
 } from "./core/context";
 import { get_denominator, get_numerator, to_fraction } from "./fraction";
-import { cubeRoot, squareRoot } from "./geometry/sqrt";
 import {
   isNegativeValue,
   isPositiveValue,
@@ -22,21 +36,7 @@ import {
   logicalXorValues,
 } from "./logical";
 import { cross_product, dot_product } from "./matrix";
-import {
-  exp_value,
-  from_number_with_ctx,
-  log_value,
-  log2_value,
-  log10_value,
-  natural_log_value,
-  precision_value,
-  round_to_scale_value,
-  round_value,
-  scale_value,
-  shifted_by_value,
-  significant_digits_value,
-  to_number_with_ctx,
-} from "./numeric";
+import { from_number_with_ctx, to_number_with_ctx } from "./numeric";
 import {
   compareValues,
   equalsValue,
@@ -449,11 +449,11 @@ export default class FixedPrecision {
   }
 
   public sqrt(): FixedPrecision {
-    return this.fromRaw(squareRoot(this.value, this.ctx.SCALE));
+    return this.fromRaw(sqrt_value(this.value, this.ctx.SCALE));
   }
 
   public cbrt(): FixedPrecision {
-    return this.fromRaw(cubeRoot(this.value, this.ctx.SCALE));
+    return this.fromRaw(cbrt_value(this.value, this.ctx.SCALE));
   }
 
   public cubeRoot(): FixedPrecision {
@@ -884,13 +884,13 @@ export default class FixedPrecision {
 
   public static sqrt(value: FixedPrecisionValue): FixedPrecision {
     return FixedPrecision.fromDefaultContextValue(value, (rawValue, ctx) =>
-      squareRoot(rawValue, ctx.SCALE),
+      sqrt_value(rawValue, ctx.SCALE),
     );
   }
 
   public static cbrt(value: FixedPrecisionValue): FixedPrecision {
     return FixedPrecision.fromDefaultContextValue(value, (rawValue, ctx) =>
-      cubeRoot(rawValue, ctx.SCALE),
+      cbrt_value(rawValue, ctx.SCALE),
     );
   }
 
@@ -1127,7 +1127,7 @@ export default class FixedPrecision {
       const rawValue = FixedPrecision.normalized(value).value;
       total += (rawValue * rawValue) / ctx.SCALE;
     }
-    return FixedPrecision.fromRawWithContext(squareRoot(total, ctx.SCALE), ctx);
+    return FixedPrecision.fromRawWithContext(sqrt_value(total, ctx.SCALE), ctx);
   }
 
   public static factorial(n: number | FixedPrecision): FixedPrecision {

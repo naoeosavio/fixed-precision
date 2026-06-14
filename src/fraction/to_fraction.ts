@@ -1,4 +1,4 @@
-import { gcd } from "./gcd";
+import { gcd } from "../arithmetic";
 import { limit_denominator } from "./internal/limit_denominator";
 
 export function to_fraction(
