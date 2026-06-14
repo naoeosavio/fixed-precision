@@ -20,7 +20,7 @@ import {
   logicalNotValue,
   logicalOrValues,
   logicalXorValues,
-} from "./logical/sign";
+} from "./logical";
 import { cross_product, dot_product } from "./matrix";
 import {
   exp_value,
