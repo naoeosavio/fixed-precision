@@ -7,9 +7,8 @@ import {
   round_value,
   scale_value,
   to_number_with_ctx,
-} from "./numeric/index.js";
-import { toStringWithCtx } from "./string/format";
-import { fromStringWithCtx } from "./string/parse";
+} from "./numeric/index";
+import { from_string_with_ctx, to_string_with_ctx } from "./string/index";
 import { precisionPowerOfTen } from "./utils";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
@@ -84,7 +83,7 @@ export default class FixedPrecision {
     if (value instanceof FixedPrecision) return value.value;
     if (typeof value === "bigint") return value;
     if (typeof value === "number") return from_number_with_ctx(value, ctx);
-    if (typeof value === "string") return fromStringWithCtx(value, ctx);
+    if (typeof value === "string") return from_string_with_ctx(value, ctx);
     throw new Error(`Invalid value type: ${typeof value}`);
   }
 
@@ -349,7 +348,7 @@ export default class FixedPrecision {
   }
 
   public toString(): string {
-    return toStringWithCtx(this.value, this.ctx);
+    return to_string_with_ctx(this.value, this.ctx);
   }
 
   public toFixed(places = 0, rm: RoundingMode = this.ctx.roundingMode): string {

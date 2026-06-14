@@ -39,7 +39,7 @@ import {
   shifted_by_value,
   significant_digits_value,
   to_number_with_ctx,
-} from "./numeric/index.js";
+} from "./numeric/index";
 import {
   compareValues,
   equalsValue,
@@ -49,8 +49,11 @@ import {
   lessThanValue,
 } from "./relational/compare";
 import { selectMax, selectMin, sumRawValues } from "./statistics/aggregate";
-import { toBaseWithCtx, toStringWithCtx } from "./string/format";
-import { fromStringWithCtx } from "./string/parse";
+import {
+  from_string_with_ctx,
+  to_base_with_ctx,
+  to_string_with_ctx,
+} from "./string/index";
 import {
   acos_value,
   acosh_value,
@@ -77,7 +80,7 @@ import {
   sinh_value,
   tan_value,
   tanh_value,
-} from "./trigonometry/index.js";
+} from "./trigonometry/index";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
@@ -184,25 +187,9 @@ export default class FixedPrecision {
     if (value instanceof FixedPrecision) return value.value;
     if (typeof value === "bigint") return value;
     if (typeof value === "number") return from_number_with_ctx(value, ctx);
-    if (typeof value === "string") return fromStringWithCtx(value, ctx);
+    if (typeof value === "string") return from_string_with_ctx(value, ctx);
     throw new Error(`Invalid value type: ${typeof value}`);
   }
-
-  // private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
-  //   if (value instanceof FixedPrecision) {
-  //     return value.value;
-  //   }
-  //   if (typeof value === "bigint") {
-  //     return value;
-  //   }
-  //   if (typeof value === "number") {
-  //     return from_number_with_ctx(value, ctx);
-  //   }
-  //   if (typeof value === "string") {
-  //     return fromStringWithCtx(value, ctx);
-  //   }
-  //   throw new Error(`Invalid value type: ${typeof value}`);
-  // }
 
   private toScaledValue(value: FixedPrecisionValue): bigint {
     return FixedPrecision.toScaled(value, this.ctx);
@@ -218,7 +205,7 @@ export default class FixedPrecision {
   }
 
   public toString(): string {
-    return toStringWithCtx(this.value, this.ctx);
+    return to_string_with_ctx(this.value, this.ctx);
   }
 
   public abs(): FixedPrecision {
@@ -1226,15 +1213,15 @@ export default class FixedPrecision {
   }
 
   public toBinary(sd?: number, rm?: RoundingMode): string {
-    return toBaseWithCtx(this.value, this.ctx, 2, sd, rm);
+    return to_base_with_ctx(this.value, this.ctx, 2, sd, rm);
   }
 
   public toOctal(sd?: number, rm?: RoundingMode): string {
-    return toBaseWithCtx(this.value, this.ctx, 8, sd, rm);
+    return to_base_with_ctx(this.value, this.ctx, 8, sd, rm);
   }
 
   public toHex(sd?: number, rm?: RoundingMode): string {
-    return toBaseWithCtx(this.value, this.ctx, 16, sd, rm);
+    return to_base_with_ctx(this.value, this.ctx, 16, sd, rm);
   }
 
   public toHexadecimal(sd?: number, rm?: RoundingMode): string {
