@@ -23,7 +23,7 @@ import { collectValues } from "./construction/values";
 import {
   configureContext,
   makeContext,
-  makeFactoryContext,
+  FactoryContext,
 } from "./core/context";
 import { get_denominator, get_numerator, to_fraction } from "./fraction";
 import {
@@ -145,7 +145,7 @@ export default class FixedPrecision {
   public static create(
     config: FixedPrecisionConfig,
   ): (val: FixedPrecisionValue) => FixedPrecision {
-    const ctx = makeFactoryContext(config);
+    const ctx = FactoryContext(config);
     return (val: FixedPrecisionValue) => new FixedPrecision(val, ctx);
   }
 

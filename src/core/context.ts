@@ -50,7 +50,7 @@ export function configureContext(
   return makeContext(places, roundingMode);
 }
 
-export function makeFactoryContext(config: FixedPrecisionConfig): FPContext {
+export function FactoryContext(config: FixedPrecisionConfig): FPContext {
   if (config.places === undefined) {
     throw new Error("Decimal places must be specified in factory config");
   }
