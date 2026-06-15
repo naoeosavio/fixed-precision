@@ -1,4 +1,4 @@
-import { absolute_big_int } from "./absolute_big_int";
+import { abs_value } from "../../arithmetic";
 
 export function closer_fraction(
   original_numerator: bigint,
@@ -8,11 +8,11 @@ export function closer_fraction(
   right_numerator: bigint,
   right_denominator: bigint,
 ): { numerator: bigint; denominator: bigint } {
-  const left_distance = absolute_big_int(
+  const left_distance = abs_value(
     left_numerator * original_denominator -
       original_numerator * left_denominator,
   );
-  const right_distance = absolute_big_int(
+  const right_distance = abs_value(
     right_numerator * original_denominator -
       original_numerator * right_denominator,
   );

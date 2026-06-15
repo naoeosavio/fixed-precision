@@ -20,11 +20,7 @@ import {
   permutations_value,
 } from "./combinatorics";
 import { collectValues } from "./construction/values";
-import {
-  configureContext,
-  makeContext,
-  FactoryContext,
-} from "./core/context";
+import { configureContext, FactoryContext, makeContext } from "./core/context";
 import { get_denominator, get_numerator, to_fraction } from "./fraction";
 import {
   isNegativeValue,
