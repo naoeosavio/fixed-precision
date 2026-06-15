@@ -1,4 +1,5 @@
 import type { FPContext } from "../FixedPrecision";
+import { cleanTrailingZeros, count_digits } from "../utils";
 
 export function significant_digits_value(
   value: bigint,
@@ -14,20 +15,17 @@ export function significant_digits_value(
   const fractional_part = abs_value - integer_part * ctx.SCALE;
 
   if (fractional_part === 0n) {
-    const integer_digits = integer_part.toString();
-    return include_zeros
-      ? integer_digits.length
-      : integer_digits.replace(/0+$/, "").length;
+    const { n: stripped, c: trimmed } = cleanTrailingZeros(integer_part);
+    const digits = count_digits(stripped);
+    return include_zeros ? digits + trimmed : digits || 1;
   }
 
-  const fractional_digits = fractional_part
-    .toString()
-    .padStart(ctx.places, "0")
-    .replace(/0+$/, "");
+  const { n: stripped_frac, c: trimmed_frac } =
+    cleanTrailingZeros(fractional_part);
 
   if (integer_part === 0n) {
-    return fractional_digits.replace(/^0+/, "").length;
+    return count_digits(stripped_frac) || 1;
   }
 
-  return integer_part.toString().length + fractional_digits.length;
+  return count_digits(integer_part) + (ctx.places - trimmed_frac);
 }

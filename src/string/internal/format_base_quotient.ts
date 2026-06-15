@@ -1,3 +1,4 @@
+import { cleanTrailingZeros } from "../../utils";
 import { base_power } from "./base_power";
 
 export function format_base_quotient(
@@ -15,10 +16,13 @@ export function format_base_quotient(
     return `${sign}${integer_part.toString(radix)}`;
   }
 
-  const fractional_digits = fractional_part
+  const { n: stripped_frac, c: trimmed_frac } = cleanTrailingZeros(
+    fractional_part,
+    radix,
+  );
+  const fractional_digits = stripped_frac
     .toString(radix)
-    .padStart(fractional_places, "0")
-    .replace(/0+$/, "");
+    .padStart(fractional_places - trimmed_frac, "0");
 
   return `${sign}${integer_part.toString(radix)}.${fractional_digits}`;
 }
