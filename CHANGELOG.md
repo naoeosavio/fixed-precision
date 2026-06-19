@@ -2,6 +2,26 @@
 
 All notable changes to the fixed-precision library will be documented in this file.
 
+## [1.7.0] — 2026-06-19
+
+### Fixes
+
+- Fixed zero formatting to return `"0"` instead of `"0."` with trailing zeros.
+
+### Performance
+
+- Improved trailing zero removal performance by using numeric utilities instead of string operations.
+
+### Refactors
+
+- Adopted `snake_case` naming convention across arithmetic, combinatorics, fraction, logical, matrix, numeric, relational, statistics, string, and trigonometry modules.
+- Modularized monolithic files: split arithmetic, combinatorics, fraction, matrix, statistics, string, and trigonometry logic into per-function modules and added centralized barrel exports.
+- Reorganized arithmetic module into a dedicated `src/arithmetic` directory.
+- Centralized relational and logical module exports.
+- Replaced local absolute bigint helper with a shared `abs_value` function.
+- Renamed `makeFactoryContext` to `FactoryContext` for PascalCase consistency.
+- Removed redundant non-null assertions and `.js` extensions from imports after adjusting `tsconfig`.
+
 ## [1.6.0] — 2026-06-12
 
 ### Fixes
@@ -224,6 +244,7 @@ All notable changes to the fixed-precision library will be documented in this fi
 - **Fixed**: for any bug fixes
 - **Security**: in case of vulnerabilities
 
+[1.7.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.4.1...v1.5.0
 [1.4.1]: https://github.com/naoeosavio/fixed-precision/compare/v1.4.0...v1.4.1
