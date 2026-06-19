@@ -179,7 +179,7 @@ describe("FixedPrecision", () => {
     test("mod() - remainder of zero", () => {
       const x = new FixedPrecision("10");
       const y = new FixedPrecision("5");
-      expect(x.mod(y).toString()).toBe("0.00000000");
+      expect(x.mod(y).toString()).toBe("0");
     });
 
     test("product() - large multiplication", () => {
@@ -214,7 +214,7 @@ describe("FixedPrecision", () => {
         "5.00000000",
       );
       expect(new FixedPrecision("-1").clamp(0, 10).toString()).toBe(
-        "0.00000000",
+        "0",
       );
       expect(new FixedPrecision("11").clamp(0, 10).toString()).toBe(
         "10.00000000",
@@ -378,7 +378,7 @@ describe("FixedPrecision", () => {
     });
 
     test("logarithm wrappers call the matching instance methods", () => {
-      expect(FixedPrecision.ln("1").toString()).toBe("0.00000000");
+      expect(FixedPrecision.ln("1").toString()).toBe("0");
       expect(FixedPrecision.log("8", "2").toString()).toBe("3.00000000");
       expect(FixedPrecision.log2("8").toString()).toBe("3.00000000");
       expect(FixedPrecision.log10("100").toString()).toBe("2.00000000");
@@ -500,7 +500,7 @@ describe("FixedPrecision", () => {
     test("sqrt() of zero returns zero", () => {
       const a = FP20(0);
       const result = a.sqrt();
-      expect(result.toString()).toBe("0.00000000000000000000");
+      expect(result.toString()).toBe("0");
     });
 
     test("FixedPrecision.sqrt() returns square root using default context", () => {
@@ -629,9 +629,9 @@ describe("FixedPrecision", () => {
     test("sin(), cos(), and tan() handle zero", () => {
       const zero = FP20("0");
 
-      expect(zero.sin().toString()).toBe("0.00000000000000000000");
+      expect(zero.sin().toString()).toBe("0");
       expect(zero.cos().toString()).toBe("1.00000000000000000000");
-      expect(zero.tan().toString()).toBe("0.00000000000000000000");
+      expect(zero.tan().toString()).toBe("0");
     });
 
     test("sin() and cos() handle common radian angles", () => {
@@ -1020,7 +1020,7 @@ describe("FixedPrecision", () => {
 
     test("hypot() accepts arrays and returns zero with no values", () => {
       expect(FixedPrecision.hypot([6, 8]).toString()).toBe("10.00000000");
-      expect(FixedPrecision.hypot().toString()).toBe("0.00000000");
+      expect(FixedPrecision.hypot().toString()).toBe("0");
     });
 
     test("hypot() normalizes values to the default context", () => {
