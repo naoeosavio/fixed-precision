@@ -14,6 +14,7 @@ const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
 const FP8_DOWN = FixedPrecision.create({ places: 8, roundingMode: 1 });
 const FP10 = FixedPrecision.create({ places: 10, roundingMode: 4 });
 const FP15 = FixedPrecision.create({ places: 15, roundingMode: 4 });
+const FP16 = FixedPrecision.create({ places: 16, roundingMode: 4 });
 const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
 
 const PI = "3.14159265358979323846";
@@ -60,6 +61,7 @@ describe("FixedPrecision", () => {
     test("eq", () => {
       expect(FP8("123.45678900").eq(FP8("123.45678900"))).toBe(true);
       expect(FP8("123.45678900").eq(FP8("123.45678899"))).toBe(false);
+      expect(FP20("3").eq(FP20("3"))).toBe(true);
     });
 
     test("gt gte lt lte", () => {
@@ -69,6 +71,10 @@ describe("FixedPrecision", () => {
       expect(a.gte(b)).toBe(true);
       expect(b.lt(a)).toBe(true);
       expect(b.lte(a)).toBe(true);
+      expect(FP20("3").lt(FP20("4"))).toBe(true);
+      expect(FP20("3").gt(FP20("4"))).toBe(false);
+      expect(FP20("-5").lt(FP20("2"))).toBe(true);
+      expect(FP20("-5").lt(FP20("-3"))).toBe(true);
     });
 
     test("equal values", () => {
@@ -98,6 +104,9 @@ describe("FixedPrecision", () => {
     test("neg", () => {
       expect(FP8("42.00000000").neg().toString()).toBe("-42.00000000");
       expect(FP8("-42.00000000").neg().toString()).toBe("42.00000000");
+      expect(FP6("-3.14").abs().toString()).toBe("3.140000");
+      expect(FP6("-3.14").neg().toString()).toBe("3.140000");
+      expect(FP6("-3.14").neg().neg().toString()).toBe("-3.140000");
     });
 
     test("sign", () => {
@@ -249,27 +258,37 @@ describe("FixedPrecision", () => {
     test("add", () => {
       expect(FP8("10.5").add(FP8("3.2")).toString()).toBe("13.70000000");
       expect(FP8("10.5").add(FP8(0)).toString()).toBe("10.50000000");
+      expect(FP4("1234.56").add(FP4("765.44")).toString()).toBe("2000.0000");
+      expect(() => FP4("-2").add(FP2("1"))).toThrow("Cannot operate on different precisions");
     });
 
     test("sub", () => {
       expect(FP8("3.2").sub(FP8("10.5")).toString()).toBe("-7.30000000");
       expect(FP8("10.5").sub(FP8(0)).toString()).toBe("10.50000000");
+      expect(FP4("3").sub(FP4("9")).toString()).toBe("-6.0000");
     });
 
     test("mul", () => {
       expect(FP8("10.5").mul(FP8("3.2")).toString()).toBe("33.60000000");
       expect(FP8("10.5").mul(FP8(1)).toString()).toBe("10.50000000");
+      expect(FP4("1.2500").mul(FP4("4.0000")).toString()).toBe("5.0000");
+      expect(FP4("-2").mul(FP4("-3")).toString()).toBe("6.0000");
     });
 
     test("div", () => {
       expect(FP8("10.5").div(FP8("3.2")).toFixed(2)).toBe("3.28");
       expect(FP8("10.5").div(FP8("10.5")).toString()).toBe("1.00000000");
       expect(() => FP8("10.5").div(FP8(0))).toThrow("Division by zero");
+      expect(FP4("10").div(FP4("3")).toString()).toBe("3.3333");
+      expect(() => FP4("10").div(FP4("0"))).toThrow();
     });
 
     test("mod", () => {
       expect(FP8("10").mod(FP8("3")).toString()).toBe("1.00000000");
       expect(FP8("10").mod(FP8("5")).toString()).toBe("0");
+      expect(FP6("10").mod(FP6("3")).toString()).toBe("1.000000");
+      expect(FP6("-10").mod(FP6("3")).toString()).toBe("-1.000000");
+      expect(FP6("10.5").mod(FP6("3.25")).toString()).toBe("0.750000");
     });
 
     test("product", () => {
@@ -328,16 +347,22 @@ describe("FixedPrecision", () => {
     test("ceil", () => {
       expect(FP8("1.00000001").ceil().toString()).toBe("2.00000000");
       expect(FP8("-1.00000001").ceil().toString()).toBe("-1.00000000");
+      expect(FP6("3.2").ceil().toString()).toBe("4.000000");
+      expect(FP6("-3.2").ceil().toString()).toBe("-3.000000");
     });
 
     test("floor", () => {
       expect(FP8("1.99999999").floor().toString()).toBe("1.00000000");
       expect(FP8("-1.00000001").floor().toString()).toBe("-2.00000000");
+      expect(FP6("3.2").floor().toString()).toBe("3.000000");
+      expect(FP6("-3.2").floor().toString()).toBe("-4.000000");
     });
 
     test("trunc", () => {
       expect(FP8("1.98765432").trunc().toString()).toBe("1.00000000");
       expect(FP8("-1.98765432").trunc().toString()).toBe("-1.00000000");
+      expect(FP6("3.7").trunc().toString()).toBe("3.000000");
+      expect(FP6("-3.7").trunc().toString()).toBe("-3.000000");
     });
 
     test("round", () => {
@@ -346,11 +371,20 @@ describe("FixedPrecision", () => {
       expect(FP8("1.23455000").round(4, 4).toString()).toBe("1.23460000");
       expect(FP8("-1.23455000").round(4, 4).toString()).toBe("-1.23460000");
       expect(FP8("1.23456789").round(2).toString()).toBe("1.23000000");
+      expect(FP6("3.5").round(0).toString()).toBe("4.000000");
+      expect(FP6("3.4").round(0).toString()).toBe("3.000000");
+      expect(FP6("-3.5").round(0).toString()).toBe("-4.000000");
+      expect(FP6("3.141592").round(4).toString()).toBe("3.141600");
+      expect(FP6("3.141592").round(2).toString()).toBe("3.140000");
+      expect(FP6("3.141592").round(0).toString()).toBe("3.000000");
     });
 
     test("pow", () => {
       expect(FP8("2.00000000").pow(3).toString()).toBe("8.00000000");
       expect(FP8("2.00000000").pow(-2).toFixed(8)).toBe("0.25000000");
+      expect(FP20("2").pow(10).toString()).toBe("1024.00000000000000000000");
+      expect(FP20("1.05").pow(24).toString()).toBe("3.22509994371369982542");
+      expect(FP20("3").pow(0).toString()).toBe("1.00000000000000000000");
     });
 
     test("square cube", () => {
@@ -369,6 +403,10 @@ describe("FixedPrecision", () => {
       expect(FP20(0).sqrt().toString()).toBe("0");
       expect(FixedPrecision.sqrt("9").toString()).toBe("3.00000000");
       expect(FixedPrecision.sqrt("2").toNumber()).toBeCloseTo(Math.sqrt(2), 7);
+      expect(FP20("2").sqrt().toString()).toBe("1.41421356237309504880");
+      expect(FP20("9").sqrt().toString()).toBe("3.00000000000000000000");
+      expect(FP20("0.5").sqrt().toString()).toBe("0.70710678118654752440");
+      expect(() => FP20("-4").sqrt()).toThrow();
     });
 
     test("cbrt", () => {
@@ -392,6 +430,11 @@ describe("FixedPrecision", () => {
       expect(FP20("1").exp().toString()).toBe("2.71828182845904523536");
       expect(FP20("-1").exp().toNumber()).toBeCloseTo(Math.exp(-1), 14);
       expect(FP20("-1").exp().toString()).toBe("0.36787944117144232159");
+      expect(FP16("0").exp().toString()).toBe("1.0000000000000000");
+      expect(FP16("1").exp().toString()).toBe("2.7182818284590452");
+      expect(FP16("2").exp().toString()).toBe("7.3890560989306502");
+      expect(FP16("-1").exp().toString()).toBe("0.3678794411714423");
+      expect(FP16("10").exp().toString()).toBe("22026.4657948067165190");
     });
 
     test("ln", () => {
@@ -402,6 +445,12 @@ describe("FixedPrecision", () => {
       expect(FP20("123.456789").ln().toString()).toBe(
         "4.81589120820374401402",
       );
+      expect(FP16("1").ln().toString()).toBe("0");
+      expect(FP16("2.7182818284590452").ln().toString()).toBe(
+        "0.9999999999999999",
+      );
+      expect(FP16("2").ln().toString()).toBe("0.6931471805599453");
+      expect(FP16("10").ln().toString()).toBe("2.3025850929940456");
     });
 
     test("log", () => {
@@ -409,6 +458,9 @@ describe("FixedPrecision", () => {
       expect(FP20("2").log().toString()).toBe(FP20("2").ln().toString());
       expect(FP20("16").log(2).toString()).toBe("4.00000000000000000000");
       expect(FP20("81").log(3).toString()).toBe("4.00000000000000000000");
+      expect(FP16("8").log2().toString()).toBe("3.0000000000000000");
+      expect(FP16("1000").log10().toString()).toBe("3.0000000000000000");
+      expect(FP16("27").log(FP16("3")).toString()).toBe("3.0000000000000000");
     });
 
     test("log10", () => {
@@ -436,6 +488,8 @@ describe("FixedPrecision", () => {
       expect(() => FP20("10").log(0)).toThrow(
         "Logarithm base must be positive and not equal to 1",
       );
+      expect(() => FP16("0").ln()).toThrow();
+      expect(() => FP16("-1").ln()).toThrow();
     });
 
     test("scale", () => {
@@ -661,6 +715,37 @@ describe("FixedPrecision", () => {
       expect(FixedPrecision.isFixedPrecision(FP8("1"))).toBe(true);
       expect(FixedPrecision.isFixedPrecision("1")).toBe(false);
     });
+
+    test("string representations", () => {
+      expect(FP("123456789").toString()).toBe("123456789");
+      expect(FP2("-1234.56").toString()).toBe("-1234.56");
+      expect(FP4("9.5").toString()).toBe("9.5000");
+      expect(FP4("0.0099").toString()).toBe("0.0099");
+      expect(FP4("0").toString()).toBe("0");
+      expect(
+        FP2("3.141592653589793238462643383279502884197169").toString(),
+      ).toBe("3.14");
+    });
+
+    test("parse", () => {
+      expect(FP6(42).toString()).toBe("42.000000");
+      expect(FP6(-999).toString()).toBe("-999.000000");
+      expect(FP6(Number.MAX_SAFE_INTEGER).toString()).toBe(
+        "9007199254740991.000000",
+      );
+      expect(FP6("1234.56789").trunc().toNumber()).toBe(1234);
+      expect(FP6("-99").trunc().toNumber()).toBe(-99);
+      expect(FP10(3.14159265358979).toString()).toBe("3.1415926535");
+      expect(FP10(-0.1).toString()).toBe("-0.1000000000");
+      expect(FP10(1 / 3).toString()).toBe("0.3333333333");
+      expect(FP6(1e15).toString()).toBe("1000000000000000.000000");
+      expect(() => FP6(NaN)).toThrow();
+      expect(() => FP6(Infinity)).toThrow();
+      expect(FP10("3.1415926535").toNumber()).toBeCloseTo(3.1415926535);
+      expect(FP10("-1234567890.1234567890").toNumber()).toBeCloseTo(
+        -1234567890.123456789,
+      );
+    });
   });
 
   describe("String", () => {
@@ -788,12 +873,22 @@ describe("FixedPrecision", () => {
       expect(FP20("0").sin().toString()).toBe("0");
       expect(FP20("0").cos().toString()).toBe("1.00000000000000000000");
       expect(FP20("0").tan().toString()).toBe("0");
+      expect(FP16("0").sin().toString()).toBe("0");
+      expect(FP16("0").cos().toString()).toBe("1.0000000000000000");
+      expect(FP16("0").tan().toString()).toBe("0");
     });
 
     test("sin cos common angles", () => {
       expect(FP20(HALF_PI).sin().toNumber()).toBeCloseTo(1, 14);
       expect(FP20(PI).sin().toNumber()).toBeCloseTo(0, 14);
       expect(FP20(PI).cos().toNumber()).toBeCloseTo(-1, 14);
+      expect(FP16("1.5707963267948966").sin().toString()).toBe(
+        "1.0000000000000000",
+      );
+      expect(FP16("3.1415926535897932").sin().toString()).toBe("0");
+      expect(FP16("3.1415926535897932").cos().toString()).toBe(
+        "-1.0000000000000000",
+      );
     });
 
     test("sin cos tan non-trivial", () => {
@@ -804,6 +899,18 @@ describe("FixedPrecision", () => {
         expect(f.cos().toNumber()).toBeCloseTo(Math.cos(n), 12);
         expect(f.tan().toNumber()).toBeCloseTo(Math.tan(n), 12);
       }
+      expect(FP16("0.5235987755982988").sin().toString()).toBe(
+        "0.4999999999999999",
+      );
+      expect(FP16("1.0471975511965977").cos().toString()).toBe(
+        "0.5000000000000000",
+      );
+      expect(FP16("0.7853981633974483").tan().toString()).toBe(
+        "0.9999999999999999",
+      );
+      expect(FP16("1.0471975511965977").tan().toString()).toBe(
+        "1.7320508075688771",
+      );
     });
 
     test("negative radians", () => {
@@ -811,6 +918,16 @@ describe("FixedPrecision", () => {
       expect(f.sin().toNumber()).toBeCloseTo(Math.sin(-0.75), 7);
       expect(f.cos().toNumber()).toBeCloseTo(Math.cos(-0.75), 7);
       expect(f.tan().toNumber()).toBeCloseTo(Math.tan(-0.75), 7);
+      expect(FP16("-0.5235987755982988").sin().toString()).toBe(
+        "0.4999999999999999",
+      );
+      expect(FP16("6.2831853071795864").sin().toString()).toBe("0");
+    });
+
+    test("tan pi/2", () => {
+      expect(FP16("1.5707963267948966").tan().toString()).toBe(
+        "51998505354962076.9700596246061503",
+      );
     });
 
     test("reciprocal", () => {
@@ -854,6 +971,57 @@ describe("FixedPrecision", () => {
       );
       expect(FP20("2").acsch().toNumber()).toBeCloseTo(Math.asinh(1 / 2), 12);
       expect(FP20("2").acoth().toNumber()).toBeCloseTo(Math.atanh(1 / 2), 12);
+    });
+
+    test("atan exact", () => {
+      expect(FP16("0").atan().toString()).toBe("0");
+      expect(FP16("1").atan().toString()).toBe("0.7853981633974483");
+      expect(FP16("-1").atan().toString()).toBe("-0.7853981633974483");
+      expect(FP16("1.7320508075688772").atan().toString()).toBe(
+        "1.0471975511965977",
+      );
+      expect(FP16("0.5773502691896257").atan().toString()).toBe(
+        "0.5235987755982988",
+      );
+      expect(FP16("10").atan().toString()).toBe("1.4711276743037345");
+    });
+
+    test("atan2 exact", () => {
+      expect(FP16("1").atan2(FP16("1")).toString()).toBe(
+        "0.7853981633974483",
+      );
+      expect(FP16("1").atan2(FP16("-1")).toString()).toBe(
+        "2.3561944901923449",
+      );
+    });
+
+    test("asin exact", () => {
+      expect(FP16("0").asin().toString()).toBe("0");
+      expect(FP16("1").asin().toString()).toBe("1.5707963267948966");
+      expect(FP16("-1").asin().toString()).toBe("-1.5707963267948966");
+      expect(FP16("0.5").asin().toString()).toBe("0.5235987755982988");
+      expect(FP16("-0.5").asin().toString()).toBe("0.5235987755982988");
+    });
+
+    test("acos exact", () => {
+      expect(FP16("1").acos().toString()).toBe("0");
+      expect(FP16("-1").acos().toString()).toBe("3.1415926535897932");
+      expect(FP16("0").acos().toString()).toBe("1.5707963267948966");
+      expect(FP16("0.5").acos().toString()).toBe("1.0471975511965977");
+    });
+
+    test("trig identities", () => {
+      expect(
+        FP16("0.70710678118654752440084436210484").asin().sin().toString(),
+      ).toBe("0.7071067811865474");
+      expect(
+        FP16("0.70710678118654752440084436210484").acos().cos().toString(),
+      ).toBe("0.7071067811865475");
+    });
+
+    test("inverse domain validation", () => {
+      expect(() => FP16("1.5").asin()).toThrow();
+      expect(() => FP16("1.5").acos()).toThrow();
     });
 
     test("domain validation", () => {
