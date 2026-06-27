@@ -103,6 +103,17 @@ describe("Arithmetic", () => {
     );
   });
 
+  test("rest", () => {
+    expect(FP8("12.34").rest("5.67").toString()).toBe("0.00000002");
+    expect(FP8("12.34").rest(5.67).toString()).toBe("0.00000002");
+    expect(FP8("10").rest("3").toString()).toBe("0.00000001");
+    expect(FP8("10").rest("5").toString()).toBe("0");
+    expect(() => FP8("10").rest("0")).toThrow("Division by zero");
+    expect(() => FP8("10").rest(FP4("3"))).toThrow(
+      "Cannot operate on different precisions",
+    );
+  });
+
   test("clamp", () => {
     expect(FP8("5").clamp(0, 10).toString()).toBe("5.00000000");
     expect(FP8("-1").clamp(0, 10).toString()).toBe("0");

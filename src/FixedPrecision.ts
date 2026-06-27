@@ -370,6 +370,11 @@ export default class FixedPrecision {
     };
   }
 
+  public rest(other: FixedPrecisionValue): FixedPrecision {
+    const d = this.divmod(other);
+    return d.remainder;
+  }
+
   public dividedToIntegerBy(other: FixedPrecisionValue): FixedPrecision {
     return this.idiv(other);
   }
