@@ -1,5 +1,7 @@
 import { describe, expect, test } from "vitest";
 
+import FixedPrecision from "../src/FixedPrecision";
+
 import { factorial_value } from "../src/combinatorics/factorial";
 import { permutations_value } from "../src/combinatorics/permutations";
 import { combinations_value } from "../src/combinatorics/combinations";
@@ -53,5 +55,28 @@ describe("Combinatorics", () => {
       expect(() => combinations_value(-1, 2)).toThrow());
     test("throws on negative k", () =>
       expect(() => combinations_value(5, -1)).toThrow());
+  });
+
+  describe("FixedPrecision wrappers", () => {
+    test("factorial", () => {
+      expect(FixedPrecision.factorial(5).toNumber()).toBe(120);
+      expect(FixedPrecision.factorial(0).toNumber()).toBe(1);
+      expect(() => FixedPrecision.factorial(-1)).toThrow();
+    });
+
+    test("permutations", () => {
+      expect(FixedPrecision.permutations(5, 2).toNumber()).toBe(20);
+      expect(FixedPrecision.permutations(5, 5).toNumber()).toBe(120);
+      expect(FixedPrecision.permutations(5, 6).toNumber()).toBe(0);
+      expect(() => FixedPrecision.permutations(-1, 2)).toThrow();
+    });
+
+    test("combinations", () => {
+      expect(FixedPrecision.combinations(5, 2).toNumber()).toBe(10);
+      expect(FixedPrecision.combinations(5, 3).toNumber()).toBe(10);
+      expect(FixedPrecision.combinations(5, 5).toNumber()).toBe(1);
+      expect(FixedPrecision.combinations(5, 6).toNumber()).toBe(0);
+      expect(() => FixedPrecision.combinations(-1, 2)).toThrow();
+    });
   });
 });
