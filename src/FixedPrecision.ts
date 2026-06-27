@@ -21,7 +21,7 @@ import {
 } from "./combinatorics";
 import { collectValues } from "./construction/values";
 import { configureContext, FactoryContext, makeContext } from "./core/context";
-import { get_denominator, get_numerator, to_fraction } from "./fraction";
+import { get_denominator, get_numerator, fraction_value } from "./fraction";
 import {
   isNegativeValue,
   isPositiveValue,
@@ -605,13 +605,13 @@ export default class FixedPrecision {
     return new FixedPrecision(denominator * this.ctx.SCALE, this.ctx);
   }
 
-  public toFraction(
+  public fraction(
     maxDen?: FixedPrecisionValue,
   ): [FixedPrecision, FixedPrecision] {
     const fraction =
       maxDen === undefined
-        ? to_fraction(this.value, this.ctx.SCALE)
-        : to_fraction(
+        ? fraction_value(this.value, this.ctx.SCALE)
+        : fraction_value(
             this.value,
             this.ctx.SCALE,
             FixedPrecision.normalized(maxDen).scale(0, 1).value,

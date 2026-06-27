@@ -585,21 +585,21 @@ describe("FixedPrecision", () => {
       expect(x.den().toNumber()).toBe(2);
     });
 
-    test("toFraction", () => {
-      const [num, den] = FP8("12.34").toFraction();
+    test("fraction", () => {
+      const [num, den] = FP8("12.34").fraction();
       expect(num.toNumber()).toBe(617);
       expect(den.toNumber()).toBe(50);
       expect(num.div(den).toString()).toBe("12.34000000");
     });
 
-    test("toFraction with maxDen", () => {
-      const [num, den] = FP8("0.33333333").toFraction(100);
+    test("fraction with maxDen", () => {
+      const [num, den] = FP8("0.33333333").fraction(100);
       expect(num.toNumber()).toBe(1);
       expect(den.toNumber()).toBe(3);
     });
 
-    test("toFraction validation", () => {
-      expect(() => FP8("0.5").toFraction(0)).toThrow(
+    test("fraction validation", () => {
+      expect(() => FP8("0.5").fraction(0)).toThrow(
         "maxDen must be a positive integer",
       );
     });

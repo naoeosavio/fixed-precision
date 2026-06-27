@@ -1,7 +1,7 @@
 import { gcd } from "../arithmetic";
 import { limit_denominator } from "./internal/limit_denominator";
 
-export function to_fraction(
+export function fraction_value(
   value: bigint,
   scale: bigint,
   max_den?: bigint,
