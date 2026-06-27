@@ -21,7 +21,7 @@ import {
 } from "./combinatorics";
 import { collectValues } from "./construction/values";
 import { configureContext, FactoryContext, makeContext } from "./core/context";
-import { get_denominator, get_numerator, fraction_value } from "./fraction";
+import { fraction_value, get_denominator, get_numerator } from "./fraction";
 import {
   isNegativeValue,
   isPositiveValue,
