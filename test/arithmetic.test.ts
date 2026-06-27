@@ -11,48 +11,50 @@ const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
 
 describe("Arithmetic", () => {
   test("add", () => {
-    expect(FP8("10.5").add(FP8("3.2")).toString()).toBe("13.70000000");
-    expect(FP8("10.5").add(FP8(0)).toString()).toBe("10.50000000");
-    expect(FP4("1234.56").add(FP4("765.44")).toString()).toBe("2000.0000");
+    expect(FP8("10.5").add("3.2").toString()).toBe("13.70000000");
+    expect(FP8("10.5").add(0).toString()).toBe("10.50000000");
+    expect(FP4("1234.56").add("765.44").toString()).toBe("2000.0000");
     expect(() => FP4("-2").add(FP2("1"))).toThrow(
       "Cannot operate on different precisions",
     );
   });
 
   test("sub", () => {
-    expect(FP8("3.2").sub(FP8("10.5")).toString()).toBe("-7.30000000");
-    expect(FP8("10.5").sub(FP8(0)).toString()).toBe("10.50000000");
-    expect(FP4("3").sub(FP4("9")).toString()).toBe("-6.0000");
+    expect(FP8("3.2").sub("10.5").toString()).toBe("-7.30000000");
+    expect(FP8("10.5").sub(0).toString()).toBe("10.50000000");
+    expect(FP4("3").sub("9").toString()).toBe("-6.0000");
   });
 
   test("mul", () => {
-    expect(FP8("10.5").mul(FP8("3.2")).toString()).toBe("33.60000000");
-    expect(FP8("10.5").mul(FP8(1)).toString()).toBe("10.50000000");
-    expect(FP4("1.2500").mul(FP4("4.0000")).toString()).toBe("5.0000");
-    expect(FP4("-2").mul(FP4("-3")).toString()).toBe("6.0000");
+    expect(FP8("10.5").mul("3.2").toString()).toBe("33.60000000");
+    expect(FP8("10.5").mul(1).toString()).toBe("10.50000000");
+    expect(FP4("1.2500").mul("4.0000").toString()).toBe("5.0000");
+    expect(FP4("-2").mul("-3").toString()).toBe("6.0000");
   });
 
   test("div", () => {
-    expect(FP8("10.5").div(FP8("3.2")).toFixed(2)).toBe("3.28");
-    expect(FP8("10.5").div(FP8("10.5")).toString()).toBe("1.00000000");
-    expect(() => FP8("10.5").div(FP8(0))).toThrow("Division by zero");
-    expect(FP4("10").div(FP4("3")).toString()).toBe("3.3333");
-    expect(() => FP4("10").div(FP4("0"))).toThrow();
+    expect(FP8("10.5").div("3.2").toFixed(2)).toBe("3.28");
+    expect(FP8("10.5").div("10.5").toString()).toBe("1.00000000");
+    expect(() => FP8("10.5").div(0)).toThrow("Division by zero");
+    expect(FP4("10").div("3").toString()).toBe("3.3333");
+    expect(() => FP4("10").div("0")).toThrow();
   });
 
   test("mod", () => {
-    expect(FP8("10").mod(FP8("3")).toString()).toBe("1.00000000");
-    expect(FP8("10").mod(FP8("5")).toString()).toBe("0");
-    expect(FP6("10").mod(FP6("3")).toString()).toBe("1.000000");
-    expect(FP6("-10").mod(FP6("3")).toString()).toBe("-1.000000");
-    expect(FP6("10.5").mod(FP6("3.25")).toString()).toBe("0.750000");
+    expect(FP8("10").mod("3").toString()).toBe("1.00000000");
+    expect(FP8("10").mod("5").toString()).toBe("0");
+    expect(FP6("10").mod("3").toString()).toBe("1.000000");
+    expect(FP6("-10").mod("3").toString()).toBe("-1.000000");
+    expect(FP6("10.5").mod("3").toString()).toBe("0");
+    expect(FP6("10.5").mod("3.25").toString()).toBe("0.750000");
+    expect(FP8("12.34").mod("5.67").toString()).toBe("1.72000000");
   });
 
   test("times", () => {
-    expect(FP8("100000000").times(FP8("100000000")).toString()).toBe(
+    expect(FP8("100000000").times("100000000").toString()).toBe(
       "1000000000000000000000000.00000000",
     );
-    expect(FP8("10.5").times(FP8(1)).toString()).toBe(
+    expect(FP8("10.5").times(1).toString()).toBe(
       "1050000000.00000000",
     );
   });
@@ -66,15 +68,39 @@ describe("Arithmetic", () => {
   });
 
   test("ratio", () => {
-    expect(
-      FP8("10.00000000").ratio(FP8("0.00000002")).toString(),
+    expect( FP8("10.00000000").ratio("0.00000002").toString(),
     ).toBe("5.00000000");
   });
 
   test("rem", () => {
-    expect(
-      FP8("10.50000000").rem(FP8("3.00000000")).toString(),
-    ).toBe("1.50000000");
+    expect(FP8("10").rem("3").toString()).toBe("1.00000000");
+    expect(FP8("10").rem("5").toString()).toBe("0");
+    expect(FP6("10").rem("3").toString()).toBe("1.000000");
+    expect(FP6("-10").rem("3").toString()).toBe("-1.000000");
+    expect(FP6("10.5").rem("3").toString()).toBe("1.500000");
+    expect(FP6("10.5").rem("3.25").toString()).toBe("0.750000");
+    expect(FP8("12.34").rem("5.67").toString()).toBe("1.00000000");
+  });
+
+  test("divmod", () => {
+    const r = FP8("10").divmod("3");
+    expect(r.quotient.toString()).toBe("3.33333333");
+    expect(r.remainder.toString()).toBe("0.00000001");
+
+    const n = FP8("-10").divmod("3");
+    expect(n.quotient.toString()).toBe("-3.33333333");
+    expect(n.remainder.toString()).toBe("-0.00000001");
+
+    const e = FP8("10").divmod("5");
+    expect(e.quotient.toString()).toBe("2.00000000");
+    expect(e.remainder.toString()).toBe("0");
+
+    expect(() => FP8("10").divmod("0")).toThrow(
+      "Division by zero",
+    );
+    expect(() => FP8("10").divmod(FP4("3"))).toThrow(
+      "Cannot operate on different precisions",
+    );
   });
 
   test("clamp", () => {
@@ -306,11 +332,11 @@ describe("Arithmetic", () => {
   test("static exp", () => {
     fixedconfig.configure({ places: 20, roundingMode: 4 });
     try {
-      expect(FixedPrecision.exp(2).toNumber()).toBeCloseTo(Math.exp(2), 14);
-      expect(FixedPrecision.exp(2).toString()).toBe(
+      expect(  FixedPrecision.exp(2).toNumber()).toBeCloseTo(Math.exp(2), 14);
+      expect(  FixedPrecision.exp(2).toString()).toBe(
         "7.38905609893065022723",
       );
-      expect(FixedPrecision.exp("2").toString()).toBe(
+      expect(  FixedPrecision.exp("2").toString()).toBe(
         FP20("2").exp().toString(),
       );
     } finally {
@@ -320,8 +346,7 @@ describe("Arithmetic", () => {
 
   test("chaining", () => {
     expect(FP8(10.5).add(5).div(3).toNumber()).toBeCloseTo((10.5 + 5) / 3);
-    expect(
-      FP8(100).add("50").sub(25).mul(2).div("5").toNumber(),
+    expect( FP8(100).add("50").sub(25).mul(2).div("5").toNumber(),
     ).toBeCloseTo(((100 + 50 - 25) * 2) / 5);
     expect(FP8(10.5).add(5).gt(15)).toBe(true);
     expect(FP8(10).mul(2).eq(20)).toBe(true);

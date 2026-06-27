@@ -358,10 +358,15 @@ export default class FixedPrecision {
     remainder: FixedPrecision;
   } {
     const coerced = this.coerce(other);
-    const scaled = this.value * this.ctx.SCALE;
+    const quotient = this.fromRaw(
+      (this.value * this.ctx.SCALE) / coerced.value,
+    );
+
     return {
-      quotient: this.fromRaw(scaled / coerced.value),
-      remainder: this.fromRaw(scaled % coerced.value),
+      quotient,
+      remainder: this.fromRaw(
+        this.value - (quotient.value * coerced.value) / this.ctx.SCALE,
+      ),
     };
   }
 
