@@ -42,7 +42,7 @@ const total = new FixedPrecision("100.00")
   .sub(2n);     // Subtract 0.00000002
 ```
 
-### Multiplication (`mul` / `product`)
+### Multiplication (`mul` / `times`)
 
 ```typescript
 const price = new FixedPrecision("19.99");
@@ -52,14 +52,14 @@ const quantity = new FixedPrecision(3);
 const subtotal = price.mul(quantity); // "59.97000000"
 
 // Raw multiplication (without scaling)
-const rawProduct = price.product(quantity); // "5997000000.00000000"
+const rawProduct = price.times(quantity); // "5997000000.00000000"
 
 // With percentage
 const discount = new FixedPrecision("0.15"); // 15%
 const discountAmount = subtotal.mul(discount); // "8.99550000"
 ```
 
-### Division (`div` / `fraction`)
+### Division (`div` / `ratio`)
 
 ```typescript
 const total = new FixedPrecision("100.00");
@@ -69,7 +69,7 @@ const people = new FixedPrecision(4);
 const share = total.div(people); // "25.00000000"
 
 // Raw division
-const rawQuotient = total.fraction(people); // "0.25000000"
+const rawQuotient = total.ratio(people); // "0.25000000"
 
 // Division by zero throws error
 try {
@@ -79,20 +79,87 @@ try {
 }
 ```
 
-### Modulo (`mod` / `leftover`)
+### Modulo and Remainder (`mod`, `rem`, `divmod`, `rest`)
+
+FixedPrecision provides four operations for division decomposition. With **SCALE = 100\_000\_000** (8 decimal places) and values `a = 12.34`, `b = 5.67`:
 
 ```typescript
-const amount = new FixedPrecision("10.50");
-const divisor = new FixedPrecision("3.00");
+a raw:   1234000000n  = 12.34 × SCALE
+b raw:    567000000n  = 5.67  × SCALE
+```
 
-// Regular modulo
-const remainder = amount.mod(divisor); // "1.50000000"
+#### How Each Operation Works
 
-// Raw modulo
-const rawRemainder = amount.leftover(divisor); // "1.50000000"
+##### `mod` — Scaled Modulo
 
-// Useful for checking divisibility
-const isDivisible = amount.mod(2).eq(0); // false (10.50 % 2 ≠ 0)
+```typescript
+mod = (a.value × SCALE) % b.value
+mod = (1234000000 × 100000000) % 567000000
+mod = 172000000n  →  1.72000000
+```
+
+The dividend is multiplied by SCALE before the modulo, providing extra precision. The result retains SCALE precision: it represents the remainder of an enhanced-precision division. Useful when you need the remainder with full decimal fidelity — e.g. checking if a high-precision amount is divisible.
+
+##### `rem` — Raw Remainder
+
+```typescript
+rem = a.value % b.value
+rem = 1234000000 % 567000000
+rem = 100000000n  →  1.00000000
+```
+
+Plain bigint modulo on the scaled values. This is equivalent to `(a % b) × SCALE`. Use it when you only care about the integer-level remainder — e.g. "how many units are left after grouping."
+
+##### `divmod` — Quotient + Exact Remainder
+
+```typescript
+quotient = (a.value × SCALE) / b.value
+         = 1234000000 × 100000000 / 567000000
+         = 217636684n  →  2.17636684
+
+remainder = a.value - (quotient × b.value) / SCALE
+          = 1234000000 - (217636684 × 567000000) / 100000000
+          = 1234000000 - 1233999998
+          = 2n  →  0.00000002
+```
+
+Returns both the quotient (same as `div()`) and the **exact remainder** after full-precision division — the amount "left over" that cannot be expressed at the current scale. This is always the smallest non-negative residual that, when added back, reconstructs the original dividend:
+`a = quotient × b + remainder / SCALE`.
+
+##### `rest` — Divmod Remainder Alias
+
+```typescript
+a.rest(b) === a.divmod(b).remainder
+```
+
+Convenience method that returns only the exact remainder from the internal division, without the quotient.
+
+#### Comparison Table (12.34 / 5.67)
+
+| Method | Raw Bigint | Decimal | Meaning |
+|--------|-----------|---------|---------|
+| `mod` | `172000000n` | `1.72000000` | Scaled remainder (extra precision) |
+| `rem` / `leftover` | `100000000n` | `1.00000000` | Raw integer remainder |
+| `divmod().remainder` / `rest` | `2n` | `0.00000002` | Exact residual after full-precision division |
+
+#### Usage Examples
+
+```typescript
+const a = FP8("12.34");
+const b = FP8("5.67");
+
+a.mod(b).toString();            // "1.72000000"
+a.rem(b).toString();            // "1.00000000"
+a.rest(b).toString();           // "0.00000002"
+a.divmod(b).quotient.toString(); // "2.17636684"
+a.divmod(b).remainder.toString(); // "0.00000002"
+
+// Accepts numbers and strings through coercion
+a.rest(5.67);      // "0.00000002"
+a.rest("5.67");    // "0.00000002"
+
+// Checking divisibility
+const isDivisible = a.mod(2).eq(0); // false
 ```
 
 ## Advanced Arithmetic
