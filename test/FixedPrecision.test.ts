@@ -291,11 +291,11 @@ describe("FixedPrecision", () => {
       expect(FP6("10.5").mod(FP6("3.25")).toString()).toBe("0.750000");
     });
 
-    test("product", () => {
-      expect(FP8("100000000").product(FP8("100000000")).toString()).toBe(
+    test("times", () => {
+      expect(FP8("100000000").times(FP8("100000000")).toString()).toBe(
         "1000000000000000000000000.00000000",
       );
-      expect(FP8("10.5").product(FP8(1)).toString()).toBe(
+      expect(FP8("10.5").times(FP8(1)).toString()).toBe(
         "1050000000.00000000",
       );
     });
@@ -308,15 +308,15 @@ describe("FixedPrecision", () => {
       );
     });
 
-    test("fraction", () => {
+    test("ratio", () => {
       expect(
-        FP8("10.00000000").fraction(FP8("0.00000002")).toString(),
+        FP8("10.00000000").ratio(FP8("0.00000002")).toString(),
       ).toBe("5.00000000");
     });
 
-    test("leftover", () => {
+    test("rem", () => {
       expect(
-        FP8("10.50000000").leftover(FP8("3.00000000")).toString(),
+        FP8("10.50000000").rem(FP8("3.00000000")).toString(),
       ).toBe("1.50000000");
     });
 
