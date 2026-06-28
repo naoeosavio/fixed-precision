@@ -249,7 +249,7 @@ export default class FixedPrecision {
     );
   }
 
-  public product(other: FixedPrecisionValue): FixedPrecision {
+  public tiems(other: FixedPrecisionValue): FixedPrecision {
     return this.fromRaw(this.value * this.toScaledValue(other));
   }
 
@@ -265,7 +265,7 @@ export default class FixedPrecision {
     );
   }
 
-  public fraction(other: FixedPrecisionValue): FixedPrecision {
+  public ratio(other: FixedPrecisionValue): FixedPrecision {
     return this.fromRaw(this.value / this.toScaledValue(other));
   }
 
@@ -275,8 +275,29 @@ export default class FixedPrecision {
     );
   }
 
-  public leftover(other: FixedPrecisionValue): FixedPrecision {
+  public rem(other: FixedPrecisionValue): FixedPrecision {
     return this.fromRaw(this.value % this.toScaledValue(other));
+  }
+  public divmod(other: FixedPrecisionValue): {
+    quotient: FixedPrecision;
+    remainder: FixedPrecision;
+  } {
+    const coerced = this.coerce(other);
+    const quotient = this.fromRaw(
+      (this.value * this.ctx.SCALE) / coerced.value,
+    );
+
+    return {
+      quotient,
+      remainder: this.fromRaw(
+        this.value - (quotient.value * coerced.value) / this.ctx.SCALE,
+      ),
+    };
+  }
+
+  public rest(other: FixedPrecisionValue): FixedPrecision {
+    const d = this.divmod(other);
+    return d.remainder;
   }
 
   public neg(): FixedPrecision {

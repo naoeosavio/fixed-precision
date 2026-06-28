@@ -482,7 +482,7 @@ const b = new FixedPrecision("2.50");
 a.minus(b); // "2.50000000"
 ```
 
-#### `product(other: FixedPrecisionValue): FixedPrecision`
+#### `times(other: FixedPrecisionValue): FixedPrecision`
 
 Returns the raw product (without scaling).
 
@@ -495,10 +495,10 @@ Returns the raw product (without scaling).
 ```typescript
 const a = new FixedPrecision("1.23");
 const b = new FixedPrecision("2.00");
-a.product(b); // "246000000.00000000"
+a.times(b); // "246000000.00000000"
 ```
 
-#### `fraction(other: FixedPrecisionValue): FixedPrecision`
+#### `ratio(other: FixedPrecisionValue): FixedPrecision`
 
 Returns the raw quotient (without scaling).
 
@@ -511,10 +511,10 @@ Returns the raw quotient (without scaling).
 ```typescript
 const a = new FixedPrecision("10.00");
 const b = new FixedPrecision("2.00");
-a.fraction(b); // "5.00000000"
+a.ratio(b); // "5.00000000"
 ```
 
-#### `leftover(other: FixedPrecisionValue): FixedPrecision`
+#### `rem(other: FixedPrecisionValue): FixedPrecision`
 
 Returns the raw remainder (without scaling).
 
@@ -527,7 +527,7 @@ Returns the raw remainder (without scaling).
 ```typescript
 const a = new FixedPrecision("10.50");
 const b = new FixedPrecision("3.00");
-a.leftover(b); // "1.50000000"
+a.rem(b); // "1.50000000"
 ```
 
 ### Comparison Methods

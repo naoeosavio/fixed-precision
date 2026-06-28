@@ -90,7 +90,7 @@ FixedPrecision provides two sets of operations:
 - Validate configuration when operating with other FixedPrecision instances
 
 ### Without Scaling (Raw Operations)
-- `plus()`, `minus()`, `product()`, `fraction()`, `leftover()`
+- `plus()`, `minus()`, `times()`, `ratio()`, `rem()`
 - Operate directly on scaled values
 - No configuration validation
 - Useful for advanced calculations and performance optimization
@@ -100,7 +100,7 @@ const a = new FixedPrecision("1.23");  // 123000000
 const b = new FixedPrecision("2.00");  // 200000000
 
 a.mul(b);      // Returns 2.46 (with scaling)
-a.product(b);  // Returns 24600000000000000 (without scaling)
+a.times(b);  // Returns 24600000000000000 (without scaling)
 ```
 
 ## Immutability

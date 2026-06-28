@@ -25,7 +25,7 @@ a.mul(b);      // Returns "2.46000000"
 // Calculation: (123000000 * 200000000) / 100000000 = 246000000
 
 // Raw operation (without scaling)  
-a.product(b);  // Returns "246000000.00000000"
+a.times(b);  // Returns "246000000.00000000"
 // Calculation: 123000000 * 200000000 = 24600000000000000
 ```
 
@@ -49,30 +49,30 @@ const result = a.minus(b); // "2.50000000"
 // Calculation: 500000000 - 250000000 = 250000000
 ```
 
-### `product()` - Raw Multiplication
+### `times()` - Raw Multiplication
 ```typescript
 const a = new FixedPrecision("1.23"); // 123000000
 const b = new FixedPrecision("2.00"); // 200000000
 
-const result = a.product(b); // "246000000.00000000"
+const result = a.times(b); // "246000000.00000000"
 // Calculation: 123000000 * 200000000 = 24600000000000000
 ```
 
-### `fraction()` - Raw Division
+### `ratio()` - Raw Division
 ```typescript
 const a = new FixedPrecision("10.00"); // 1000000000
 const b = new FixedPrecision("2.00");  // 200000000
 
-const result = a.fraction(b); // "5.00000000"
+const result = a.ratio(b); // "5.00000000"
 // Calculation: 1000000000 / 200000000 = 5
 ```
 
-### `leftover()` - Raw Modulo
+### `rem()` - Raw Modulo
 ```typescript
 const a = new FixedPrecision("10.50"); // 1050000000
 const b = new FixedPrecision("3.00");  // 300000000
 
-const result = a.leftover(b); // "1.50000000"
+const result = a.rem(b); // "1.50000000"
 // Calculation: 1050000000 % 300000000 = 150000000
 ```
 
@@ -120,11 +120,11 @@ function weightedAverage(values: FixedPrecision[], weights: FixedPrecision[]): F
   let sumWeights = new FixedPrecision(0);
   
   for (let i = 0; i < values.length; i++) {
-    sumProducts = sumProducts.plus(values[i].product(weights[i]));
+    sumProducts = sumProducts.plus(values[i].times(weights[i]));
     sumWeights = sumWeights.plus(weights[i]);
   }
   
-  return sumProducts.fraction(sumWeights);
+  return sumProducts.ratio(sumWeights);
 }
 ```
 
@@ -168,7 +168,7 @@ const btc = FixedPrecision.create({ places: 8 })("0.001"); // 8 decimals (Bitcoi
 
 // Convert BTC to USD using raw operations
 const btcPrice = new FixedPrecision("50000.00"); // USD per BTC
-const usdValue = btc.product(btcPrice); // Raw multiplication
+const usdValue = btc.times(btcPrice); // Raw multiplication
 ```
 
 ### 2. Scientific Calculations
@@ -178,7 +178,7 @@ const planckConstant = new FixedPrecision("6.62607015e-34");
 const frequency = new FixedPrecision("5.0e14");
 
 // Calculate photon energy: E = hν
-const energy = planckConstant.product(frequency);
+const energy = planckConstant.times(frequency);
 ```
 
 ### 3. Game Development
@@ -188,7 +188,7 @@ const position = FixedPrecision.create({ places: 4 })("123.4567"); // 4 decimals
 const velocity = FixedPrecision.create({ places: 6 })("0.123456"); // 6 decimals
 
 // Update position using raw operations
-const newPosition = position.plus(velocity.product(deltaTime));
+const newPosition = position.plus(velocity.times(deltaTime));
 ```
 
 ## ⚠️ Important Considerations
@@ -216,7 +216,7 @@ const result = a.plus(b); // "1.00000200" (not "3.00")
 const a = new FixedPrecision("1.23"); // 123000000
 const b = new FixedPrecision("2.00"); // 200000000
 
-const product = a.product(b); // "246000000.00000000"
+const product = a.times(b); // "246000000.00000000"
 
 // This represents 246000000 * 10^-8 = 2.46
 // Not 246000000 (which would be the regular multiplication result)

@@ -52,7 +52,7 @@ const quantity = new FixedPrecision(3);
 const subtotal = price.mul(quantity); // "59.97000000"
 
 // Raw multiplication (without scaling)
-const rawProduct = price.times(quantity); // "5997000000.00000000"
+const rawTimes = price.times(quantity); // "5997000000.00000000"
 
 // With percentage
 const discount = new FixedPrecision("0.15"); // 15%
@@ -123,7 +123,7 @@ remainder = a.value - (quotient × b.value) / SCALE
           = 2n  →  0.00000002
 ```
 
-Returns both the quotient (same as `div()`) and the **exact remainder** after full-precision division — the amount "left over" that cannot be expressed at the current scale. This is always the smallest non-negative residual that, when added back, reconstructs the original dividend:
+Returns both the quotient (same as `div()`) and the **exact remainder** after full-precision division — the amount "rest" that cannot be expressed at the current scale. This is always the smallest non-negative residual that, when added back, reconstructs the original dividend:
 `a = quotient × b + remainder / SCALE`.
 
 ##### `rest` — Divmod Remainder Alias
@@ -139,7 +139,7 @@ Convenience method that returns only the exact remainder from the internal divis
 | Method | Raw Bigint | Decimal | Meaning |
 |--------|-----------|---------|---------|
 | `mod` | `172000000n` | `1.72000000` | Scaled remainder (extra precision) |
-| `rem` / `leftover` | `100000000n` | `1.00000000` | Raw integer remainder |
+| `rem` | `100000000n` | `1.00000000` | Raw integer remainder |
 | `divmod().remainder` / `rest` | `2n` | `0.00000002` | Exact residual after full-precision division |
 
 #### Usage Examples
@@ -286,7 +286,7 @@ const calculation = new FixedPrecision("100.00")
 
 ### When to Use Raw Operations
 
-Raw operations (`plus`, `minus`, `product`, `fraction`, `leftover`) are faster but don't apply scaling:
+Raw operations (`plus`, `minus`, `times`, `ratio`, `rem`) are faster but don't apply scaling:
 
 ```typescript
 // Use raw operations when:
@@ -301,7 +301,7 @@ const b = new FixedPrecision("2.00"); // 200000000
 a.mul(b); // "2.46000000"
 
 // Raw (without scaling): 123000000 * 200000000 = 24600000000000000  
-a.product(b); // "246000000.00000000"
+a.times(b); // "246000000.00000000"
 ```
 
 ### Avoiding Unnecessary Conversions

@@ -17,7 +17,7 @@ Welcome to the FixedPrecision documentation! This library provides fixed-precisi
 - [Minimal Build](minimal.md) - Smaller entry point for core decimal operations
 
 ### Advanced Topics
-- [Raw Operations](raw-operations.md) - Operations without scaling (plus, minus, product, etc.)
+- [Raw Operations](raw-operations.md) - Operations without scaling (plus, minus, times, etc.)
 - [Precision Factories](factories.md) - Creating isolated precision contexts
 - [Performance Guide](performance.md) - Performance considerations and best practices
 - [Error Handling](errors.md) - Common errors and how to handle them

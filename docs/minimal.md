@@ -20,7 +20,7 @@ Use `fixed-precision/minimal` when bundle size matters and your code only needs 
 - construction from `string`, `number`, `bigint`, or another FixedPrecision value
 - precision factories with `FixedPrecision.create({ places, roundingMode })`
 - arithmetic: `add`, `sub`, `mul`, `div`, `idiv`, `mod`, `pow`, `sqrt`
-- raw operations: `plus`, `minus`, `product`, `fraction`, `leftover`
+- raw operations: `plus`, `minus`, `times`, `ratio`, `rem`
 - comparisons and sign checks: `cmp`, `eq`, `gt`, `gte`, `lt`, `lte`, `isInteger`, `isNegative`, `isPositive`, `isZero`
 - rounding and scale changes: `round`, `scale`, `prec`, `trunc`, `ceil`, `floor`, `shiftedBy`
 - aggregate helpers: `random`, `min`, `max`, `sum`

@@ -11,7 +11,7 @@ FixedPrecision is designed for accuracy and predictability, but understanding it
 From fastest to slowest:
 
 1. **Comparison operations** (`eq`, `lt`, `gt`, etc.) - Direct bigint comparisons
-2. **Raw operations** (`plus`, `minus`, `product`, etc.) - No scaling or validation
+2. **Raw operations** (`plus`, `minus`, `times`, etc.) - No scaling or validation
 3. **Basic arithmetic** (`add`, `sub`) - Simple bigint arithmetic with scaling
 4. **Multiplication** (`mul`) - Bigint multiplication with scaling adjustment
 5. **Division** (`div`) - Bigint division with rounding
@@ -148,7 +148,7 @@ console.timeEnd("regular");
 console.time("raw");
 const bScaled = b.value;
 for (let i = 0; i < 1000000; i++) {
-  const result = a.plus(bScaled).minus(bScaled).product(bScaled).fraction(bScaled);
+  const result = a.plus(bScaled).minus(bScaled).times(bScaled).ratio(bScaled);
 }
 console.timeEnd("raw");
 ```
