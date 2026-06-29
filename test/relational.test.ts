@@ -8,15 +8,15 @@ const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
 
 describe("Relational", () => {
   test("cmp", () => {
-    expect(FP8("5").cmp(FP8(5))).toBe(0);
-    expect(FP8("4.99999999").cmp(FP8("5.00000000"))).toBe(-1);
-    expect(FP8("5.00000000").cmp(FP8("4.99999999"))).toBe(1);
+    expect(FP8("5").cmp(5)).toBe(0);
+    expect(FP8("4.99999999").cmp("5.00000000")).toBe(-1);
+    expect(FP8("5.00000000").cmp("4.99999999")).toBe(1);
   });
 
   test("eq", () => {
-    expect(FP8("123.45678900").eq(FP8("123.45678900"))).toBe(true);
-    expect(FP8("123.45678900").eq(FP8("123.45678899"))).toBe(false);
-    expect(FP20("3").eq(FP20("3"))).toBe(true);
+    expect(FP8("123.45678900").eq("123.45678900")).toBe(true);
+    expect(FP8("123.45678900").eq("123.45678899")).toBe(false);
+    expect(FP20("3").eq("3")).toBe(true);
   });
 
   test("gt gte lt lte", () => {
@@ -26,10 +26,10 @@ describe("Relational", () => {
     expect(a.gte(b)).toBe(true);
     expect(b.lt(a)).toBe(true);
     expect(b.lte(a)).toBe(true);
-    expect(FP20("3").lt(FP20("4"))).toBe(true);
-    expect(FP20("3").gt(FP20("4"))).toBe(false);
-    expect(FP20("-5").lt(FP20("2"))).toBe(true);
-    expect(FP20("-5").lt(FP20("-3"))).toBe(true);
+    expect(FP20("3").lt("4")).toBe(true);
+    expect(FP20("3").gt("4")).toBe(false);
+    expect(FP20("-5").lt("2")).toBe(true);
+    expect(FP20("-5").lt("-3")).toBe(true);
   });
 
   test("equal values", () => {

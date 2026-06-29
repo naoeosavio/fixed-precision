@@ -46,7 +46,7 @@ Welcome to the FixedPrecision documentation! This library provides fixed-precisi
 
 ## Version Information
 
-**Current Version:** 1.2.0  
+**Current Version:** 1.7.0  
 **TypeScript Support:** Full TypeScript support with strict typing  
 **Browser Support:** Modern browsers with BigInt support  
 **Node.js Support:** Node.js 10+ (with BigInt support)

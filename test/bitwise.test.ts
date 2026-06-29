@@ -6,15 +6,15 @@ const FP = FixedPrecision.create({ places: 0 });
 
 describe("Bitwise", () => {
   test("bitAnd", () => {
-    expect(FP(12).bitAnd(FP(5)).toString()).toBe("4");
+    expect(FP(12).bitAnd(5).toString()).toBe("4");
   });
 
   test("bitOr", () => {
-    expect(FP(12).bitOr(FP(5)).toString()).toBe("13");
+    expect(FP(12).bitOr(5).toString()).toBe("13");
   });
 
   test("bitXor", () => {
-    expect(FP(12).bitXor(FP(5)).toString()).toBe("9");
+    expect(FP(12).bitXor(5).toString()).toBe("9");
   });
 
   test("bitNot", () => {
