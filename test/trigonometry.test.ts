@@ -114,7 +114,7 @@ describe("Trigonometry", () => {
   // test("tan 045°", () => { expect(RAD045.tan().toString()).toBe(TAN45.toString()); });
   // test("tan 060°", () => { expect(RAD060.tan().toString()).toBe(TAN60.toString()); });
   // test("tan 075°", () => { expect(RAD075.tan().toString()).toBe(TAN75.toString()); });
-  test("tan 090° is large", () => { expect(RAD090.tan().abs().gt(FP20("1e20"))).toBe(true); });
+  test("tan 090° is large", () => { expect(() => RAD090.tan()).toThrow(); });
   // test("tan 105°", () => { expect(RAD105.tan().toString()).toBe(TAN75.neg().toString()); });
   // test("tan 120°", () => { expect(RAD120.tan().toString()).toBe(TAN60.neg().toString()); });
   // test("tan 135°", () => { expect(RAD135.tan().toString()).toBe(TAN45.neg().toString()); });
@@ -126,7 +126,7 @@ describe("Trigonometry", () => {
   // test("tan 225°", () => { expect(RAD225.tan().toString()).toBe(TAN45.toString()); });
   // test("tan 240°", () => { expect(RAD240.tan().toString()).toBe(TAN60.toString()); });
   // test("tan 255°", () => { expect(RAD255.tan().toString()).toBe(TAN75.toString()); });
-  // test("tan 270° is large", () => { expect(RAD270.tan().abs().gt(FP20("1e20"))).toBe(true); });
+    test("tan 270° is large", () => { expect(() => RAD270.tan()).toThrow(); });
   // test("tan 285°", () => { expect(RAD285.tan().toString()).toBe(TAN75.neg().toString()); });
   // test("tan 300°", () => { expect(RAD300.tan().toString()).toBe(TAN60.neg().toString()); });
   // test("tan 315°", () => { expect(RAD315.tan().toString()).toBe(TAN45.neg().toString()); });
@@ -166,7 +166,7 @@ describe("Trigonometry", () => {
   // test("sec 045°", () => { expect(RAD045.sec().toString()).toBe(SEC45.toString()); });
   // test("sec 060°", () => { expect(RAD060.sec().toString()).toBe(SEC60.toString()); });
   // test("sec 075°", () => { expect(RAD075.sec().toString()).toBe(SEC75.toString()); });
-  test("sec 090° is large", () => { expect(RAD090.sec().abs().gt(FP20("1e20"))).toBe(true); });
+  test("sec 090° is large", () => { expect(() => RAD090.sec()).toThrow(); });
   // test("sec 105°", () => { expect(RAD105.sec().toString()).toBe(SEC75.neg().toString()); });
   // test("sec 120°", () => { expect(RAD120.sec().toString()).toBe(SEC60.neg().toString()); });
   // test("sec 135°", () => { expect(RAD135.sec().toString()).toBe(SEC45.neg().toString()); });
@@ -178,7 +178,7 @@ describe("Trigonometry", () => {
   // test("sec 225°", () => { expect(RAD225.sec().toString()).toBe(SEC45.neg().toString()); });
   // test("sec 240°", () => { expect(RAD240.sec().toString()).toBe(SEC60.neg().toString()); });
   // test("sec 255°", () => { expect(RAD255.sec().toString()).toBe(SEC75.neg().toString()); });
-  // test("sec 270° is large", () => { expect(RAD270.sec().abs().gt(FP20("1e20"))).toBe(true); });
+  test("sec 270° is large", () => { expect((() => RAD270.sec())).toThrow(); });
   // test("sec 285°", () => { expect(RAD285.sec().toString()).toBe(SEC75.toString()); });
   // test("sec 300°", () => { expect(RAD300.sec().toString()).toBe(SEC60.toString()); });
   // test("sec 315°", () => { expect(RAD315.sec().toString()).toBe(SEC45.toString()); });
@@ -198,7 +198,7 @@ describe("Trigonometry", () => {
   // test("csc 135°", () => { expect(RAD135.csc().toString()).toBe(SEC45.toString()); });
   // test("csc 150°", () => { expect(RAD150.csc().toString()).toBe(SEC60.toString()); });
   // test("csc 165°", () => { expect(RAD165.csc().toString()).toBe(SEC75.toString()); });
-  // test("csc 180° is large", () => { expect(RAD180.csc().abs().gt(FP20("1e20"))).toBe(true); });
+  test("csc 180° is large", () => { expect(() => RAD180.csc()).toThrow(); });
   // test("csc 195°", () => { expect(RAD195.csc().toString()).toBe(SEC75.neg().toString()); });
   // test("csc 210°", () => { expect(RAD210.csc().toString()).toBe(SEC60.neg().toString()); });
   // test("csc 225°", () => { expect(RAD225.csc().toString()).toBe(SEC45.neg().toString()); });
@@ -210,7 +210,7 @@ describe("Trigonometry", () => {
   // test("csc 315°", () => { expect(RAD315.csc().toString()).toBe(SEC45.neg().toString()); });
   // test("csc 330°", () => { expect(RAD330.csc().toString()).toBe(SEC60.neg().toString()); });
   // test("csc 345°", () => { expect(RAD345.csc().toString()).toBe(SEC75.neg().toString()); });
-  // test("csc 360° is large", () => { expect(RAD360.csc().abs().gt(FP20("1e20"))).toBe(true); });
+  test("csc 360° is large", () => { expect(() => RAD360.csc()).toThrow(); });
 
   test("cot 0° throws", () => { expect(() => RAD000.cot()).toThrow(); });
   // test("cot 015°", () => { expect(RAD015.cot().toString()).toBe(TAN75.toString()); });
@@ -224,7 +224,7 @@ describe("Trigonometry", () => {
   // test("cot 135°", () => { expect(RAD135.cot().toString()).toBe(TAN45.neg().toString()); });
   // test("cot 150°", () => { expect(RAD150.cot().toString()).toBe(TAN60.neg().toString()); });
   // test("cot 165°", () => { expect(RAD165.cot().toString()).toBe(TAN75.neg().toString()); });
-  // test("cot 180° is large", () => { expect(RAD180.cot().abs().gt(FP20("1e20"))).toBe(true); });
+  test("cot 180° is large", () => { expect(() => RAD180.cot()).toThrow(); });
   // test("cot 195°", () => { expect(RAD195.cot().toString()).toBe(TAN75.toString()); });
   // test("cot 210°", () => { expect(RAD210.cot().toString()).toBe(TAN60.toString()); });
   // test("cot 225°", () => { expect(RAD225.cot().toString()).toBe(TAN45.toString()); });
@@ -236,7 +236,7 @@ describe("Trigonometry", () => {
   // test("cot 315°", () => { expect(RAD315.cot().toString()).toBe(TAN45.neg().toString()); });
   // test("cot 330°", () => { expect(RAD330.cot().toString()).toBe(TAN60.neg().toString()); });
   // test("cot 345°", () => { expect(RAD345.cot().toString()).toBe(TAN75.neg().toString()); });
-  // test("cot 360° is large", () => { expect(RAD360.cot().abs().gt(FP20("1e20"))).toBe(true); });
+  test("cot 360° is large", () => { expect(() => RAD360.cot()).toThrow(); });
 
   test("asin 0°", () => { expect(RAD000.asin().toString()).toBe(RAD000.toString()); });
   // test("asin 015°", () => { expect(SIN15.asin().toString()).toBe(RAD015.toString()); });
