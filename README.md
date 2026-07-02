@@ -39,8 +39,8 @@ const b = new FixedPrecision(2.3456);
 const sum = a.add(b);
 console.log("Sum:", sum.toString());
 
-const product = a.mul(b);
-console.log("Product:", product.toString());
+const times = a.mul(b);
+console.log("Product:", times.toString());
 
 // Chaining with raw numbers (new feature)
 const result = new FixedPrecision(10.5).add(5).div(3).toNumber();
@@ -51,7 +51,7 @@ const mixed = new FixedPrecision(100).add("50").sub(25n).mul(2).div("5");
 console.log("Mixed types:", mixed.toString()); // 50.00000000
 
 // Raw operations (without scaling)
-const rawResult = new FixedPrecision("1.23").product("2.00");
+const rawResult = new FixedPrecision("1.23").times("2.00");
 console.log("Raw product:", rawResult.toString()); // 246000000.00000000
 
 // Direct bigint operations (WARNING: bigint values are pre-scaled!)
@@ -129,13 +129,13 @@ const complex = new FixedPrecision(1000)
 // Raw operations in chains
 const rawChain = new FixedPrecision("1.23")
   .plus("2.00")    // Raw sum
-  .product("3.00") // Raw product
+  .times("3.00") // Raw product
   .minus("1.00");  // Raw difference
 
 // Mixing raw and scaled operations
 const mixedChain = new FixedPrecision(100)
   .add(50)         // Scaled addition
-  .product(2)      // Raw multiplication
+  .times(2)      // Raw multiplication
   .div(3);         // Scaled division
 ```
 
@@ -200,7 +200,7 @@ FixedPrecision provides two sets of arithmetic operations:
 - **Automatic conversion**: Raw values (string, number, bigint) are converted using the current instance's context
 
 **Without scaling (raw operations):**
-- `plus()`, `minus()`, `product()`, `fraction()`, `leftover()` - Operate directly on scaled values
+- `plus()`, `minus()`, `times()`, `ratio()`, `rem()` - Operate directly on scaled values
 - **No configuration validation**: Can operate with FixedPrecision instances of different configurations
 - **Direct bigint support**: Accepts bigint values representing pre-scaled amounts
 - **Use cases**: Advanced calculations, working with pre-scaled values, mixing different precisions
@@ -214,7 +214,7 @@ const b = new FixedPrecision("2.00");  // value = 200000000 (scaled by 10^8)
 a.mul(b);      // Returns 2.46 (with scaling: (123000000 * 200000000) / 10^8)
 
 // Without scaling (raw operations)
-a.product(b);  // Returns 24600000000000000 (without scaling: 123000000 * 200000000)
+a.times(b);  // Returns 24600000000000000 (without scaling: 123000000 * 200000000)
 
 // Raw operations with different configurations
 const c = FixedPrecision.create({ places: 2 })("2.00"); // value = 200 (2 decimal places)
@@ -283,9 +283,9 @@ FixedPrecision provides two sets of arithmetic operations:
 **Raw operations without scaling** (operate directly on scaled values, no configuration validation):
 - **`plus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw sum (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 - **`minus(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw difference (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
-- **`product(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw product (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
-- **`fraction(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw quotient (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
-- **`leftover(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw remainder (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`times(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw product (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`ratio(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw quotient (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
+- **`rem(other: FixedPrecisionValue): FixedPrecision`**: Returns the raw remainder (without scaling). Accepts FixedPrecision instance, number, string, or bigint.
 
 **Other operations:**
 - **`pow(exp: number): FixedPrecision`**: Raises the value to an integer exponent.
