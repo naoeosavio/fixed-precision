@@ -1,4 +1,5 @@
 import type { FPContext } from "../FixedPrecision";
+import { clamp_unit } from "./internal/clamp_unit";
 import { PI } from "./internal/constants";
 import { reciprocal_work } from "./internal/reciprocal_work";
 import { reduce_angle } from "./internal/reduce_angle";
@@ -16,7 +17,10 @@ export function csc_value(value: bigint, ctx: FPContext): bigint {
 
   const work = get_work_context(ctx);
   const reduced = reduce_angle(to_work_scale(value, work.guard_scale), work);
-  const sine = sin_work(reduced.angle, work.scale, work.max_iterations);
+  const sine = clamp_unit(
+    sin_work(reduced.angle, work.scale, work.max_iterations),
+    work.scale,
+  );
   return from_work_scale(
     reciprocal_work(sine, work.scale, "Cosecant"),
     work.guard_scale,

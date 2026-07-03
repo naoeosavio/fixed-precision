@@ -1,3 +1,5 @@
+import { cordic_sincos } from "./cordic";
+
 export function sin_work(
   value: bigint,
   scale: bigint,
@@ -6,21 +8,6 @@ export function sin_work(
   if (value === 0n) {
     return 0n;
   }
-
-  const value_squared = (value * value) / scale;
-  let term = value;
-  let sum = value;
-
-  for (let index = 1; index <= max_iterations; index += 1) {
-    const divisor = BigInt(2 * index * (2 * index + 1));
-    term = -(term * value_squared) / (scale * divisor);
-
-    if (term === 0n) {
-      break;
-    }
-
-    sum += term;
-  }
-
-  return sum;
+  const [, sin] = cordic_sincos(value, scale, max_iterations);
+  return sin;
 }

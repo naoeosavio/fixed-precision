@@ -1,4 +1,5 @@
 import type { FPContext } from "../FixedPrecision";
+import { clamp_unit } from "./internal/clamp_unit";
 import { PI } from "./internal/constants";
 import { cos_work } from "./internal/cos_series";
 import { reciprocal_work } from "./internal/reciprocal_work";
@@ -16,8 +17,10 @@ export function sec_value(value: bigint, ctx: FPContext): bigint {
 
   const work = get_work_context(ctx);
   const reduced = reduce_angle(to_work_scale(value, work.guard_scale), work);
-  const cosine =
-    reduced.cos_sign * cos_work(reduced.angle, work.scale, work.max_iterations);
+  const cosine = clamp_unit(
+    reduced.cos_sign * cos_work(reduced.angle, work.scale, work.max_iterations),
+    work.scale,
+  );
   return from_work_scale(
     reciprocal_work(cosine, work.scale, "Secant"),
     work.guard_scale,
