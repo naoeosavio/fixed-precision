@@ -7,7 +7,8 @@ import { get_work_context } from "./internal/work_context";
 
 export function cos_value(value: bigint, ctx: FPContext): bigint {
   const work = get_work_context(ctx);
-  const reduced = reduce_angle(to_work_scale(value), work);
-  const result = reduced.cos_sign * cos_work(reduced.angle, work.scale);
-  return from_work_scale(clamp_unit(result, work.scale));
+  const reduced = reduce_angle(to_work_scale(value, work.guard_scale), work);
+  const result =
+    reduced.cos_sign * cos_work(reduced.angle, work.scale, work.max_iterations);
+  return from_work_scale(clamp_unit(result, work.scale), work.guard_scale);
 }

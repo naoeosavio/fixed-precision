@@ -3,8 +3,8 @@ import { assert_non_zero } from "./internal/assert_non_zero";
 import { PI } from "./internal/constants";
 import { cos_work } from "./internal/cos_series";
 import { reduce_angle } from "./internal/reduce_angle";
-import { scaled_decimal } from "./internal/scaled_decimal";
 import { from_work_scale, to_work_scale } from "./internal/scale_utils";
+import { scaled_decimal } from "./internal/scaled_decimal";
 import { sin_work } from "./internal/sin_series";
 import { get_work_context } from "./internal/work_context";
 
@@ -16,11 +16,12 @@ export function tan_value(value: bigint, ctx: FPContext): bigint {
     throw new Error("Tangent is undefined when cosine is zero");
   }
 
-  const reduced = reduce_angle(to_work_scale(value), work);
-  const cosine = reduced.cos_sign * cos_work(reduced.angle, work.scale);
+  const reduced = reduce_angle(to_work_scale(value, work.guard_scale), work);
+  const cosine =
+    reduced.cos_sign * cos_work(reduced.angle, work.scale, work.max_iterations);
 
   assert_non_zero(cosine, "Tangent is undefined when cosine is zero");
 
-  const sine = sin_work(reduced.angle, work.scale);
-  return from_work_scale((sine * work.scale) / cosine);
+  const sine = sin_work(reduced.angle, work.scale, work.max_iterations);
+  return from_work_scale((sine * work.scale) / cosine, work.guard_scale);
 }

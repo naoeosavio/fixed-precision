@@ -1,5 +1,5 @@
 export function get_guard_scale(places: number): bigint {
-  const exponent = BigInt(Math.max(2, Math.ceil(places * 2 / 5)));
+  const exponent = BigInt(Math.max(2, Math.ceil((places * 2) / 5)));
   return 10n ** exponent;
 }
 

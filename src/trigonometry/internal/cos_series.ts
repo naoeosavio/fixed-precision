@@ -1,6 +1,8 @@
-import { MAX_SERIES_ITERATIONS } from "./constants";
-
-export function cos_work(value: bigint, scale: bigint): bigint {
+export function cos_work(
+  value: bigint,
+  scale: bigint,
+  max_iterations: number,
+): bigint {
   if (value === 0n) {
     return scale;
   }
@@ -9,7 +11,7 @@ export function cos_work(value: bigint, scale: bigint): bigint {
   let term = scale;
   let sum = scale;
 
-  for (let index = 1; index <= MAX_SERIES_ITERATIONS; index += 1) {
+  for (let index = 1; index <= max_iterations; index += 1) {
     const divisor = BigInt((2 * index - 1) * (2 * index));
     term = -(term * value_squared) / (scale * divisor);
 

@@ -9,7 +9,7 @@ export function acos_value(value: bigint, ctx: FPContext): bigint {
   assert_between_minus_one_and_one(value, ctx, "Arccosine");
 
   const work = get_work_context(ctx);
-  const input = to_work_scale(value);
+  const input = to_work_scale(value, work.guard_scale);
   const companion = sqrt_one_minus_squared(input, work.scale);
-  return from_work_scale(atan2_work(companion, input, work));
+  return from_work_scale(atan2_work(companion, input, work), work.guard_scale);
 }
