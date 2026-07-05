@@ -1,6 +1,5 @@
 import type { FPContext } from "../../FixedPrecision";
 import { get_guard_scale, get_max_iterations, PI } from "./constants";
-import { scaled_decimal } from "./scaled_decimal";
 
 let work_context_cache: Map<bigint, Work_Context> | undefined;
 
@@ -27,14 +26,14 @@ export function get_work_context(ctx: FPContext): Work_Context {
 }
 
 function make_work_context(ctx: FPContext): Work_Context {
-  const guard_scale = get_guard_scale(ctx.places);
+  const guard = get_guard_scale(ctx.places);
   const max_iterations = get_max_iterations(ctx.places);
-  const scale = ctx.SCALE * guard_scale;
-  const pi = scaled_decimal(PI, scale);
+  const scale = ctx.SCALE * guard.guard_scale;
+  const pi = BigInt(PI.slice(0, guard.guard + ctx.places + 1));
 
   return {
     scale,
-    guard_scale,
+    guard_scale: guard.guard_scale,
     max_iterations,
     pi,
     half_pi: pi >> 1n,

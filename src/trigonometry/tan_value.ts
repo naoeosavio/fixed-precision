@@ -1,16 +1,16 @@
 import type { FPContext } from "../FixedPrecision";
 import { assert_non_zero } from "./internal/assert_non_zero";
 import { PI } from "./internal/constants";
-import { cos_work } from "./internal/cos_series";
+import { cos_series } from "./internal/cos_series";
 import { reduce_angle } from "./internal/reduce_angle";
 import { from_work_scale, to_work_scale } from "./internal/scale_utils";
-import { scaled_decimal } from "./internal/scaled_decimal";
+
 import { sin_work } from "./internal/sin_series";
 import { get_work_context } from "./internal/work_context";
 
 export function tan_value(value: bigint, ctx: FPContext): bigint {
   const work = get_work_context(ctx);
-  const pi_half = scaled_decimal(PI, ctx.SCALE) >> 1n;
+  const pi_half = BigInt(PI.slice(0, ctx.places + 1)) >> 1n;
 
   if (value % pi_half === 0n && (value / pi_half) % 2n !== 0n) {
     throw new Error("Tangent is undefined when cosine is zero");
@@ -18,7 +18,8 @@ export function tan_value(value: bigint, ctx: FPContext): bigint {
 
   const reduced = reduce_angle(to_work_scale(value, work.guard_scale), work);
   const cosine =
-    reduced.cos_sign * cos_work(reduced.angle, work.scale, work.max_iterations);
+    reduced.cos_sign *
+    cos_series(reduced.angle, work.scale, work.max_iterations);
 
   assert_non_zero(cosine, "Tangent is undefined when cosine is zero");
 
