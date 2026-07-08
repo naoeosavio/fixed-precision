@@ -1,51 +1,25 @@
 import type { FPContext } from "../FixedPrecision";
-import { clamp_unit } from "./internal/clamp_unit";
-import { PI } from "./internal/constants";
-import { sin_work } from "./internal/sin_series";
-
-const GUARD = 2n;
-const GUARD_SCALE = 10n ** GUARD;
+import { convert_radianos } from "./internal/convert_radianos";
+import { cos_series } from "./internal/cos_series";
+import { reconvert_angle } from "./internal/reconvert_angle";
+import { reduce_angle_quadrant_cos } from "./internal/reduce_angle_quadrant_cos";
+import { get_work_context } from "./internal/work_context";
 
 export function sin_value(value: bigint, ctx: FPContext): bigint {
-  const places = ctx.places;
-  const workScale = ctx.SCALE * GUARD_SCALE;
-  const maxIter = places * 4;
+  const work = get_work_context(ctx);
+  const weak_pi = work.pi / work.guard_scale;
+  const reduced = reduce_angle_quadrant_cos(value, weak_pi, false);
+  if (reduced.angle === 0n || reduced.angle === weak_pi) {
+    return ctx.SCALE * reduced.sign;
+  }
 
-  const piDigits = PI.replace(".", "");
-  const workDigits = places + Number(GUARD);
-  const piRaw = BigInt(piDigits.slice(0, workDigits + 1));
-
-  const piFP20 = BigInt(piDigits.slice(0, places + 1));
-  const halfPiFP20 = piFP20 / 2n;
-  const degApprox = ((value * 180n) + halfPiFP20) / piFP20;
-  const xRaw = (degApprox * piRaw) / 180n;
-
-  const twoPi = piRaw * 2n;
-  const halfPi = piRaw / 2n;
-
-  let angle = ((xRaw % twoPi) + twoPi) % twoPi;
-
-  if (angle === 0n || angle === piRaw) {
+  if (reduced.angle === weak_pi >> 1n) {
     return 0n;
   }
-
-  if (angle === halfPi) {
-    return ctx.SCALE;
-  }
-
-  let sign = 1n;
-  if (angle > piRaw + halfPi) {
-    angle = twoPi - angle;
-    sign = -1n;
-  } else if (angle > piRaw) {
-    angle = angle - piRaw;
-    sign = -1n;
-  } else if (angle > halfPi) {
-    angle = piRaw - angle;
-  }
-
-  const rawSin = sin_work(angle, workScale, maxIter);
-  const result = (sign * rawSin) / GUARD_SCALE;
-
-  return clamp_unit(result, ctx.SCALE);
+  const angle =
+    reconvert_angle(reduced.angle + 2n, ctx.SCALE, work.pi) * work.guard_scale;
+  const radinos = convert_radianos(angle, work.pi, ctx.SCALE);
+  const result =
+    reduced.sign * cos_series(radinos, work.scale, work.max_iterations);
+  return result / work.guard_scale;
 }
