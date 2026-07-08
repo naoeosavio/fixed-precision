@@ -1,12 +1,12 @@
 type Reduced_Angle = {
   angle: bigint;
-  cos_sign: 1n | -1n;
-  sin_sign: 1n | -1n;
+  sign: 1n | -1n;
 };
 
-export function reduce_angle_quadrant(
+export function reduce_angle_quadrant_cos(
   value: bigint,
   work: bigint,
+  is_cos: boolean,
 ): Reduced_Angle {
   const pi = work;
   const two_pi = pi << 1n;
@@ -19,27 +19,23 @@ export function reduce_angle_quadrant(
 
   if (angle <= half_pi) {
     return {
-      angle: angle,
-      cos_sign: 1n,
-      sin_sign: 1n,
+      angle: is_cos ? angle : half_pi - angle,
+      sign: 1n,
     };
   } else if (angle <= pi) {
     return {
-      angle: pi - angle,
-      cos_sign: -1n,
-      sin_sign: 1n,
+      angle: is_cos ? pi - angle : angle - half_pi,
+      sign: is_cos ? -1n : 1n,
     };
   } else if (angle <= pi + half_pi) {
     return {
-      angle: angle - pi,
-      cos_sign: -1n,
-      sin_sign: -1n,
+      angle: is_cos ? angle - pi : pi - angle + half_pi,
+      sign: -1n,
     };
   } else {
     return {
-      angle: two_pi - angle,
-      cos_sign: -1n,
-      sin_sign: 1n,
+      angle: is_cos ? two_pi - angle : angle - (pi + half_pi),
+      sign: is_cos ? 1n : -1n,
     };
   }
 }
