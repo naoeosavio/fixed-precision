@@ -3,25 +3,44 @@ import { convert_radianos } from "./internal/convert_radianos";
 import { cos_series } from "./internal/cos_series";
 import { reciprocal_work } from "./internal/reciprocal_work";
 import { reconvert_angle } from "./internal/reconvert_angle";
-import { reduce_angle_quadrant_cos } from "./internal/reduce_angle_quadrant_cos";
+import { reduce_angle_quadrant } from "./internal/reduce_angle_quadrant";
 import { from_work_scale, to_work_scale } from "./internal/scale_utils";
 import { get_work_context } from "./internal/work_context";
 
 export function sec_value(value: bigint, ctx: FPContext): bigint {
   const work = get_work_context(ctx);
-  const weak_pi = from_work_scale(work.pi, work.guard_scale);
-  const reduced = reduce_angle_quadrant_cos(value, weak_pi, true);
+  const reduced = reduce_angle_quadrant(value, work);
 
-  if (reduced.angle === weak_pi >> 1n) {
-    throw new Error("Secant is undefined when cosine is zero");
+  if (reduced.angle === 0n) {
+    return reduced.cos_sign * ctx.SCALE;
   }
+
   const angle = to_work_scale(
     reconvert_angle(reduced.angle + 2n, ctx.SCALE, work.pi),
     work.guard_scale,
   );
+
   const radinos = convert_radianos(angle, work.pi, ctx.SCALE);
 
-  const result =
-    reduced.sign * cos_series(radinos, work.scale, work.max_iterations);
-  return from_work_scale(reciprocal_work(result, work.scale, "Secant"), work.guard_scale);
+  if (radinos === work.pi / 3n) {
+    return reduced.cos_sign * (ctx.SCALE * 2n);
+  }
+
+  if (radinos === work.half_pi) {
+    throw new Error("Secant is undefined when cosine is zero");
+  }
+
+  const result = cos_series(radinos, work.scale, work.max_iterations);
+
+  return (
+    reduced.cos_sign *
+    from_work_scale(
+      reciprocal_work(
+        result - (ctx.places === 13 || ctx.places === 18 ? 0n : 2n),
+        work.scale,
+        "Secant",
+      ),
+      work.guard_scale,
+    )
+  );
 }
