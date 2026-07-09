@@ -2,7 +2,7 @@ export function get_guard_scale(places: number): {
   guard: number;
   guard_scale: bigint;
 } {
-  const exponent = places == 16 ? 3 : places == 7 ? 3 : 2;
+  const exponent = places === 16 || places === 7 ? 3 : 2;
   return { guard: exponent, guard_scale: BigInt(10 ** exponent) };
 }
 
