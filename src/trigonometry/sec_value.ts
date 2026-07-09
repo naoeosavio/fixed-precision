@@ -20,21 +20,21 @@ export function sec_value(value: bigint, ctx: FPContext): bigint {
     work.guard_scale,
   );
 
-  const radinos = convert_radianos(angle, work.pi, ctx.SCALE);
-
-  if (radinos === work.pi / 3n) {
+  if (angle * 10n === 60n * ctx.SCALE) {
     return reduced.cos_sign * (ctx.SCALE * 2n);
   }
 
-  if (radinos === work.half_pi) {
+  if (angle * 10n === 90n * ctx.SCALE) {
     throw new Error("Secant is undefined when cosine is zero");
   }
+
+  const radinos = convert_radianos(angle, work.pi, ctx.SCALE);
 
   const result = cos_series(radinos, work.scale, work.max_iterations);
 
   return (
     reduced.cos_sign *
-    from_work_scale(
+    from_work_scale( 
       reciprocal_work(
         result - (ctx.places === 13 || ctx.places === 18 ? 0n : 2n),
         work.scale,

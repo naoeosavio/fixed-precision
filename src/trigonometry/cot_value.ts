@@ -11,7 +11,7 @@ import { get_work_context } from "./internal/work_context";
 export function cot_value(value: bigint, ctx: FPContext): bigint {
   const work = get_work_context(ctx);
   const weak_pi = from_work_scale(work.pi, work.guard_scale);
-  const reduced = reduce_angle_quadrant(value, weak_pi);
+  const reduced = reduce_angle_quadrant(value, work);
   if (reduced.angle === 0n) {
     throw new Error("Cotangent is undefined when sine is zero");
   }
