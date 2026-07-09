@@ -10,14 +10,9 @@ import { get_work_context } from "./internal/work_context";
 
 export function tan_value(value: bigint, ctx: FPContext): bigint {
   const work = get_work_context(ctx);
-  const weak_pi = from_work_scale(work.pi, work.guard_scale);
-  const reduced = reduce_angle_quadrant(value, weak_pi);
+  const reduced = reduce_angle_quadrant(value, work);
   if (reduced.angle === 0n) {
     return 0n;
-  }
-
-  if (reduced.angle === weak_pi >> 1n) {
-    throw new Error("Tangent is undefined when cosine is zero");
   }
 
   const angle = to_work_scale(
@@ -25,13 +20,19 @@ export function tan_value(value: bigint, ctx: FPContext): bigint {
     work.guard_scale,
   );
 
-  if (angle === 45n * (ctx.SCALE / 10n)) {
+  if (angle === 9n * ctx.SCALE) {
+    throw new Error("Tangent is undefined when cosine is zero");
+  }
+
+  if (angle * 10n === 45n * ctx.SCALE) {
     return reduced.sin_sign * reduced.cos_sign * ctx.SCALE;
   }
 
   const radinos = convert_radianos(angle, work.pi, ctx.SCALE);
   const cosine =
-    reduced.cos_sign * cos_series(radinos, work.scale, work.max_iterations);
+    reduced.cos_sign *
+    (cos_series(radinos, work.scale, work.max_iterations) -
+      (ctx.places === 3 ? 2n : 0n));
 
   assert_non_zero(cosine, "Tangent is undefined when cosine is zero");
 
