@@ -34,7 +34,7 @@ export function sec_value(value: bigint, ctx: FPContext): bigint {
 
   return (
     reduced.cos_sign *
-    from_work_scale( 
+    from_work_scale(
       reciprocal_work(
         result - (ctx.places === 13 || ctx.places === 18 ? 0n : 2n),
         work.scale,

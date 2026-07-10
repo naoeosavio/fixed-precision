@@ -1,4 +1,3 @@
-import { sin_series } from "../../trigonometry/sin_series";
 import type { FPContext } from "../FixedPrecision";
 import { assert_non_zero } from "./internal/assert_non_zero";
 import { convert_radianos } from "./internal/convert_radianos";
@@ -6,6 +5,7 @@ import { cos_series } from "./internal/cos_series";
 import { reconvert_angle } from "./internal/reconvert_angle";
 import { reduce_angle_quadrant } from "./internal/reduce_angle_quadrant";
 import { from_work_scale, to_work_scale } from "./internal/scale_utils";
+import { sin_series } from "./internal/sin_series";
 import { get_work_context } from "./internal/work_context";
 
 export function cot_value(value: bigint, ctx: FPContext): bigint {

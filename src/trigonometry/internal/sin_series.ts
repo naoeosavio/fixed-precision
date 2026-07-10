@@ -1,33 +1,24 @@
-function div_round(a: bigint, b: bigint): bigint {
-  const half = b / 2n;
-  if (a >= 0n) {
-    return (a + half) / b;
-  }
-  return (a - half) / b;
-}
-
-export function sin_work(
+export function sin_series(
   value: bigint,
   scale: bigint,
   max_iterations: number,
-): bigint {
+) {
   if (value === 0n) {
     return 0n;
   }
 
-  const x2 = div_round(value * value, scale);
+  const value_squared = (value * value) / scale;
   let term = value;
-  let sum = value;
+  let sum = term;
+  let n = 1;
 
-  for (let n = 1; n <= max_iterations; n++) {
-    const divisor = BigInt(2 * n * (2 * n + 1));
-    term = -div_round(div_round(term * x2, scale), divisor);
-
+  while (n < max_iterations) {
+    term = -((term * value_squared) / (scale * BigInt(2 * n * (2 * n + 1))));
     if (term === 0n) {
       break;
     }
-
     sum += term;
+    n++;
   }
 
   return sum;
