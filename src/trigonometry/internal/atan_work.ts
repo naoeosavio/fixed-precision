@@ -20,3 +20,4 @@ export function atan_work(value: bigint, work: Work_Context): bigint {
 
   return sign * reduced;
 }
+ 

@@ -3,6 +3,10 @@ export function atan_series_work(
   scale: bigint,
   max_iterations: number,
 ): bigint {
+  if (value === 0n) {
+    return 0n;
+  }
+
   const value_squared = (value * value) / scale;
   let term = value;
   let sum = value;
