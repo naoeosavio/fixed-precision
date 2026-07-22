@@ -7,16 +7,40 @@ export function to_string_with_ctx(value: bigint, ctx: FPContext): string {
   if (value === 0n) return "0";
 
   const str = value.toString();
-  const is_negative = str[0] === "-";
-  const len = str.length - (is_negative ? 1 : 0);
+  const len = str.length;
 
-  if (len > P) {
-    return `${str.slice(0, -P)}.${str.slice(-P)}`;
+  let j = len;
+
+  if (str[len - 1] === "0") {
+    const min = len - P;
+    while (j > min && str[j - 1] === "0") {
+      --j;
+    }
   }
 
-  if (is_negative) {
-    return `-0.${"0".repeat(P - len)}${str.slice(1)}`;
+  const effective_places = P - len + j;
+
+  //X.XX
+  if (effective_places === 0) {
+    return str.slice(0, j);
   }
 
-  return `0.${"0".repeat(P - len)}${str}`;
+  const start = str[0] === "-" ? 1 : 0;
+  const clean_len = j - start;
+  if (clean_len > effective_places) {
+    const dot = j - effective_places;
+    return `${str.slice(0, dot)}.${str.substring(dot, j)}`;
+  }
+
+  //0.XX
+  const abs = str.slice(start, j);
+
+  if (clean_len === effective_places) {
+    return (start ? "-0." : "0.") + abs;
+  }
+
+  //0.0X
+  return (
+    (start ? "-0." : "0.") + "0".repeat(effective_places - clean_len) + abs
+  );
 }
