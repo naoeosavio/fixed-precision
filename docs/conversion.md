@@ -4,22 +4,32 @@ FixedPrecision provides several ways to convert between types and formats.
 
 ## Converting to String
 
-### `toString()`
+### `toString(trimZeros?)`
 
-Returns the decimal value as a string with the context's number of decimal places.
+Returns the decimal value as a string. By default, trailing zeros are stripped (new behavior). Pass `false` to keep trailing zeros at the context's full decimal places.
 
 ```ts
 const value = new FixedPrecision("123.456789");
-value.toString(); // "123.45678900" (8 decimals)
+
+value.toString();       // "123.456789"   (trailing zeros stripped)
+value.toString(true);   // "123.456789"   (same)
+value.toString(false);  // "123.45678900" (old behavior, full 8 decimals)
+```
+
+```ts
+const exact = new FixedPrecision("5.00000000");
+
+exact.toString();       // "5"
+exact.toString(false);  // "5.00000000"
 ```
 
 ### `valueOf()`
 
-Alias for `toString()`. Called implicitly during string concatenation.
+Called implicitly during string concatenation. Uses `toString()` (trailing zeros stripped).
 
 ```ts
 const value = new FixedPrecision("50.00");
-"Total: " + value; // "Total: 50.00000000"
+"Total: " + value; // "Total: 50"
 ```
 
 ### `toFixed(places?, rm?)`
@@ -222,7 +232,7 @@ FixedPrecision.sqrt("16.00");       // "4.00000000"
 
 | Method | Input Type | Output Type | Notes |
 |--------|-----------|-------------|-------|
-| `toString()` | — | `string` | Context's decimal places |
+| `toString(trimZeros?)` | — | `string` | Strips trailing zeros by default; `false` keeps full places |
 | `valueOf()` | — | `string` | Same as `toString()` |
 | `toJSON()` | — | `string` | For `JSON.stringify()` |
 | `toFixed(n)` | — | `string` | Exactly `n` decimal places |

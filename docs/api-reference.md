@@ -203,16 +203,29 @@ Creates a precision context object.
 
 ### Conversion Methods
 
-#### `toString(): string`
+#### `toString(trimZeros?: boolean): string`
 
 Returns the decimal value as a string.
+
+**Parameters:**
+- `trimZeros`: `boolean` (optional, default `true`) — When `true` (default), trailing zeros are stripped. When `false`, the output shows all decimal places (old behavior).
 
 **Returns:** `string`
 
 **Example:**
 ```typescript
 const value = new FixedPrecision("123.456789");
-value.toString(); // "123.45678900"
+
+value.toString();       // "123.456789"   (trailing zeros stripped)
+value.toString(true);   // "123.456789"   (explicit)
+value.toString(false);  // "123.45678900" (full 8 decimals)
+```
+
+```typescript
+const exact = new FixedPrecision("5.00000000");
+
+exact.toString();       // "5"
+exact.toString(false);  // "5.00000000"
 ```
 
 #### `toNumber(): number`
@@ -238,7 +251,7 @@ Serializes the value to JSON by returning its string representation.
 **Example:**
 ```typescript
 const value = new FixedPrecision("123.45");
-JSON.stringify({ amount: value }); // '{"amount":"123.45000000"}'
+JSON.stringify({ amount: value }); // '{"amount":"123.45"}'
 ```
 
 ### Arithmetic Operations
@@ -766,11 +779,11 @@ const down = 1; // ROUND_DOWN
 const halfUp = 4; // ROUND_HALF_UP
 const value = new FixedPrecision("9876.54321");
 
-value.prec(2).toString(); // "9900.00000000"
-value.prec(7).toString(); // "9876.54300000"
-value.prec(20).toString(); // "9876.54321000"
-value.prec(1, down).toString(); // "9000.00000000"
-value.prec(1, halfUp).toString(); // "10000.00000000"
+value.prec(2).toString(); // "9900"
+value.prec(7).toString(); // "9876.543"
+value.prec(20).toString(); // "9876.54321"
+value.prec(1, down).toString(); // "9000"
+value.prec(1, halfUp).toString(); // "10000"
 ```
 
 #### `ceil(): FixedPrecision`

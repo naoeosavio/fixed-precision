@@ -111,8 +111,8 @@ FixedPrecision instances are **immutable**. Operations return new instances:
 const a = new FixedPrecision("10.00");
 const b = a.add("5.00");  // Returns new instance
 
-console.log(a.toString()); // "10.00000000" (unchanged)
-console.log(b.toString()); // "15.00000000" (new instance)
+console.log(a.toString()); // "10" (unchanged, trailing zeros stripped)
+console.log(b.toString()); // "15" (new instance)
 ```
 
 ## Error Handling

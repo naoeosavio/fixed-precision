@@ -26,9 +26,9 @@ const subtotal = price.mul(quantity);
 const discountAmount = subtotal.mul(discount);
 const total = subtotal.sub(discountAmount);
 
-console.log("Subtotal:", subtotal.toString());    // "59.97000000"
-console.log("Discount:", discountAmount.toString()); // "8.99550000"
-console.log("Total:", total.toString());          // "50.97450000"
+console.log("Subtotal:", subtotal.toString());    // "59.97"
+console.log("Discount:", discountAmount.toString()); // "8.9955"
+console.log("Total:", total.toString());          // "50.9745"
 ```
 
 ## Method Chaining
@@ -43,7 +43,7 @@ const result = new FixedPrecision(100)
   .mul(2n)          // Multiply by 2 (bigint)
   .div(5);          // Divide by 5
 
-console.log("Result:", result.toString()); // "50.00000000"
+console.log("Result:", result.toString()); // "50"
 ```
 
 ## Key Features Demonstrated
@@ -87,7 +87,8 @@ if (purchaseAmount.eq(150)) {
 ```typescript
 const value = new FixedPrecision("123.456789");
 
-console.log(value.toString());        // "123.45678900" (8 decimals)
+console.log(value.toString());        // "123.456789" (8 places, trailing zeros stripped)
+console.log(value.toString(false)); // "123.45678900" (all 8 decimal places)
 console.log(value.round(2).toString()); // "123.46" (rounded to 2 decimals)
 console.log(value.toNumber());        // 123.456789
 ```
