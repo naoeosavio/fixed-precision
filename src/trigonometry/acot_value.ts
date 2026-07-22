@@ -7,10 +7,14 @@ export function acot_value(value: bigint, ctx: FPContext): bigint {
   const work = get_work_context(ctx);
 
   if (value === 0n) {
-    return from_work_scale(work.half_pi);
+    return from_work_scale(work.half_pi, work.guard_scale);
   }
 
   return from_work_scale(
-    atan_work((work.scale * work.scale) / to_work_scale(value), work),
+    atan_work(
+      (work.scale * work.scale) / to_work_scale(value, work.guard_scale),
+      work,
+    ),
+    work.guard_scale,
   );
 }

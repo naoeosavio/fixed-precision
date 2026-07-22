@@ -1,23 +1,24 @@
-import { MAX_SERIES_ITERATIONS } from "./constants";
-
-export function sin_work(value: bigint, scale: bigint): bigint {
+export function sin_series(
+  value: bigint,
+  scale: bigint,
+  max_iterations: number,
+) {
   if (value === 0n) {
     return 0n;
   }
 
   const value_squared = (value * value) / scale;
   let term = value;
-  let sum = value;
+  let sum = term;
+  let n = 1;
 
-  for (let index = 1; index <= MAX_SERIES_ITERATIONS; index += 1) {
-    const divisor = BigInt(2 * index * (2 * index + 1));
-    term = -(term * value_squared) / (scale * divisor);
-
+  while (n < max_iterations) {
+    term = -((term * value_squared) / (scale * BigInt(2 * n * (2 * n + 1))));
     if (term === 0n) {
       break;
     }
-
     sum += term;
+    n++;
   }
 
   return sum;

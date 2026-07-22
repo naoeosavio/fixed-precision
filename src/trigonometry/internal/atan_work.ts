@@ -14,8 +14,9 @@ export function atan_work(value: bigint, work: Work_Context): bigint {
         atan_reduced_work(
           (work.scale * work.scale) / absolute_value,
           work.scale,
+          work.max_iterations,
         )
-      : atan_reduced_work(absolute_value, work.scale);
+      : atan_reduced_work(absolute_value, work.scale, work.max_iterations);
 
   return sign * reduced;
 }
