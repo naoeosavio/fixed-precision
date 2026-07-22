@@ -1,25 +1,19 @@
-import { sqrt_initial_guess } from "./internal/sqrt_initial_guess";
+export function sqrt_value(x: bigint, scale: bigint): bigint {
+  if (x < 0n) throw new Error("Square root of negative number");
+  if (x === 0n) return 0n;
+  if (x === scale) return scale;
 
-export function sqrt_value(value: bigint, scale: bigint): bigint {
-  if (value < 0n) {
-    throw new Error("Square root of negative number");
-  }
-  if (value === 0n) {
-    return 0n;
-  }
-
-  const target = value * scale;
+  const target = x * scale;
   if (target < 2n) {
     return target;
   }
 
-  let current = sqrt_initial_guess(target);
-  let next = (current + target / current) >> 1n;
+  let current = target >> 1n;
+  if (current === 0n) current = 1n;
 
-  while (next < current) {
+  while (true) {
+    const next = (current + target / current) >> 1n;
+    if (next >= current) return current;
     current = next;
-    next = (current + target / current) >> 1n;
   }
-
-  return current;
 }
