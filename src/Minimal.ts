@@ -367,12 +367,12 @@ export default class FixedPrecision {
     return to_number_with_ctx(scaled.value, scaled.ctx);
   }
 
-  public toString(): string {
-    return to_string_with_ctx(this.value, this.ctx);
+  public toString(trimZeros = true): string {
+    return to_string_with_ctx(this.value, this.ctx, trimZeros);
   }
 
   public toFixed(places = 0, rm: RoundingMode = this.ctx.roundingMode): string {
-    return this.scale(places, rm).toString();
+    return this.scale(places, rm).toString(false);
   }
 
   public toExponential(dp = this.ctx.places, rm?: RoundingMode): string {

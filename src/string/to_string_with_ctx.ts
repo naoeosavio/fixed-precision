@@ -1,6 +1,6 @@
 import type { FPContext } from "../FixedPrecision";
 
-export function to_string_with_ctx(value: bigint, ctx: FPContext): string {
+export function to_string_with_ctx(value: bigint, ctx: FPContext, trimZeros = true): string {
   const P = ctx.places;
 
   if (P === 0) return value.toString();
@@ -11,7 +11,7 @@ export function to_string_with_ctx(value: bigint, ctx: FPContext): string {
 
   let j = len;
 
-  if (str[len - 1] === "0") {
+  if (trimZeros && str[len - 1] === "0") {
     const min = len - P;
     while (j > min && str[j - 1] === "0") {
       --j;
