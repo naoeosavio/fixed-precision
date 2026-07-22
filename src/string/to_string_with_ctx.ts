@@ -1,6 +1,10 @@
 import type { FPContext } from "../FixedPrecision";
 
-export function to_string_with_ctx(value: bigint, ctx: FPContext, trimZeros = true): string {
+export function to_string_with_ctx(
+  value: bigint,
+  ctx: FPContext,
+  trimZeros = true,
+): string {
   const P = ctx.places;
 
   if (P === 0) return value.toString();

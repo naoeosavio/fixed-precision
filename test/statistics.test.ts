@@ -7,7 +7,7 @@ const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
 
 describe("Statistics", () => {
   test("min", () => {
-    expect(FixedPrecision.min("5.5").toString()).toBe("5.50000000");
+    expect(FixedPrecision.min("5.5").toString(false)).toBe("5.50000000");
     expect(FixedPrecision.min("10.5", "3.2").toNumber()).toBe(3.2);
     expect(
       FixedPrecision.min("5.0", "3.0", "7.0", "1.0", "4.0").toNumber(),
@@ -20,13 +20,13 @@ describe("Statistics", () => {
       50.25,
     );
     expect(FixedPrecision.min(FP8("10.0"), "5.5", 3.0).toNumber()).toBe(3);
-    expect(FixedPrecision.min(FP4("100.5"), "50.25").toString()).toBe(
+    expect(FixedPrecision.min(FP4("100.5"), "50.25").toString(false)).toBe(
       "50.25000000",
     );
   });
 
   test("max", () => {
-    expect(FixedPrecision.max("-3.5").toString()).toBe("-3.50000000");
+    expect(FixedPrecision.max("-3.5").toString(false)).toBe("-3.50000000");
     expect(FixedPrecision.max("10.5", "3.2").toNumber()).toBe(10.5);
     expect(
       FixedPrecision.max("1.0", "3.0", "7.0", "5.0", "2.0").toNumber(),
@@ -71,17 +71,17 @@ describe("Statistics", () => {
     expect(FixedPrecision.sum(FP8("10.5"), "5.25", 3.0).toNumber()).toBe(
       18.75,
     );
-    expect(FixedPrecision.sum(FP4("10.50"), "20.25").toString()).toBe(
+    expect(FixedPrecision.sum(FP4("10.50"), "20.25").toString(false)).toBe(
       "30.75000000",
     );
     expect(FixedPrecision.sum([]).toNumber()).toBe(0);
   });
 
   test("hypot", () => {
-    expect(FixedPrecision.hypot(3, 4).toString()).toBe("5.00000000");
-    expect(FixedPrecision.hypot("1", "2", "2").toString()).toBe("3.00000000");
-    expect(FixedPrecision.hypot([6, 8]).toString()).toBe("10.00000000");
+    expect(FixedPrecision.hypot(3, 4).toString(false)).toBe("5.00000000");
+    expect(FixedPrecision.hypot("1", "2", "2").toString(false)).toBe("3.00000000");
+    expect(FixedPrecision.hypot([6, 8]).toString(false)).toBe("10.00000000");
     expect(FixedPrecision.hypot().toString()).toBe("0");
-    expect(FixedPrecision.hypot(FP4("3"), "4").toString()).toBe("5.00000000");
+    expect(FixedPrecision.hypot(FP4("3"), "4").toString(false)).toBe("5.00000000");
   });
 });

@@ -11,7 +11,7 @@ describe("String", () => {
   });
 
   test("toExponential large", () => {
-    expect(FP8("12345678.00000000").toExponential(4)).toContain("e");
+    expect(FP8("12345678").toExponential(4)).toContain("e");
   });
 
   test("toPrecision moderate", () => {
@@ -24,26 +24,26 @@ describe("String", () => {
 
   test("prec default half-up", () => {
     const x = FP8("9876.54321");
-    expect(x.prec(2).toString()).toBe("9900.00000000");
-    expect(x.prec(7).toString()).toBe("9876.54300000");
-    expect(x.prec(20).toString()).toBe("9876.54321000");
+    expect(x.prec(2).toString()).toBe("9900");
+    expect(x.prec(7).toString()).toBe("9876.543");
+    expect(x.prec(20).toString()).toBe("9876.54321");
   });
 
   test("prec down half-up", () => {
     const x = FP8("9876.54321");
-    expect(x.prec(1, 1).toString()).toBe("9000.00000000");
-    expect(x.prec(1, 4).toString()).toBe("10000.00000000");
+    expect(x.prec(1, 1).toString()).toBe("9000");
+    expect(x.prec(1, 4).toString()).toBe("10000");
   });
 
   test("prec no mutate", () => {
     const x = FP8("9876.54321");
     x.prec(2);
-    expect(x.toString()).toBe("9876.54321000");
+    expect(x.toString(false)).toBe("9876.54321000");
   });
 
   test("prec small negative", () => {
-    expect(FP8("0.00123456").prec(2).toString()).toBe("0.00120000");
-    expect(FP8("-9876.54321").prec(2).toString()).toBe("-9900.00000000");
+    expect(FP8("0.00123456").prec(2).toString()).toBe("0.0012");
+    expect(FP8("-9876.54321").prec(2).toString()).toBe("-9900");
   });
 
   test("prec validation", () => {
@@ -60,7 +60,7 @@ describe("String", () => {
     expect(FP8("123.456789").toFixed(3)).toBe("123.457");
     const v = FP8(499.99999999999994);
     expect(v.toFixed(4)).toBe("500.0000");
-    expect(v.toFixed(4)).toBe(v.scale(4).toString());
+    expect(v.toFixed(4)).toBe(v.scale(4).toString(false));
   });
 
   test("base conversion", () => {
@@ -86,5 +86,40 @@ describe("String", () => {
     expect(() => FP8("10.625").toBinary(0)).toThrow("Invalid precision");
     expect(() => FP8("10.625").toOctal(1.5)).toThrow("Invalid precision");
     expect(() => FP8("10.625").toHex(1e6)).toThrow("Invalid precision");
+  });
+
+  test("toString default strips trailing zeros", () => {
+    expect(FP8("5.00000000").toString()).toBe("5");
+    expect(FP8("1.23450000").toString()).toBe("1.2345");
+    expect(FP8("-42.00000000").toString()).toBe("-42");
+    expect(FP8("0").toString()).toBe("0");
+    expect(FP8("0.10000000").toString()).toBe("0.1");
+    expect(FP8("0.00000000").toString()).toBe("0");
+    expect(FP8("100.00000000").toString()).toBe("100");
+  });
+
+  test("toString(true) strips trailing zeros", () => {
+    expect(FP8("5.00000000").toString(true)).toBe("5");
+    expect(FP8("1.23450000").toString(true)).toBe("1.2345");
+    expect(FP8("-42.00000000").toString(true)).toBe("-42");
+    expect(FP8("0.10000000").toString(true)).toBe("0.1");
+    expect(FP8("100.00000000").toString(true)).toBe("100");
+  });
+
+  test("toString(false) keeps trailing zeros", () => {
+    expect(FP8("5.00000000").toString(false)).toBe("5.00000000");
+    expect(FP8("1.23450000").toString(false)).toBe("1.23450000");
+    expect(FP8("-42.00000000").toString(false)).toBe("-42.00000000");
+    expect(FP8("0.10000000").toString(false)).toBe("0.10000000");
+    expect(FP8("100.00000000").toString(false)).toBe("100.00000000");
+    expect(FP8("0").toString(false)).toBe("0");
+    expect(FP8("0.00000000").toString(false)).toBe("0");
+  });
+
+  test("toString edge cases", () => {
+    expect(FP8("0.00100000").toString()).toBe("0.001");
+    expect(FP8("0.00100000").toString(false)).toBe("0.00100000");
+    expect(FP8("0.00123000").toString()).toBe("0.00123");
+    expect(FP8("0.00123000").toString(false)).toBe("0.00123000");
   });
 });

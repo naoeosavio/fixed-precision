@@ -75,7 +75,7 @@ describe("Numeric", () => {
 
   test("toNumber above MAX_SAFE_INTEGER", () => {
     const r = FP20("499.99999999999994").round(4);
-    expect(r.toString()).toBe("500.00000000000000000000");
+    expect(r.toString(false)).toBe("500.00000000000000000000");
     expect(r.toNumber()).toBe(500);
     expect(r.toNumber()).toBe(Number(r.toFixed(4)));
   });
@@ -92,7 +92,7 @@ describe("Numeric", () => {
   test("toNumber with places", () => {
     const v = FP8("1.255");
     expect(v.toNumber(2)).toBe(1.26);
-    expect(v.toString()).toBe("1.25500000");
+    expect(v.toString(false)).toBe("1.25500000");
   });
 
   test("isInteger", () => {
@@ -125,7 +125,7 @@ describe("Numeric", () => {
   test("string representations", () => {
     expect(FP("123456789").toString()).toBe("123456789");
     expect(FP2("-1234.56").toString()).toBe("-1234.56");
-    expect(FP4("9.5").toString()).toBe("9.5000");
+    expect(FP4("9.5").toString(false)).toBe("9.5000");
     expect(FP4("0.0099").toString()).toBe("0.0099");
     expect(FP4("0").toString()).toBe("0");
     expect(
@@ -134,17 +134,17 @@ describe("Numeric", () => {
   });
 
   test("parse", () => {
-    expect(FP6(42).toString()).toBe("42.000000");
-    expect(FP6(-999).toString()).toBe("-999.000000");
-    expect(FP6(Number.MAX_SAFE_INTEGER).toString()).toBe(
+    expect(FP6(42).toString(false)).toBe("42.000000");
+    expect(FP6(-999).toString(false)).toBe("-999.000000");
+    expect(FP6(Number.MAX_SAFE_INTEGER).toString(false)).toBe(
       "9007199254740991.000000",
     );
     expect(FP6("1234.56789").trunc().toNumber()).toBe(1234);
     expect(FP6("-99").trunc().toNumber()).toBe(-99);
     expect(FP10(3.14159265358979).toString()).toBe("3.1415926535");
-    expect(FP10(-0.1).toString()).toBe("-0.1000000000");
+    expect(FP10(-0.1).toString(false)).toBe("-0.1000000000");
     expect(FP10(1 / 3).toString()).toBe("0.3333333333");
-    expect(FP6(1e15).toString()).toBe("1000000000000000.000000");
+    expect(FP6(1e15).toString(false)).toBe("1000000000000000.000000");
     expect(() => FP6(NaN)).toThrow();
     expect(() => FP6(Infinity)).toThrow();
     expect(FP10("3.1415926535").toNumber()).toBeCloseTo(3.1415926535);

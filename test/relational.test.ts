@@ -57,11 +57,11 @@ describe("Relational", () => {
   });
 
   test("neg", () => {
-    expect(FP8("42.00000000").neg().toString()).toBe("-42.00000000");
-    expect(FP8("-42.00000000").neg().toString()).toBe("42.00000000");
-    expect(FP6("-3.14").abs().toString()).toBe("3.140000");
-    expect(FP6("-3.14").neg().toString()).toBe("3.140000");
-    expect(FP6("-3.14").neg().neg().toString()).toBe("-3.140000");
+    expect(FP8("42.00000000").neg().toString(false)).toBe("-42.00000000");
+    expect(FP8("-42.00000000").neg().toString(false)).toBe("42.00000000");
+    expect(FP6("-3.14").abs().toString(false)).toBe("3.140000");
+    expect(FP6("-3.14").neg().toString(false)).toBe("3.140000");
+    expect(FP6("-3.14").neg().neg().toString(false)).toBe("-3.140000");
   });
 
   test("sign", () => {

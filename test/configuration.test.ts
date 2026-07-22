@@ -22,7 +22,7 @@ describe("Configuration", () => {
   test("configure rounding mode", () => {
     fixedconfig.configure({ places: 8, roundingMode: 2 });
     const a = new FixedPrecision("1.00000001");
-    expect(a.ceil().toString()).toBe("2.00000000");
+    expect(a.ceil().toString(false)).toBe("2.00000000");
   });
 
   test("configure invalid rounding mode throws", () => {

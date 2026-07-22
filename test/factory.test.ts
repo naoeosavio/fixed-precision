@@ -8,8 +8,8 @@ const FP8_DOWN = FixedPrecision.create({ places: 8, roundingMode: 1 });
 
 describe("Factory", () => {
   test("independent precisions", () => {
-    expect(FP8("1").toString()).toBe("1.00000000");
-    expect(FP2("1").toString()).toBe("1.00");
+    expect(FP8("1").toString(false)).toBe("1.00000000");
+    expect(FP2("1").toString(false)).toBe("1.00");
   });
 
   test("cross-factory arithmetic throws", () => {
@@ -20,12 +20,12 @@ describe("Factory", () => {
 
   test("ignores global configure", () => {
     fixedconfig.configure({ places: 4 });
-    expect(FP2("1").toString()).toBe("1.00");
-    expect(new FixedPrecision("1").toString()).toBe("1.0000");
+    expect(FP2("1").toString(false)).toBe("1.00");
+    expect(new FixedPrecision("1").toString(false)).toBe("1.0000");
   });
 
   test("default rounding mode", () => {
-    expect(FP8_DOWN("1.23456789").round(4).toString()).toBe("1.23450000");
-    expect(FP8("1.23456781").round(4).toString()).toBe("1.23460000");
+    expect(FP8_DOWN("1.23456789").round(4).toString(false)).toBe("1.23450000");
+    expect(FP8("1.23456781").round(4).toString(false)).toBe("1.23460000");
   });
 });

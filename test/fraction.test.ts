@@ -9,7 +9,7 @@ describe("Fraction", () => {
     const x = FP8("12.34");
     expect(x.num().toNumber()).toBe(617);
     expect(x.den().toNumber()).toBe(50);
-    expect(x.num().div(x.den()).toString()).toBe("12.34000000");
+    expect(x.num().div(x.den()).toString(false)).toBe("12.34000000");
   });
 
   test("negative num den", () => {
@@ -22,7 +22,7 @@ describe("Fraction", () => {
     const [num, den] = FP8("12.34").fraction();
     expect(num.toNumber()).toBe(617);
     expect(den.toNumber()).toBe(50);
-    expect(num.div(den).toString()).toBe("12.34000000");
+    expect(num.div(den).toString(false)).toBe("12.34000000");
   });
 
   test("fraction with maxDen", () => {
