@@ -2,6 +2,67 @@
 
 All notable changes to the fixed-precision library will be documented in this file.
 
+## [1.7.1] — 2026-07-22
+
+## Features
+- Added `trimZeros` option to `toString` method (default enabled) to strip trailing zeros; can be disabled with `toString(false)`.
+- Implemented `atan` using inverse identity for improved accuracy over the full input range.
+- Replaced cosine algorithm with exact quadrant reduction and series computation.
+- Added dynamic guard scale and max iterations based on precision for optimized trigonometric performance.
+- Added domain checks for reciprocal trigonometric functions (`cot`, `csc`, `sec`) to throw errors at undefined points.
+- Extended operators to accept raw numbers and strings directly (bitwise, relational).
+- Added `rest` method to return remainder from `divmod` operation.
+
+## Fixes
+- Corrected `csc` special angle handling and precision for reciprocals.
+- Fixed tangent calculation for certain angles and improved undefined condition detection.
+- Corrected quadrant sign values in angle reduction for proper trigonometric results.
+- Replaced approximate large-value return with explicit error at mathematically undefined points for `tan`, `sec`, `csc`, and `cot`.
+- Fixed `divmod` remainder calculation to avoid rounding errors by deriving from quotient.
+
+## Refactors
+- Renamed `toFraction` to `fraction` and `to_fraction` to `fraction_value` for clarity.
+- Simplified square root calculation by removing dependency on internal guess function and optimizing convergence.
+- Relocated and simplified `sin_series` into internal module; updated `cot` and `tan` accordingly.
+- Rewrote `tan_value`, `cot_value`, `sec_value`, `csc_value`, and `sin_value` to use unified quadrant reduction and radian conversion.
+- Replaced CORDIC algorithm with direct Taylor series for sine and cosine.
+- Improved angle reduction and special-case handling in secant and cosecant.
+
+## Performance
+- Optimized `toString` trailing zero removal with a single fast scan and single allocation, improving throughput by up to 16% for trailing-zero cases.
+- Removed `scaled_decimal` utility and inlined PI scaling to reduce overhead in trigonometry.
+- Implemented CORDIC algorithm for sine and cosine to improve convergence and precision.
+
+## Documentation
+- Updated `toString` documentation for new `trimZeros` parameter and default behavior.
+- Added comprehensive testing guide covering setup, matchers, property-based testing, and CI.
+- Added integration guide for modules, frameworks, testing tools, state management, validation, and APIs.
+- Added migration guide from Big.js, Decimal.js, BigNumber.js, and Math.js.
+- Added common patterns guide for value construction, factories, rounding, serialization, and error handling.
+- Added type definitions documentation for core types and import paths.
+- Added configuration guide for global, factory, and instance-level settings.
+- Added error handling documentation for all exception types.
+- Added conversion methods documentation (toString, toFixed, toExponential, toPrecision, toNumber, base conversion).
+- Added rounding and scaling documentation.
+- Added factories documentation with comparison table.
+- Added installation guide for npm, yarn, pnpm, bun, CDN, and build from source.
+- Expanded modulo and remainder documentation with `mod`, `rem`, `divmod`, and `rest` operations.
+- Renamed raw arithmetic methods in README: `product` → `times`, `fraction` → `ratio`, `leftover` → `rem`.
+
+## Tests
+- Added comprehensive unit tests for arithmetic, statistics, relational, logical, bitwise, matrix, fraction, combinatorics, probability, and trigonometric functions.
+- Added unit tests for string formatting methods (toExponential, toPrecision, toFixed, base conversion).
+- Added tests for factory creation, configuration, cross-factory restrictions, and global configuration.
+- Added tests for trigonometric functions at standard angles with exact string validation.
+- Restructured test suite by feature categories with factory-created contexts and explicit rounding modes.
+- Uncommented and updated trigonometric test cases for inverse and hyperbolic functions.
+
+## Chores
+- Removed deprecated `FixedPrecision.test.ts` file.
+
+## Breaking Changes
+- Renamed raw arithmetic methods: `product` → `times`, `fraction` → `ratio`, `leftover` → `rem`. Added `divmod` returning quotient and remainder, and `rest` as remainder alias.
+
 ## [1.7.0] — 2026-06-19
 
 ### Fixes
@@ -244,6 +305,7 @@ All notable changes to the fixed-precision library will be documented in this fi
 - **Fixed**: for any bug fixes
 - **Security**: in case of vulnerabilities
 
+[1.7.1]: https://github.com/naoeosavio/fixed-precision/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.5.0...v1.6.0
 [1.5.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.4.1...v1.5.0
