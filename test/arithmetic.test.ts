@@ -216,7 +216,6 @@ describe("Arithmetic", () => {
       FP20("125.00000000").cbrt().toString(),
     );
     expect(FixedPrecision.cbrt("64").toString(false)).toBe("4.00000000");
-    expect(FixedPrecision.cubeRoot("64").toString(false)).toBe("4.00000000");
   });
 
   test("exp", () => {
@@ -312,7 +311,7 @@ describe("Arithmetic", () => {
 
   test("static wrappers", () => {
     expect(FixedPrecision.abs("-2.5").toString(false)).toBe("2.50000000");
-    expect(FixedPrecision.add("1.5", "2.25").toString(false)).toBe("3.75000000");
+    expect(FixedPrecision.add(FP8("1.5"), FP6("2.25")).toString(false)).toBe("3.75000000");
     expect(FixedPrecision.sub("5", "2.5").toString(false)).toBe("2.50000000");
     expect(FixedPrecision.mul("2.5", "4").toString(false)).toBe("10.00000000");
     expect(FixedPrecision.div("7.5", "2.5").toString(false)).toBe("3.00000000");

@@ -4,7 +4,7 @@ import FixedPrecision, {
   type FixedPrecisionConfig,
   fixedconfig,
   type RoundingMode,
-} from "../src/FixedPrecision.js";
+} from "../src/FixedPrecision";
 
 describe("Configuration", () => {
   test("configure places", () => {

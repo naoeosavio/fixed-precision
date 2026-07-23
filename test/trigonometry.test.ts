@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import FixedPrecision, { fixedconfig } from "../src/FixedPrecision.js";
+import FixedPrecision, { fixedconfig } from "../src/FixedPrecision";
 
 const FPTEST = FixedPrecision.create({ places: 20 , roundingMode: 4 });
 

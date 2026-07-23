@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import FixedPrecision from "../src/FixedPrecision.js";
+import FixedPrecision from "../src/FixedPrecision";
 
 const FP = FixedPrecision.create({ places: 0 });
 const FP2 = FixedPrecision.create({ places: 2, roundingMode: 4 });

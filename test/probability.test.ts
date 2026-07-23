@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import FixedPrecision from "../src/FixedPrecision.js";
+import FixedPrecision from "../src/FixedPrecision";
 
 describe("Probability", () => {
   test("random in range", () => {
