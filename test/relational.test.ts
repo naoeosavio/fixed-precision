@@ -9,18 +9,18 @@ const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
 describe("Relational", () => {
   test("cmp", () => {
     expect(FP8("5").cmp(5)).toBe(0);
-    expect(FP8("4.99999999").cmp("5.00000000")).toBe(-1);
-    expect(FP8("5.00000000").cmp("4.99999999")).toBe(1);
+    expect(FP8("4.99999999").cmp("5")).toBe(-1);
+    expect(FP8("5").cmp("4.99999999")).toBe(1);
   });
 
   test("eq", () => {
-    expect(FP8("123.45678900").eq("123.45678900")).toBe(true);
-    expect(FP8("123.45678900").eq("123.45678899")).toBe(false);
+    expect(FP8("123.456789").eq("123.456789")).toBe(true);
+    expect(FP8("123.456789").eq("123.45678899")).toBe(false);
     expect(FP20("3").eq("3")).toBe(true);
   });
 
   test("gt gte lt lte", () => {
-    const a = FP8("10.00000000");
+    const a = FP8("10");
     const b = FP8("9.99999999");
     expect(a.gt(b)).toBe(true);
     expect(a.gte(b)).toBe(true);
@@ -33,8 +33,8 @@ describe("Relational", () => {
   });
 
   test("equal values", () => {
-    const a = FP8("100.00000000");
-    const b = FP8("100.00000000");
+    const a = FP8("100");
+    const b = FP8("100");
     expect(a.gt(b)).toBe(false);
     expect(a.lt(b)).toBe(false);
     expect(a.gte(b)).toBe(true);
@@ -47,8 +47,8 @@ describe("Relational", () => {
   });
 
   test("isPositive", () => {
-    expect(FP8("1.00000000").isPositive()).toBe(true);
-    expect(FP8("-1.00000000").isPositive()).toBe(false);
+    expect(FP8("1").isPositive()).toBe(true);
+    expect(FP8("-1").isPositive()).toBe(false);
   });
 
   test("isNegative", () => {
@@ -57,11 +57,11 @@ describe("Relational", () => {
   });
 
   test("neg", () => {
-    expect(FP8("42.00000000").neg().toString(false)).toBe("-42.00000000");
-    expect(FP8("-42.00000000").neg().toString(false)).toBe("42.00000000");
-    expect(FP6("-3.14").abs().toString(false)).toBe("3.140000");
-    expect(FP6("-3.14").neg().toString(false)).toBe("3.140000");
-    expect(FP6("-3.14").neg().neg().toString(false)).toBe("-3.140000");
+    expect(FP8("42").neg().toString()).toBe("-42");
+    expect(FP8("-42").neg().toString()).toBe("42");
+    expect(FP6("-3.14").abs().toString()).toBe("3.14");
+    expect(FP6("-3.14").neg().toString()).toBe("3.14");
+    expect(FP6("-3.14").neg().neg().toString()).toBe("-3.14");
   });
 
   test("sign", () => {

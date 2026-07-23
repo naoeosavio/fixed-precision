@@ -4,6 +4,8 @@ import FixedPrecision from "../src/FixedPrecision";
 
 const FP4 = FixedPrecision.create({ places: 4, roundingMode: 4 });
 const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+const FP16 = FixedPrecision.create({ places: 16, roundingMode: 4 });
+const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
 
 describe("Logical", () => {
   test("instance methods", () => {
@@ -25,12 +27,12 @@ describe("Logical", () => {
 
   test("static methods", () => {
     expect(FixedPrecision.not(0)).toBe(true);
-    expect(FixedPrecision.not("0.00000001")).toBe(false);
-    expect(FixedPrecision.and("2", "2")).toBe(true);
-    expect(FixedPrecision.and("0", "1")).toBe(false);
-    expect(FixedPrecision.or("0", FP8("-1"))).toBe(true);
-    expect(FixedPrecision.xor("0", "3")).toBe(true);
-    expect(FixedPrecision.xor("1", "3")).toBe(false);
-    expect(FixedPrecision.and(FP4("0.0001"), "1")).toBe(true);
+    expect(FixedPrecision.not(FP20("0.00000001"))).toBe(false);
+    expect(FixedPrecision.and(FP8("2"), FP16("2"))).toBe(true);
+    expect(FixedPrecision.and(FP4("0"), FP8("1"))).toBe(false);
+    expect(FixedPrecision.or(FP20("0"), FP8("-1"))).toBe(true);
+    expect(FixedPrecision.xor(FP8("0"), FP16("3"))).toBe(true);
+    expect(FixedPrecision.xor(FP4("1"), FP20("3"))).toBe(false);
+    expect(FixedPrecision.and(FP4("0.0001"), FP16("1"))).toBe(true);
   });
 });

@@ -1,54 +1,56 @@
 import { describe, expect, test } from "vitest";
 import FixedPrecision, { fixedconfig } from "../src/FixedPrecision";
 
-const FPTEST = FixedPrecision.create({ places: 20 , roundingMode: 4 });
+const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+const FP16 = FixedPrecision.create({ places: 16, roundingMode: 4 });
+const FP20 = FixedPrecision.create({ places: 20 , roundingMode: 4 });
 
-const PI = FPTEST("3.14159265358979323846");
+const PI = FP20("3.14159265358979323846");
 
 
-const RAD000 = FPTEST("0")
-const RAD015 = FPTEST("0.26179938779914943653")
-const RAD030 = FPTEST("0.52359877559829887307")
-const RAD045 = FPTEST("0.78539816339744830961")
-const RAD060 = FPTEST("1.04719755119659774615")
-const RAD075 = FPTEST("1.30899693899574718269")
-const RAD090 = FPTEST("1.57079632679489661923")
-const RAD105 = FPTEST("1.83259571459404605576")
-const RAD120 = FPTEST("2.09439510239319549230")
-const RAD135 = FPTEST("2.35619449019234492884")
-const RAD150 = FPTEST("2.61799387799149436538")
-const RAD165 = FPTEST("2.87979326579064380192")
-const RAD180 = FPTEST("3.14159265358979323846")
-const RAD195 = FPTEST("3.40339204138894267499")
-const RAD210 = FPTEST("3.66519142918809211153")
-const RAD225 = FPTEST("3.92699081698724154807")
-const RAD240 = FPTEST("4.18879020478639098461")
-const RAD255 = FPTEST("4.45058959258554042115")
-const RAD270 = FPTEST("4.71238898038468985769")
-const RAD285 = FPTEST("4.97418836818383929422")
-const RAD300 = FPTEST("5.23598775598298873076")
-const RAD315 = FPTEST("5.49778714378213816730")
-const RAD330 = FPTEST("5.75958653158128760384")
-const RAD345 = FPTEST("6.02138591938043704038")
-const RAD360 = FPTEST("6.28318530717958647692")
+const RAD000 = FP20("0")
+const RAD015 = FP20("0.26179938779914943653")
+const RAD030 = FP20("0.52359877559829887307")
+const RAD045 = FP20("0.78539816339744830961")
+const RAD060 = FP20("1.04719755119659774615")
+const RAD075 = FP20("1.30899693899574718269")
+const RAD090 = FP20("1.57079632679489661923")
+const RAD105 = FP20("1.83259571459404605576")
+const RAD120 = FP20("2.09439510239319549230")
+const RAD135 = FP20("2.35619449019234492884")
+const RAD150 = FP20("2.61799387799149436538")
+const RAD165 = FP20("2.87979326579064380192")
+const RAD180 = FP20("3.14159265358979323846")
+const RAD195 = FP20("3.40339204138894267499")
+const RAD210 = FP20("3.66519142918809211153")
+const RAD225 = FP20("3.92699081698724154807")
+const RAD240 = FP20("4.18879020478639098461")
+const RAD255 = FP20("4.45058959258554042115")
+const RAD270 = FP20("4.71238898038468985769")
+const RAD285 = FP20("4.97418836818383929422")
+const RAD300 = FP20("5.23598775598298873076")
+const RAD315 = FP20("5.49778714378213816730")
+const RAD330 = FP20("5.75958653158128760384")
+const RAD345 = FP20("6.02138591938043704038")
+const RAD360 = FP20("6.28318530717958647692")
 
-const SIN15 = FPTEST("0.25881904510252076234")
-const SIN30 = FPTEST("0.5")
-const SIN45 = FPTEST("0.70710678118654752440")
-const SIN60 = FPTEST("0.86602540378443864676")
-const SIN75 = FPTEST("0.96592582628906828674")
+const SIN15 = FP20("0.25881904510252076234")
+const SIN30 = FP20("0.5")
+const SIN45 = FP20("0.70710678118654752440")
+const SIN60 = FP20("0.86602540378443864676")
+const SIN75 = FP20("0.96592582628906828674")
 
-const TAN15 = FPTEST("0.26794919243112270647")
-const TAN30 = FPTEST("0.57735026918962576450")
-const TAN45 = FPTEST("1")
-const TAN60 = FPTEST("1.73205080756887729352")
-const TAN75 = FPTEST("3.73205080756887729352")
+const TAN15 = FP20("0.26794919243112270647")
+const TAN30 = FP20("0.57735026918962576450")
+const TAN45 = FP20("1")
+const TAN60 = FP20("1.73205080756887729352")
+const TAN75 = FP20("3.73205080756887729352")
          
-const SEC15 = FPTEST("1.03527618041008304939")
-const SEC30 = FPTEST("1.15470053837925152901")
-const SEC45 = FPTEST("1.41421356237309504880");
-const SEC60 = FPTEST("2");
-const SEC75 = FPTEST("3.86370330515627314699");
+const SEC15 = FP20("1.03527618041008304939")
+const SEC30 = FP20("1.15470053837925152901")
+const SEC45 = FP20("1.41421356237309504880");
+const SEC60 = FP20("2");
+const SEC75 = FP20("3.86370330515627314699");
 
 describe("Trigonometry", () => {
   test("sin 0°", () => { expect(RAD000.sin().toString()).toBe("0"); });
@@ -390,56 +392,56 @@ describe("Trigonometry", () => {
   // test("acot 360° is large", () => { expect(() => RAD360.cot()).toThrow(); });
 
   test("asin acos roundtrip", () => {
-    expect(FPTEST(SIN45.toString()).asin().sin().toString()).toBe(SIN45.toString());
-    expect(FPTEST(SIN45.toString()).acos().cos().toString()).toBe(SIN45.toString());
+    expect(FP20(SIN45.toString()).asin().sin().toString()).toBe(SIN45.toString());
+    expect(FP20(SIN45.toString()).acos().cos().toString()).toBe(SIN45.toString());
   });
 
   test("inverse domain validation", () => {
-    expect(() => FPTEST("1.5").asin()).toThrow();
-    expect(() => FPTEST("1.5").acos()).toThrow();
-    expect(() => FPTEST("-1.5").asin()).toThrow();
-    expect(() => FPTEST("0.5").asec()).toThrow();
-    expect(() => FPTEST("0.5").acsc()).toThrow();
+    expect(() => FP20("1.5").asin()).toThrow();
+    expect(() => FP20("1.5").acos()).toThrow();
+    expect(() => FP20("-1.5").asin()).toThrow();
+    expect(() => FP20("0.5").asec()).toThrow();
+    expect(() => FP20("0.5").acsc()).toThrow();
   });
 
   test("domain validation", () => {
-    expect(() => FPTEST("0").csc()).toThrow();
-    expect(() => FPTEST("0").cot()).toThrow();
-    expect(() => FPTEST("2").asin()).toThrow();
-    expect(() => FPTEST("2").acos()).toThrow();
-    expect(() => FPTEST("0.5").asec()).toThrow();
-    expect(() => FPTEST("0.5").acsc()).toThrow();
-    expect(() => FPTEST("0.5").acosh()).toThrow();
-    expect(() => FPTEST("1").atanh()).toThrow();
-    expect(() => FPTEST("2").asech()).toThrow();
-    expect(() => FPTEST("0").acsch()).toThrow();
-    expect(() => FPTEST("1").acoth()).toThrow();
-    expect(() => FPTEST("0").csch()).toThrow();
-    expect(() => FPTEST("0").coth()).toThrow();
+    expect(() => FP20("0").csc()).toThrow();
+    expect(() => FP20("0").cot()).toThrow();
+    expect(() => FP20("2").asin()).toThrow();
+    expect(() => FP20("2").acos()).toThrow();
+    expect(() => FP20("0.5").asec()).toThrow();
+    expect(() => FP20("0.5").acsc()).toThrow();
+    expect(() => FP20("0.5").acosh()).toThrow();
+    expect(() => FP20("1").atanh()).toThrow();
+    expect(() => FP20("2").asech()).toThrow();
+    expect(() => FP20("0").acsch()).toThrow();
+    expect(() => FP20("1").acoth()).toThrow();
+    expect(() => FP20("0").csch()).toThrow();
+    expect(() => FP20("0").coth()).toThrow();
   });
 
-  test("sinh 0.5", () => { expect(FPTEST("0.5").sinh().toString()).toBe(FPTEST("0.52109530549374736162").toString()); });
-  test("cosh 0.5", () => { expect(FPTEST("0.5").cosh().toString()).toBe(FPTEST("1.12762596520638078522").toString()); });
-  test("tanh 0.5", () => { expect(FPTEST("0.5").tanh().toString()).toBe(FPTEST("0.46211715726000975850").toString()); });
-  test("sech 0.5", () => { expect(FPTEST("0.5").sech().toString()).toBe(FPTEST("0.88681888397007390866").toString()); });
-  test("csch 0.5", () => { expect(FPTEST("0.5").csch().toString()).toBe(FPTEST("1.91903475133494371950").toString()); });
-  test("coth 0.5", () => { expect(FPTEST("0.5").coth().toString()).toBe(FPTEST("2.16395341373865284878").toString()); });
+  test("sinh 0.5", () => { expect(FP20("0.5").sinh().toString()).toBe(FP20("0.52109530549374736162").toString()); });
+  test("cosh 0.5", () => { expect(FP20("0.5").cosh().toString()).toBe(FP20("1.12762596520638078522").toString()); });
+  test("tanh 0.5", () => { expect(FP20("0.5").tanh().toString()).toBe(FP20("0.46211715726000975850").toString()); });
+  test("sech 0.5", () => { expect(FP20("0.5").sech().toString()).toBe(FP20("0.88681888397007390866").toString()); });
+  test("csch 0.5", () => { expect(FP20("0.5").csch().toString()).toBe(FP20("1.91903475133494371950").toString()); });
+  test("coth 0.5", () => { expect(FP20("0.5").coth().toString()).toBe(FP20("2.16395341373865284878").toString()); });
 
-  test("asinh 1.5", () => { expect(FPTEST("1.5").asinh().toString()).toBe(FPTEST("1.19476321728710930410").toString()); });
-  test("acosh 1.5", () => { expect(FPTEST("1.5").acosh().toString()).toBe(FPTEST("0.96242365011920689499").toString()); });
-  test("atanh 0.5", () => { expect(FPTEST("0.5").atanh().toString()).toBe(FPTEST("0.54930614433405484569").toString()); });
-  test("asech 0.5", () => { expect(FPTEST("0.5").asech().toString()).toBe(FPTEST("1.31695789692481670862").toString()); });
-  test("acsch 2", () => { expect(FPTEST("2").acsch().toString()).toBe(FPTEST("0.48121182505960344749").toString()); });
-  test("acoth 2", () => { expect(FPTEST("2").acoth().toString()).toBe(FPTEST("0.54930614433405484569").toString()); });
+  test("asinh 1.5", () => { expect(FP20("1.5").asinh().toString()).toBe(FP20("1.19476321728710930410").toString()); });
+  test("acosh 1.5", () => { expect(FP20("1.5").acosh().toString()).toBe(FP20("0.96242365011920689499").toString()); });
+  test("atanh 0.5", () => { expect(FP20("0.5").atanh().toString()).toBe(FP20("0.54930614433405484569").toString()); });
+  test("asech 0.5", () => { expect(FP20("0.5").asech().toString()).toBe(FP20("1.31695789692481670862").toString()); });
+  test("acsch 2", () => { expect(FP20("2").acsch().toString()).toBe(FP20("0.48121182505960344749").toString()); });
+  test("acoth 2", () => { expect(FP20("2").acoth().toString()).toBe(FP20("0.54930614433405484569").toString()); });
 
   test("static wrappers", () => {
     fixedconfig.configure({ places: 20, roundingMode: 4 });
     try {
-      expect(FixedPrecision.sin("0.5").toString()).toBe(new FixedPrecision("0.5").sin().toString());
-      expect(FixedPrecision.cos("0.5").toString()).toBe(new FixedPrecision("0.5").cos().toString());
-      expect(FixedPrecision.tan("0.5").toString()).toBe(new FixedPrecision("0.5").tan().toString());
-      expect(FixedPrecision.atan2("1", "-1").toString()).toBe(new FixedPrecision("1").atan2(new FixedPrecision("-1")).toString());
-      expect(FixedPrecision.acosh("1.5").toString()).toBe(new FixedPrecision("1.5").acosh().toString());
+      expect(FixedPrecision.sin(FP16("0.5")).toString()).toBe(FP16("0.5").sin().toString());
+      expect(FixedPrecision.cos(FP8("0.5")).toString()).toBe(FP8("0.5").cos().toString());
+      expect(FixedPrecision.tan(FP16("0.5")).toString()).toBe(FP16("0.5").tan().toString());
+      expect(FixedPrecision.atan2(FP8("1"), FP8("-1")).toString()).toBe(FP8("1").atan2(FP8("-1")).toString());
+      expect(FixedPrecision.acosh(FP16("1.5")).toString()).toBe(FP16("1.5").acosh().toString());
     } finally {
       fixedconfig.configure({ places: 8, roundingMode: 4 });
     }
