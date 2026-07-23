@@ -4,7 +4,7 @@ import { from_long_decimal_string_with_ctx } from "./internal/from_long_decimal_
 import { from_short_decimal_string_with_ctx } from "./internal/from_short_decimal_string_with_ctx";
 
 export function from_string_with_ctx(str: string, ctx: FPContext): bigint {
-  const dot_index = str.indexOf(".", 1);
+  const dot_index = str.indexOf(".");
   const P = ctx.places;
   if (dot_index === -1) {
     return from_integer_string_with_ctx(str, P, ctx);

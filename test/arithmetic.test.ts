@@ -338,6 +338,12 @@ describe("Arithmetic", () => {
     expect(FixedPrecision.clamp(FP4("12"), FP8("0"), FP20("10")).toString()).toBe("10");
   });
 
+  test("static clamp validates min <= max", () => {
+    expect(() =>
+      FixedPrecision.clamp(FP8("5"), FP8("10"), FP8("0")),
+    ).toThrow("min must be less than or equal to max");
+  });
+
   test("static exp", () => {
     fixedconfig.configure({ places: 20, roundingMode: 4 });
     try {

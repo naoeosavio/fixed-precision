@@ -148,7 +148,9 @@ export default class FixedPrecision {
     value: FixedPrecisionValue | FixedPrecisionValue[],
     ...values: FixedPrecisionValue[]
   ): FixedPrecision {
-    const items = Array.isArray(value) ? value : [value, ...values];
+    const items = Array.isArray(value)
+      ? [...value, ...values]
+      : [value, ...values];
     const first = items[0];
     if (first === undefined) {
       throw new Error("FixedPrecision.min requires at least one argument");
@@ -167,7 +169,9 @@ export default class FixedPrecision {
     value: FixedPrecisionValue | FixedPrecisionValue[],
     ...values: FixedPrecisionValue[]
   ): FixedPrecision {
-    const items = Array.isArray(value) ? value : [value, ...values];
+    const items = Array.isArray(value)
+      ? [...value, ...values]
+      : [value, ...values];
     const first = items[0];
     if (first === undefined) {
       throw new Error("FixedPrecision.max requires at least one argument");
@@ -186,7 +190,9 @@ export default class FixedPrecision {
     value: FixedPrecisionValue | FixedPrecisionValue[],
     ...values: FixedPrecisionValue[]
   ): FixedPrecision {
-    const items = Array.isArray(value) ? value : [value, ...values];
+    const items = Array.isArray(value)
+      ? [...value, ...values]
+      : [value, ...values];
     const first = items[0];
     if (first === undefined) return new FixedPrecision(0n);
 
@@ -415,7 +421,40 @@ export default class FixedPrecision {
 
   public toPrecision(sd: number, rm?: RoundingMode): string {
     if (sd >= 1e6) throw new Error("Invalid precision");
-    return this.prec(sd, rm)
+    if (this.value === 0n) return "0";
+
+    const raw = precision_value(
+      this.value,
+      sd,
+      rm ?? this.ctx.roundingMode,
+      this.ctx,
+    );
+    if (raw === 0n) return "0";
+
+    const absRaw = raw < 0n ? -raw : raw;
+    const digitLength = absRaw.toString().length;
+    const places = this.ctx.places;
+
+    let exp: number;
+    if (absRaw >= this.ctx.SCALE) {
+      exp = digitLength - places - 1;
+    } else {
+      const padLength = places - digitLength;
+      exp = -(padLength + 1);
+    }
+
+    if (exp < -6 || exp >= sd) {
+      const shiftFactor = precisionPowerOfTen(Math.abs(exp));
+      const mantissaRaw = exp >= 0 ? raw / shiftFactor : raw * shiftFactor;
+      const mantissa = this.fromRaw(mantissaRaw);
+      const dp = sd - 1;
+      let formatted = mantissa.toFixed(dp, rm);
+      const expSign = exp > 0 ? "+" : "";
+      formatted += `e${expSign}${exp}`;
+      return formatted;
+    }
+
+    return this.fromRaw(raw)
       .toString()
       .replace(/(\.\d*?)0+$/, "$1")
       .replace(/\.$/, "");

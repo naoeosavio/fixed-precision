@@ -51,6 +51,11 @@ describe("Statistics", () => {
     expect(FixedPrecision.max([FP16("2"), FP8("1"), FP20("4"), FP4("3")]).toNumber()).toBe(4);
   });
 
+  test("min/max array plus spread args", () => {
+    expect(FixedPrecision.min([FP8("2"), FP4("1")], FP20("0.5")).toString()).toBe("0.5");
+    expect(FixedPrecision.max([FP16("2"), FP8("1")], FP20("5")).toString()).toBe("5");
+  });
+
   test("min/max empty throws", () => {
     expect(() => FixedPrecision.min([])).toThrow(
       "FixedPrecision.min requires at least one argument",

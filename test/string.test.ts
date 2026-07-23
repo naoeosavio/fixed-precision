@@ -14,12 +14,46 @@ describe("String", () => {
     expect(FP8("12345678").toExponential(4)).toContain("e");
   });
 
+  test("toExponential small number produces correct mantissa", () => {
+    expect(FP8("0.00123").toExponential()).toMatch(/1\.\d+e-3/);
+  });
+
+  test("toExponential large number produces correct mantissa", () => {
+    expect(FP8("12345").toExponential(4)).toMatch(/1\.2345e/);
+  });
+
   test("toPrecision moderate", () => {
     expect(Number(FP8("12.34567890").toPrecision(4))).toBeCloseTo(12.35, 1);
   });
 
   test("toPrecision small", () => {
     expect(Number(FP8("0.00123456").toPrecision(3))).toBeGreaterThan(0);
+  });
+
+  test("toPrecision large number uses exponential notation", () => {
+    const result = FP8("12345").toPrecision(3);
+    expect(result).toMatch(/^1\.23e\+4$/);
+  });
+
+  test("toPrecision very small number uses exponential notation", () => {
+    const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
+    const result = FP20("0.000000123").toPrecision(3);
+    expect(result).toMatch(/^1\.23e-7$/);
+  });
+
+  test("toPrecision moderate number uses fixed notation", () => {
+    expect(FP8("123").toPrecision(3)).toBe("123");
+    expect(FP8("0.00123").toPrecision(3)).toBe("0.00123");
+  });
+
+  test("toPrecision negative large number uses exponential notation", () => {
+    expect(FP8("-12345").toPrecision(3)).toMatch(/^-1\.23e\+4$/);
+  });
+
+  test("fromString handles leading dot", () => {
+    expect(FP8(".5").toString()).toBe("0.5");
+    expect(FP8(".123").toString()).toBe("0.123");
+    expect(FP8("-.5").toString()).toBe("-0.5");
   });
 
   test("prec default half-up", () => {

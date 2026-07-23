@@ -117,14 +117,7 @@ export default class FixedPrecision {
   private value: bigint = 0n;
   private readonly ctx!: FPContext;
 
-  private static makeContext(
-    places: number,
-    roundingMode: RoundingMode,
-  ): FPContext {
-    return makeContext(places, roundingMode);
-  }
-
-  private static defaultContext: FPContext = FixedPrecision.makeContext(8, 4);
+  private static defaultContext: FPContext = makeContext(8, 4);
 
   public static configure(config: FixedPrecisionConfig): void {
     FixedPrecision.defaultContext = configureContext(
@@ -668,7 +661,7 @@ export default class FixedPrecision {
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
     const nextValue = scale_value(this.value, newScale, rm, this.ctx);
-    const nextCtx = FixedPrecision.makeContext(newScale, rm);
+    const nextCtx = makeContext(newScale, rm);
     const instance = new FixedPrecision(0n, nextCtx);
     instance.value = nextValue;
     return instance;
@@ -798,11 +791,11 @@ export default class FixedPrecision {
   }
 
   public static PI(): FixedPrecision {
-    return new FixedPrecision(Math.PI);
+    return new FixedPrecision("3.14159265358979323846");
   }
 
   public static e(): FixedPrecision {
-    return new FixedPrecision(Math.E);
+    return new FixedPrecision("2.71828182845904523536");
   }
 
   public static exp(value: FixedPrecisionValue): FixedPrecision {
@@ -953,6 +946,9 @@ export default class FixedPrecision {
     const raw = FixedPrecision.toScaled(value, ctx);
     const minRaw = FixedPrecision.toScaled(min, ctx);
     const maxRaw = FixedPrecision.toScaled(max, ctx);
+    if (minRaw > maxRaw) {
+      throw new Error("min must be less than or equal to max");
+    }
     return FixedPrecision.fromRawWithContext(
       raw < minRaw ? minRaw : raw > maxRaw ? maxRaw : raw,
       ctx,
@@ -1095,11 +1091,11 @@ export default class FixedPrecision {
   }
 
   public static phi(): FixedPrecision {
-    return new FixedPrecision((1 + Math.sqrt(5)) / 2);
+    return new FixedPrecision("1.61803398874989484820");
   }
 
   public static sqrt2(): FixedPrecision {
-    return new FixedPrecision(Math.sqrt(2));
+    return new FixedPrecision("1.41421356237309504880");
   }
 
   public static random(decimalPlaces?: number): FixedPrecision {
@@ -1284,11 +1280,7 @@ export default class FixedPrecision {
         : absInt === "0"
           ? -frac.search(/[1-9]/) - 1
           : 0;
-    const shiftVal = FixedPrecision.fromRawWithContext(
-      10n ** BigInt(Math.abs(exp)) * this.ctx.SCALE,
-      this.ctx,
-    );
-    const shifted = exp >= 0 ? rounded.div(shiftVal) : rounded.mul(shiftVal);
+    const shifted = rounded.shiftedBy(-exp);
     return `${shifted.toFixed(effDp)}e${exp}`
       .replace(/\.0+e/, "e")
       .replace(/(\.\d+?)0+e/, "$1e");
@@ -1298,9 +1290,37 @@ export default class FixedPrecision {
     if (this.value === 0n) {
       return "0";
     }
-    return this.fromRaw(
-      precision_value(this.value, sd, rm ?? this.ctx.roundingMode, this.ctx),
-    )
+    const raw = precision_value(
+      this.value,
+      sd,
+      rm ?? this.ctx.roundingMode,
+      this.ctx,
+    );
+    if (raw === 0n) return "0";
+
+    const absRaw = raw < 0n ? -raw : raw;
+    const digitLength = absRaw.toString().length;
+    const places = this.ctx.places;
+
+    let exp: number;
+    if (absRaw >= this.ctx.SCALE) {
+      exp = digitLength - places - 1;
+    } else {
+      const padLength = places - digitLength;
+      exp = -(padLength + 1);
+    }
+
+    if (exp < -6 || exp >= sd) {
+      const mantissaRaw = shifted_by_value(raw, -exp);
+      const mantissa = this.fromRaw(mantissaRaw);
+      const dp = sd - 1;
+      let formatted = mantissa.toFixed(dp, rm);
+      const expSign = exp > 0 ? "+" : "";
+      formatted += `e${expSign}${exp}`;
+      return formatted;
+    }
+
+    return this.fromRaw(raw)
       .toString()
       .replace(/(\.\d*?)0+$/, "$1")
       .replace(/\.$/, "");
