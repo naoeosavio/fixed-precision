@@ -137,7 +137,7 @@ new FixedPrecision("19.99").add("5.25");
 
 // After (factory)
 const FP2 = FixedPrecision.create({ places: 2 });
-FP2("19.99").add(FP2("5.25"));
+FP2("19.99").add("5.25");
 ```
 
 ### Converting between factories

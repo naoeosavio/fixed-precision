@@ -81,7 +81,7 @@ const FP2 = FixedPrecision.create({ places: 2 });
 
 it("works with factory", () => {
   const price = FP2("19.99");
-  const total = price.mul(FP2("3"));
+  const total = price.mul("3");
   expect(total.toString()).toBe("59.97");
 });
 ```
@@ -242,7 +242,7 @@ it("addition is consistent with random values", () => {
     const a = Math.random() * 1000;
     const b = Math.random() * 1000;
     const expected = (a + b).toFixed(4);
-    const result = FP(a.toString()).add(FP(b.toString()));
+    const result = FP(a.toString()).add(b.toString());
     expect(result.toFixed(4)).toBe(expected);
   }
 });

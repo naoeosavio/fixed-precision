@@ -50,7 +50,7 @@ const value = new FixedPrecision("123.45678900");
 value.round(2).toString();      // "123.46"
 value.round(0).toString();      // "123"
 value.round(4, 1).toString();   // "123.4567"  (ROUND_DOWN)
-value.round(8, 0).toString();   // "123.45678900" (same scale, ROUND_UP)
+value.round(8, 0).toString();   // "123.456789" (same scale, ROUND_UP)
 ```
 
 Negative numbers respect the rounding mode:

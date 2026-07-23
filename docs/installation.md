@@ -93,7 +93,7 @@ The compiled output lands in `dist/` (ESM: `.js`, CJS: `.cjs`, declarations: `.d
 import FixedPrecision from "fixed-precision";
 
 const v = new FixedPrecision("1.50");
-console.log(v.toString()); // "1.50"
+console.log(v.toString()); // "1.5"
 ```
 
 ## Next Steps
