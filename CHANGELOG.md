@@ -2,6 +2,27 @@
 
 All notable changes to the fixed-precision library will be documented in this file.
 
+## [1.7.2] — 2026-07-23
+
+## Refactors
+
+- Removed redundant `normalized` helper method from FixedPrecision and Minimal classes.
+- Unified context resolution and normalization across all static mathematical operations, replacing implicit default context with explicit `fromContextValue` and `normalizeTo`.
+- Improved context handling in static arithmetic and product operations by resolving precision from operands instead of using the global default.
+- Updated statistical aggregate methods (min, max, sum, hypot) to determine operation context from input arrays rather than falling back to the default configuration.
+
+## Documentation
+
+- Overhauled README and API reference with comprehensive feature summaries for advanced modules (trigonometry, logarithms, statistics, bitwise, combinatorics, vector/matrix), markdown tables for rounding modes and API details, clarified BigInt handling, and consolidated installation, quick start, and configuration sections.
+
+## Tests
+
+- Refactored test imports by removing redundant `.js` extensions and updated arithmetic test assertions to use specific precision factory instances.
+
+## Breaking Changes
+
+- Removed the `cubeRoot` method from FixedPrecision; use `cbrt` instead.
+
 ## [1.7.1] — 2026-07-22
 
 ## Features
@@ -305,6 +326,7 @@ All notable changes to the fixed-precision library will be documented in this fi
 - **Fixed**: for any bug fixes
 - **Security**: in case of vulnerabilities
 
+[1.7.2]: https://github.com/naoeosavio/fixed-precision/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/naoeosavio/fixed-precision/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.6.0...v1.7.0
 [1.6.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.5.0...v1.6.0
