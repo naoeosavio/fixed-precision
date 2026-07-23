@@ -102,7 +102,10 @@ export default class FixedPrecision {
 
   public static random(decimalPlaces?: number): FixedPrecision {
     const dec = decimalPlaces ?? FixedPrecision.defaultContext.places;
-    const rand = BigInt(Math.trunc(Math.random() * 10 ** dec));
+    let rand = 0n;
+    for (let i = 0; i < dec; i++) {
+      rand = rand * 10n + BigInt(Math.trunc(Math.random() * 10));
+    }
 
     if (decimalPlaces === undefined) {
       return new FixedPrecision(rand);

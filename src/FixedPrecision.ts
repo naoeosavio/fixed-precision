@@ -1089,7 +1089,10 @@ export default class FixedPrecision {
 
   public static random(decimalPlaces?: number): FixedPrecision {
     const dec = decimalPlaces ?? FixedPrecision.defaultContext.places;
-    const rand = BigInt(Math.floor(Math.random() * 10 ** dec));
+    let rand = 0n;
+    for (let i = 0; i < dec; i++) {
+      rand = rand * 10n + BigInt(Math.floor(Math.random() * 10));
+    }
 
     if (decimalPlaces === undefined) {
       return new FixedPrecision(rand);
@@ -1261,10 +1264,11 @@ export default class FixedPrecision {
     const effDp = dp ?? this.ctx.places;
     const rounded = this.round(effDp, rm);
     const [int = "", frac = ""] = rounded.toString().split(".");
+    const absInt = int.replace(/^-/, "");
     const exp =
-      int.length > 1
-        ? int.length - 1
-        : int === "0"
+      absInt.length > 1
+        ? absInt.length - 1
+        : absInt === "0"
           ? -frac.search(/[1-9]/) - 1
           : 0;
     const shiftVal = FixedPrecision.fromRawWithContext(
@@ -1272,22 +1276,21 @@ export default class FixedPrecision {
       this.ctx,
     );
     const shifted = exp >= 0 ? rounded.div(shiftVal) : rounded.mul(shiftVal);
-    return `${shifted.toFixed(effDp)}e${exp}`;
+    return `${shifted.toFixed(effDp)}e${exp}`
+      .replace(/\.0+e/, "e")
+      .replace(/(\.\d+?)0+e/, "$1e");
   }
 
   public toPrecision(sd: number, rm?: RoundingMode): string {
-    if (sd >= 1e6) {
-      throw new Error("Invalid precision");
-    }
     if (this.value === 0n) {
       return "0";
     }
-    const absRaw = this.value < 0n ? -this.value : this.value;
-    const rawDigitCount = absRaw.toString().length;
-    const integerDigits = rawDigitCount - this.ctx.places;
-    return this.round(sd - integerDigits, rm)
+    return this.fromRaw(
+      precision_value(this.value, sd, rm ?? this.ctx.roundingMode, this.ctx),
+    )
       .toString()
-      .replace(/0+$/, "");
+      .replace(/(\.\d*?)0+$/, "$1")
+      .replace(/\.$/, "");
   }
 
   public toFixed(places = 0, rm?: RoundingMode): string {
