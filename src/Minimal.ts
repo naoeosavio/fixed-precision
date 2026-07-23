@@ -130,6 +130,32 @@ export default class FixedPrecision {
     }
   }
 
+  private static resolveContext(values: FixedPrecisionValue[]): FPContext {
+    for (const v of values) {
+      if (v instanceof FixedPrecision) {
+        return v.ctx;
+      }
+    }
+    return FixedPrecision.defaultContext;
+  }
+
+  private static normalizeTo(
+    v: FixedPrecisionValue,
+    ctx: FPContext,
+  ): FixedPrecision {
+    if (v instanceof FixedPrecision) {
+      if (
+        v.ctx.places === ctx.places &&
+        v.ctx.roundingMode === ctx.roundingMode
+      ) {
+        return v;
+      }
+      return v.scale(ctx.places, ctx.roundingMode);
+    } else {
+      return new FixedPrecision(v, ctx);
+    }
+  }
+
   public static min(
     value: FixedPrecisionValue | FixedPrecisionValue[],
     ...values: FixedPrecisionValue[]
@@ -140,9 +166,10 @@ export default class FixedPrecision {
       throw new Error("FixedPrecision.min requires at least one argument");
     }
 
-    let result = FixedPrecision.normalized(first);
+    const ctx = FixedPrecision.resolveContext(items);
+    let result = FixedPrecision.normalizeTo(first, ctx);
     for (const item of items.slice(1)) {
-      const next = FixedPrecision.normalized(item);
+      const next = FixedPrecision.normalizeTo(item, ctx);
       if (next.lt(result)) result = next;
     }
     return result;
@@ -158,9 +185,10 @@ export default class FixedPrecision {
       throw new Error("FixedPrecision.max requires at least one argument");
     }
 
-    let result = FixedPrecision.normalized(first);
+    const ctx = FixedPrecision.resolveContext(items);
+    let result = FixedPrecision.normalizeTo(first, ctx);
     for (const item of items.slice(1)) {
-      const next = FixedPrecision.normalized(item);
+      const next = FixedPrecision.normalizeTo(item, ctx);
       if (next.gt(result)) result = next;
     }
     return result;
@@ -174,10 +202,10 @@ export default class FixedPrecision {
     const first = items[0];
     if (first === undefined) return new FixedPrecision(0n);
 
-    const ctx = FixedPrecision.normalized(first).ctx;
+    const ctx = FixedPrecision.resolveContext(items);
     let total = 0n;
     for (const item of items) {
-      total += FixedPrecision.normalized(item).value;
+      total += FixedPrecision.normalizeTo(item, ctx).value;
     }
     return new FixedPrecision(total, ctx);
   }

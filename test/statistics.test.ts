@@ -21,7 +21,7 @@ describe("Statistics", () => {
     );
     expect(FixedPrecision.min(FP8("10.0"), "5.5", 3.0).toNumber()).toBe(3);
     expect(FixedPrecision.min(FP4("100.5"), "50.25").toString(false)).toBe(
-      "50.25000000",
+      "50.2500",
     );
   });
 
@@ -72,7 +72,7 @@ describe("Statistics", () => {
       18.75,
     );
     expect(FixedPrecision.sum(FP4("10.50"), "20.25").toString(false)).toBe(
-      "30.75000000",
+      "30.7500",
     );
     expect(FixedPrecision.sum([]).toNumber()).toBe(0);
   });
@@ -82,6 +82,6 @@ describe("Statistics", () => {
     expect(FixedPrecision.hypot("1", "2", "2").toString(false)).toBe("3.00000000");
     expect(FixedPrecision.hypot([6, 8]).toString(false)).toBe("10.00000000");
     expect(FixedPrecision.hypot().toString()).toBe("0");
-    expect(FixedPrecision.hypot(FP4("3"), "4").toString(false)).toBe("5.00000000");
+    expect(FixedPrecision.hypot(FP4("3"), "4").toString(false)).toBe("5.0000");
   });
 });

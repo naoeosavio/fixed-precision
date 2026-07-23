@@ -1087,14 +1087,41 @@ export default class FixedPrecision {
     }
   }
 
+  private static resolveContext(values: FixedPrecisionValue[]): FPContext {
+    for (const v of values) {
+      if (v instanceof FixedPrecision) {
+        return v.ctx;
+      }
+    }
+    return FixedPrecision.defaultContext;
+  }
+
+  private static normalizeTo(
+    v: FixedPrecisionValue,
+    ctx: FPContext,
+  ): FixedPrecision {
+    if (v instanceof FixedPrecision) {
+      if (
+        v.ctx.places === ctx.places &&
+        v.ctx.roundingMode === ctx.roundingMode
+      ) {
+        return v;
+      }
+      return v.scale(ctx.places, ctx.roundingMode);
+    } else {
+      return new FixedPrecision(v, ctx);
+    }
+  }
+
   public static min(
     val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
     const values = collectValues(val, vals);
+    const ctx = FixedPrecision.resolveContext(values);
     return min_values(
       values,
-      (value) => FixedPrecision.normalized(value),
+      (value) => FixedPrecision.normalizeTo(value, ctx),
       (left, right) => left.lt(right),
     );
   }
@@ -1104,9 +1131,10 @@ export default class FixedPrecision {
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
     const values = collectValues(val, vals);
+    const ctx = FixedPrecision.resolveContext(values);
     return max_values(
       values,
-      (value) => FixedPrecision.normalized(value),
+      (value) => FixedPrecision.normalizeTo(value, ctx),
       (left, right) => left.gt(right),
     );
   }
@@ -1121,28 +1149,29 @@ export default class FixedPrecision {
       return new FixedPrecision(0n);
     }
 
-    const first = FixedPrecision.normalized(firstValue);
+    const ctx = FixedPrecision.resolveContext(values);
+    const first = FixedPrecision.normalizeTo(firstValue, ctx);
     const total = sum_values(
       values.slice(1),
       first.value,
-      (value) => FixedPrecision.normalized(value).value,
+      (value) => FixedPrecision.normalizeTo(value, ctx).value,
     );
-    return FixedPrecision.fromRawWithContext(total, first.ctx);
+    return FixedPrecision.fromRawWithContext(total, ctx);
   }
 
   public static hypot(
     val?: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    const ctx = FixedPrecision.defaultContext;
     if (val === undefined) {
-      return new FixedPrecision(0n, ctx);
+      return new FixedPrecision(0n);
     }
 
     const values = collectValues(val, vals);
+    const ctx = FixedPrecision.resolveContext(values);
     let total = 0n;
     for (const value of values) {
-      const rawValue = FixedPrecision.normalized(value).value;
+      const rawValue = FixedPrecision.normalizeTo(value, ctx).value;
       total += (rawValue * rawValue) / ctx.SCALE;
     }
     return FixedPrecision.fromRawWithContext(sqrt_value(total, ctx.SCALE), ctx);
