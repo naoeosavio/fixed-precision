@@ -336,7 +336,7 @@ describe("Arithmetic", () => {
 
   test("static clamp", () => {
     expect(FixedPrecision.clamp(FP4("12"), "0", "10").toString(false)).toBe(
-      "10.00000000",
+      "10.0000",
     );
   });
 

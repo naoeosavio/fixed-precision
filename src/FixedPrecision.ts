@@ -624,7 +624,7 @@ export default class FixedPrecision {
         : fraction_value(
             this.value,
             this.ctx.SCALE,
-            FixedPrecision.normalized(maxDen).scale(0, 1).value,
+            FixedPrecision.normalizeTo(maxDen, this.ctx).scale(0, 1).value,
           );
 
     return [
@@ -732,7 +732,7 @@ export default class FixedPrecision {
     value: FixedPrecisionValue,
     operation: (value: bigint, ctx: FPContext) => bigint,
   ): FixedPrecision {
-    const ctx = FixedPrecision.defaultContext;
+    const ctx = value instanceof FixedPrecision ? value.ctx : FixedPrecision.defaultContext;
     return FixedPrecision.fromRawWithContext(
       operation(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -776,22 +776,27 @@ export default class FixedPrecision {
   }
 
   public static exp(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.defaultContext;
+    const ctx = value instanceof FixedPrecision ? value.ctx : FixedPrecision.defaultContext;
     const instance = new FixedPrecision(0n, ctx);
     instance.value = exp_value(FixedPrecision.toScaled(value, ctx), ctx);
     return instance;
   }
 
   public static abs(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.normalized(value).abs();
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).abs();
   }
 
   public static add(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return FixedPrecision.normalized(left).add(
-      FixedPrecision.normalized(right),
+    const ctx = FixedPrecision.resolveContext([left, right]);
+    return FixedPrecision.normalizeTo(left, ctx).add(
+      FixedPrecision.normalizeTo(right, ctx),
     );
   }
 
@@ -799,8 +804,9 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return FixedPrecision.normalized(left).sub(
-      FixedPrecision.normalized(right),
+    const ctx = FixedPrecision.resolveContext([left, right]);
+    return FixedPrecision.normalizeTo(left, ctx).sub(
+      FixedPrecision.normalizeTo(right, ctx),
     );
   }
 
@@ -808,8 +814,9 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return FixedPrecision.normalized(left).mul(
-      FixedPrecision.normalized(right),
+    const ctx = FixedPrecision.resolveContext([left, right]);
+    return FixedPrecision.normalizeTo(left, ctx).mul(
+      FixedPrecision.normalizeTo(right, ctx),
     );
   }
 
@@ -817,8 +824,9 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return FixedPrecision.normalized(left).div(
-      FixedPrecision.normalized(right),
+    const ctx = FixedPrecision.resolveContext([left, right]);
+    return FixedPrecision.normalizeTo(left, ctx).div(
+      FixedPrecision.normalizeTo(right, ctx),
     );
   }
 
@@ -826,25 +834,42 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return FixedPrecision.normalized(left).mod(
-      FixedPrecision.normalized(right),
+    const ctx = FixedPrecision.resolveContext([left, right]);
+    return FixedPrecision.normalizeTo(left, ctx).mod(
+      FixedPrecision.normalizeTo(right, ctx),
     );
   }
 
   public static pow(value: FixedPrecisionValue, exp: number): FixedPrecision {
-    return FixedPrecision.normalized(value).pow(exp);
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).pow(exp);
   }
 
   public static ceil(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.normalized(value).ceil();
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).ceil();
   }
 
   public static floor(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.normalized(value).floor();
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).floor();
   }
 
   public static trunc(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.normalized(value).trunc();
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).trunc();
   }
 
   public static round(
@@ -852,29 +877,49 @@ export default class FixedPrecision {
     dp?: number,
     rm?: RoundingMode,
   ): FixedPrecision {
-    return FixedPrecision.normalized(value).round(dp, rm);
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).round(dp, rm);
   }
 
   public static ln(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.normalized(value).ln();
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).ln();
   }
 
   public static log(
     value: FixedPrecisionValue,
     base?: FixedPrecisionValue,
   ): FixedPrecision {
-    const normalizedValue = FixedPrecision.normalized(value);
+    const ctx =
+      base !== undefined
+        ? FixedPrecision.resolveContext([value, base])
+        : value instanceof FixedPrecision
+          ? value.ctx
+          : FixedPrecision.defaultContext;
+    const normalizedValue = FixedPrecision.normalizeTo(value, ctx);
     return base === undefined
       ? normalizedValue.log()
-      : normalizedValue.log(FixedPrecision.normalized(base));
+      : normalizedValue.log(FixedPrecision.normalizeTo(base, ctx));
   }
 
   public static log2(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.normalized(value).log2();
+    const ctx =
+      value instanceof FixedPrecision
+        ? value.ctx
+        : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).log2();
   }
 
   public static log10(value: FixedPrecisionValue): FixedPrecision {
-    return FixedPrecision.normalized(value).log10();
+    const ctx =
+      value instanceof FixedPrecision ? value.ctx : FixedPrecision.defaultContext;
+    return FixedPrecision.normalizeTo(value, ctx).log10();
   }
 
   public static clamp(
@@ -882,9 +927,10 @@ export default class FixedPrecision {
     min: FixedPrecisionValue,
     max: FixedPrecisionValue,
   ): FixedPrecision {
-    return FixedPrecision.normalized(value).clamp(
-      FixedPrecision.normalized(min),
-      FixedPrecision.normalized(max),
+    const ctx = FixedPrecision.resolveContext([value, min, max]);
+    return FixedPrecision.normalizeTo(value, ctx).clamp(
+      FixedPrecision.normalizeTo(min, ctx),
+      FixedPrecision.normalizeTo(max, ctx),
     );
   }
 
@@ -956,7 +1002,7 @@ export default class FixedPrecision {
     y: FixedPrecisionValue,
     x: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.defaultContext;
+    const ctx = FixedPrecision.resolveContext([x, y]);
     return FixedPrecision.fromRawWithContext(
       atan2_value(
         FixedPrecision.toScaled(y, ctx),
@@ -1050,43 +1096,6 @@ export default class FixedPrecision {
     );
   }
 
-  public static dot(
-    a: FixedPrecisionValue[],
-    b: FixedPrecisionValue[],
-  ): FixedPrecision {
-    const ctx = FixedPrecision.defaultContext;
-    const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
-    const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
-    const result = dot_product(rawA, rawB, ctx.SCALE);
-    return new FixedPrecision(result, ctx);
-  }
-
-  public static cross(
-    a: FixedPrecisionValue[],
-    b: FixedPrecisionValue[],
-  ): FixedPrecision[] {
-    const ctx = FixedPrecision.defaultContext;
-    const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
-    const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
-    const result = cross_product(rawA, rawB, ctx.SCALE);
-    return result.map((v) => FixedPrecision.fromRawWithContext(v, ctx));
-  }
-
-  private static normalized(v: FixedPrecisionValue): FixedPrecision {
-    if (v instanceof FixedPrecision) {
-      const ctx = FixedPrecision.defaultContext;
-      if (
-        v.ctx.places === ctx.places &&
-        v.ctx.roundingMode === ctx.roundingMode
-      ) {
-        return v;
-      }
-      return v.scale(ctx.places, ctx.roundingMode);
-    } else {
-      return new FixedPrecision(v);
-    }
-  }
-
   private static resolveContext(values: FixedPrecisionValue[]): FPContext {
     for (const v of values) {
       if (v instanceof FixedPrecision) {
@@ -1112,6 +1121,44 @@ export default class FixedPrecision {
       return new FixedPrecision(v, ctx);
     }
   }
+
+  private static normalized(v: FixedPrecisionValue): FixedPrecision {
+    if (v instanceof FixedPrecision) {
+      const ctx = FixedPrecision.defaultContext;
+      if (
+        v.ctx.places === ctx.places &&
+        v.ctx.roundingMode === ctx.roundingMode
+      ) {
+        return v;
+      }
+      return v.scale(ctx.places, ctx.roundingMode);
+    } else {
+      return new FixedPrecision(v);
+    }
+  }
+  
+  public static dot(
+    a: FixedPrecisionValue[],
+    b: FixedPrecisionValue[],
+  ): FixedPrecision {
+    const ctx = FixedPrecision.resolveContext([...a,...b]);
+    const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
+    const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
+    const result = dot_product(rawA, rawB, ctx.SCALE);
+    return new FixedPrecision(result, ctx);
+  }
+
+  public static cross(
+    a: FixedPrecisionValue[],
+    b: FixedPrecisionValue[],
+  ): FixedPrecision[] {
+    const ctx = FixedPrecision.resolveContext([...a,...b]);
+    const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
+    const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
+    const result = cross_product(rawA, rawB, ctx.SCALE);
+    return result.map((v) => FixedPrecision.fromRawWithContext(v, ctx));
+  }
+
 
   public static min(
     val: FixedPrecisionValue | FixedPrecisionValue[],
