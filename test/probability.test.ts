@@ -10,7 +10,7 @@ describe("Probability", () => {
   });
 
   test("random decimal places", () => {
-    const parts = FixedPrecision.random(8).toString().split(".");
+    const parts = FixedPrecision.random(8).toString(false).split(".");
     expect(parts[1]?.length).toBe(8);
   });
 });

@@ -107,15 +107,12 @@ export default class FixedPrecision {
       rand = rand * 10n + BigInt(Math.trunc(Math.random() * 10));
     }
 
-    if (decimalPlaces === undefined) {
-      return new FixedPrecision(rand);
-    }
-
-    const defaultPlaces = FixedPrecision.defaultContext.places;
-    const diff = defaultPlaces - dec;
-    return new FixedPrecision(
-      diff >= 0 ? rand * 10n ** BigInt(diff) : rand / 10n ** BigInt(-diff),
+    const instance = new FixedPrecision(
+      0n,
+      makeContext(dec, FixedPrecision.defaultContext.roundingMode),
     );
+    instance.value = rand;
+    return instance;
   }
 
   private static resolveContext(values: FixedPrecisionValue[]): FPContext {
@@ -201,7 +198,9 @@ export default class FixedPrecision {
     for (const item of items) {
       total += FixedPrecision.normalizeTo(item, ctx).value;
     }
-    return new FixedPrecision(total, ctx);
+    const instance = new FixedPrecision(0n, ctx);
+    instance.value = total;
+    return instance;
   }
 
   public abs(): FixedPrecision {

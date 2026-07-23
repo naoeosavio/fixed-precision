@@ -623,12 +623,12 @@ export default class FixedPrecision {
 
   public num(): FixedPrecision {
     const numerator = get_numerator(this.value, this.ctx.SCALE);
-    return new FixedPrecision(numerator * this.ctx.SCALE, this.ctx);
+    return this.fromRaw(numerator * this.ctx.SCALE);
   }
 
   public den(): FixedPrecision {
     const denominator = get_denominator(this.value, this.ctx.SCALE);
-    return new FixedPrecision(denominator * this.ctx.SCALE, this.ctx);
+    return this.fromRaw(denominator * this.ctx.SCALE);
   }
 
   public fraction(
@@ -1105,15 +1105,12 @@ export default class FixedPrecision {
       rand = rand * 10n + BigInt(Math.floor(Math.random() * 10));
     }
 
-    if (decimalPlaces === undefined) {
-      return new FixedPrecision(rand);
-    }
-
-    const defaultPlaces = FixedPrecision.defaultContext.places;
-    const diff = defaultPlaces - dec;
-    return new FixedPrecision(
-      diff >= 0 ? rand * 10n ** BigInt(diff) : rand / 10n ** BigInt(-diff),
+    const instance = new FixedPrecision(
+      0n,
+      makeContext(dec, FixedPrecision.defaultContext.roundingMode),
     );
+    instance.value = rand;
+    return instance;
   }
 
   private static resolveContext(values: FixedPrecisionValue[]): FPContext {
@@ -1150,7 +1147,7 @@ export default class FixedPrecision {
     const rawA = a.map((v) => FixedPrecision.toScaled(v, ctx));
     const rawB = b.map((v) => FixedPrecision.toScaled(v, ctx));
     const result = dot_product(rawA, rawB, ctx.SCALE);
-    return new FixedPrecision(result, ctx);
+    return FixedPrecision.fromRawWithContext(result, ctx);
   }
 
   public static cross(
