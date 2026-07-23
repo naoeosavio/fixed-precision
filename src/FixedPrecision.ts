@@ -1122,21 +1122,6 @@ export default class FixedPrecision {
     }
   }
 
-  private static normalized(v: FixedPrecisionValue): FixedPrecision {
-    if (v instanceof FixedPrecision) {
-      const ctx = FixedPrecision.defaultContext;
-      if (
-        v.ctx.places === ctx.places &&
-        v.ctx.roundingMode === ctx.roundingMode
-      ) {
-        return v;
-      }
-      return v.scale(ctx.places, ctx.roundingMode);
-    } else {
-      return new FixedPrecision(v);
-    }
-  }
-
   public static dot(
     a: FixedPrecisionValue[],
     b: FixedPrecisionValue[],
