@@ -124,6 +124,8 @@ describe("Numeric", () => {
 
   test("string representations", () => {
     expect(FP("123456789").toString()).toBe("123456789");
+    expect(FP("0.1").toString()).toBe("0");
+    expect(FP("0.9").toString()).toBe("0");
     expect(FP2("-1234.56").toString()).toBe("-1234.56");
     expect(FP4("9.5").toString(false)).toBe("9.5000");
     expect(FP4("0.0099").toString()).toBe("0.0099");

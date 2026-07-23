@@ -13,6 +13,9 @@ export function from_short_decimal_string_with_ctx(
   const n_scaled = num < 0 ? -1 / SCALE_NUM : 1 / SCALE_NUM;
 
   if (nP >= P) {
+    if (P === 0) {
+      return BigInt(Math.trunc(num));
+    }
     return BigInt(Math.trunc(num * SCALE_NUM + n_scaled));
   }
 
