@@ -166,7 +166,10 @@ export default class FixedPrecision {
 
   private coerce(value: FixedPrecisionValue): FixedPrecision {
     if (value instanceof FixedPrecision) {
-      if (this.ctx.places !== value.ctx.places) {
+      if (
+        this.ctx.places !== value.ctx.places ||
+        this.ctx.roundingMode !== value.ctx.roundingMode
+      ) {
         throw new Error("Cannot operate on different precisions");
       } else {
         return value;
@@ -177,7 +180,10 @@ export default class FixedPrecision {
   }
 
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
-    if (value instanceof FixedPrecision) return value.value;
+    if (value instanceof FixedPrecision) {
+      if (value.ctx.places === ctx.places) return value.value;
+      return scale_value(value.value, ctx.places, ctx.roundingMode, value.ctx);
+    }
     if (typeof value === "bigint") return value;
     if (typeof value === "number") return from_number_with_ctx(value, ctx);
     if (typeof value === "string") return from_string_with_ctx(value, ctx);
@@ -306,7 +312,7 @@ export default class FixedPrecision {
   }
 
   public plus(other: FixedPrecisionValue): FixedPrecision {
-    return this.fromRaw(this.value - this.toScaledValue(other));
+    return this.fromRaw(this.value + this.toScaledValue(other));
   }
 
   public sub(other: FixedPrecisionValue): FixedPrecision {
@@ -645,7 +651,7 @@ export default class FixedPrecision {
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
     const nextValue = scale_value(this.value, newScale, rm, this.ctx);
-    const nextCtx = FixedPrecision.makeContext(newScale, this.ctx.roundingMode);
+    const nextCtx = FixedPrecision.makeContext(newScale, rm);
     const instance = new FixedPrecision(0n, nextCtx);
     instance.value = nextValue;
     return instance;
@@ -885,8 +891,8 @@ export default class FixedPrecision {
     return FixedPrecision.fromContextValue(value, (rawValue, ctx) =>
       round_value(
         rawValue,
-        dp ? dp : ctx.places,
-        rm ? rm : ctx.roundingMode,
+        dp !== undefined ? dp : ctx.places,
+        rm !== undefined ? rm : ctx.roundingMode,
         ctx,
       ),
     );
@@ -1261,9 +1267,11 @@ export default class FixedPrecision {
         : int === "0"
           ? -frac.search(/[1-9]/) - 1
           : 0;
-    const shifted = rounded.div(
-      FixedPrecision.fromRawWithContext(10n ** BigInt(Math.abs(exp)), this.ctx),
+    const shiftVal = FixedPrecision.fromRawWithContext(
+      10n ** BigInt(Math.abs(exp)) * this.ctx.SCALE,
+      this.ctx,
     );
+    const shifted = exp >= 0 ? rounded.div(shiftVal) : rounded.mul(shiftVal);
     return `${shifted.toFixed(effDp)}e${exp}`;
   }
 
@@ -1271,7 +1279,13 @@ export default class FixedPrecision {
     if (sd >= 1e6) {
       throw new Error("Invalid precision");
     }
-    return this.round(sd - (Math.floor(Math.log10(this.toNumber())) + 1), rm)
+    if (this.value === 0n) {
+      return "0";
+    }
+    const absRaw = this.value < 0n ? -this.value : this.value;
+    const rawDigitCount = absRaw.toString().length;
+    const integerDigits = rawDigitCount - this.ctx.places;
+    return this.round(sd - integerDigits, rm)
       .toString()
       .replace(/0+$/, "");
   }
