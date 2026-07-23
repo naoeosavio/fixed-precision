@@ -169,8 +169,9 @@ All arithmetic methods accept `FixedPrecisionValue` (`string | number | bigint |
 | `cbrt()`    | `FixedPrecision.cbrt(v)`    | Cube root                |
 | `neg()`     | —                           | Negation (-value)        |
 | `abs()`     | `FixedPrecision.abs(v)`     | Absolute value           |
-| `idiv(v)`   | —                           | Integer division         |
-| `divmod(v)` | —                           | Division → `{ quotient, remainder }` |
+| `idiv(v)`     | —                           | Integer division         |
+| `divmod(v)`   | —                           | Division → `{ quotient, remainder }` |
+| `idivmod(v)`  | —                           | Integer division → `{ quotient, remainder }` |
 
 **Raw operations** (operate directly on scaled values, no configuration validation):
 

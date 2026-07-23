@@ -79,9 +79,9 @@ try {
 }
 ```
 
-### Modulo and Remainder (`mod`, `rem`, `divmod`, `rest`)
+### Modulo and Remainder (`mod`, `rem`, `divmod`, `idivmod`, `rest`)
 
-FixedPrecision provides four operations for division decomposition. With **SCALE = 100\_000\_000** (8 decimal places) and values `a = 12.34`, `b = 5.67`:
+FixedPrecision provides five operations for division decomposition. With **SCALE = 100\_000\_000** (8 decimal places) and values `a = 12.34`, `b = 5.67`:
 
 ```typescript
 a raw:   1234000000n  = 12.34 × SCALE
@@ -134,12 +134,33 @@ a.rest(b) === a.divmod(b).remainder
 
 Convenience method that returns only the exact remainder from the internal division, without the quotient.
 
+##### `idivmod` — Integer Quotient + Remainder
+
+```typescript
+quotient = (a.value / b.value) * SCALE
+         = (1234000000 / 567000000) * 100000000
+         = 2 * 100000000
+         = 200000000n  →  2.00000000
+
+remainder = a.value - (quotient * b.value) / SCALE
+           = 1234000000 - (200000000 * 567000000) / 100000000
+           = 1234000000 - 1134000000
+           = 100000000n  →  1.00000000
+```
+
+Returns both the **integer quotient** (using truncated bigint division) and the corresponding remainder. This differs from `divmod` in that the quotient is always an integer multiple of SCALE — equivalent to `idiv` for the quotient — and the remainder is what's left after subtracting that integer multiple of the divisor.
+
+The relationship `a = quotient × b + remainder / SCALE` still holds:
+`2.00 × 5.67 = 11.34`, plus `1.00` remainder = `12.34`.
+
 #### Comparison Table (12.34 / 5.67)
 
 | Method | Raw Bigint | Decimal | Meaning |
 |--------|-----------|---------|---------|
 | `mod` | `172000000n` | `1.72000000` | Scaled remainder (extra precision) |
 | `rem` | `100000000n` | `1.00000000` | Raw integer remainder |
+| `idivmod().quotient` | `200000000n` | `2.00000000` | Integer quotient (truncated) |
+| `idivmod().remainder` | `100000000n` | `1.00000000` | Remainder after integer division |
 | `divmod().remainder` / `rest` | `2n` | `0.00000002` | Exact residual after full-precision division |
 
 #### Usage Examples
@@ -151,8 +172,10 @@ const b = FP8("5.67");
 a.mod(b).toString();            // "1.72000000"
 a.rem(b).toString();            // "1.00000000"
 a.rest(b).toString();           // "0.00000002"
-a.divmod(b).quotient.toString(); // "2.17636684"
-a.divmod(b).remainder.toString(); // "0.00000002"
+a.idivmod(b).quotient.toString();  // "2.00000000"
+a.idivmod(b).remainder.toString(); // "1.00000000"
+a.divmod(b).quotient.toString();   // "2.17636684"
+a.divmod(b).remainder.toString();  // "0.00000002"
 
 // Accepts numbers and strings through coercion
 a.rest(5.67);      // "0.00000002"

@@ -338,6 +338,29 @@ const divisor = new FixedPrecision("3.00");
 amount.mod(divisor); // "1.50000000"
 ```
 
+#### `idivmod(other: FixedPrecisionValue): { quotient: FixedPrecision; remainder: FixedPrecision }`
+
+Returns the integer quotient and remainder of dividing this value by another value.
+
+Uses truncated (toward zero) division for the quotient — the same as `idiv`. The remainder is what's left after subtracting the integer multiple of the divisor.
+
+**Parameters:**
+- `other`: `FixedPrecisionValue` - Divisor
+
+**Returns:** `{ quotient: FixedPrecision, remainder: FixedPrecision }`
+
+**Example:**
+```typescript
+const a = new FixedPrecision("12.34");
+const b = new FixedPrecision("5.67");
+
+const { quotient, remainder } = a.idivmod(b);
+quotient.toString();  // "2.00000000"
+remainder.toString(); // "1.00000000"
+```
+
+**See also:** [`divmod`](./arithmetic.md#divmod--quotient--exact-remainder) for full-precision division with exact residual. The `idivmod` quotient is always an integer, while `divmod` retains the fractional part of the division.
+
 #### `pow(exp: number): FixedPrecision`
 
 Raises this value to an integer exponent.

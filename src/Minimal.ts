@@ -311,6 +311,23 @@ export default class FixedPrecision {
     };
   }
 
+  public idivmod(other: FixedPrecisionValue): {
+    quotient: FixedPrecision;
+    remainder: FixedPrecision;
+  } {
+    const coerced = this.coerce(other);
+    const quotient = this.fromRaw(
+      (this.value / coerced.value) * this.ctx.SCALE,
+    );
+
+    return {
+      quotient,
+      remainder: this.fromRaw(
+        this.value - (quotient.value * coerced.value) / this.ctx.SCALE,
+      ),
+    };
+  }
+
   public rest(other: FixedPrecisionValue): FixedPrecision {
     const d = this.divmod(other);
     return d.remainder;
