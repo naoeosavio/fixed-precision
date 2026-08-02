@@ -2,6 +2,35 @@
 
 All notable changes to the fixed-precision library will be documented in this file.
 
+## [1.7.3] — 2026-08-02
+
+### Features
+
+- Add `idivmod` method for combined integer division and remainder calculation.
+- Update mathematical constants to use high-precision string literals and add validation for `clamp`, `min`, and `max`.
+- Add support for scientific notation in `toExponential` and `toPrecision`, decimal strings with leading dots, and flexible argument handling in aggregation functions.
+
+### Fixes
+
+- Prevent unnecessary scaling when parsing decimal strings with zero precision.
+- Correct coercion validation, rounding mode handling in `withScale`, and automatic rescaling within `toScaled`.
+- Fix addition operator logic, `toExponential` scaling, and digit counting for zero values in `toPrecision`.
+
+### Refactors
+
+- Improve context resolution and add place validation for decimal creation.
+- Standardize `FixedPrecision` instance creation and internal value assignment.
+- Optimize random generation to avoid precision loss from exponentiation and simplify formatting logic.
+- Replace redundant normalization calls with direct `toScaled` usage.
+
+### Documentation
+
+- Refine documentation examples, factory usage snippets, and rounding behavior cases.
+
+### Tests
+
+- Simplify test output formatting, assertion setups, and standardize instance creation across test suites.
+
 ## [1.7.2] — 2026-07-23
 
 ## Refactors
@@ -326,6 +355,7 @@ All notable changes to the fixed-precision library will be documented in this fi
 - **Fixed**: for any bug fixes
 - **Security**: in case of vulnerabilities
 
+[1.7.3]: https://github.com/naoeosavio/fixed-precision/compare/v1.7.2...v1.7.3
 [1.7.2]: https://github.com/naoeosavio/fixed-precision/compare/v1.7.1...v1.7.2
 [1.7.1]: https://github.com/naoeosavio/fixed-precision/compare/v1.7.0...v1.7.1
 [1.7.0]: https://github.com/naoeosavio/fixed-precision/compare/v1.6.0...v1.7.0
