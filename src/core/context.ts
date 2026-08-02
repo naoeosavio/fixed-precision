@@ -9,6 +9,7 @@ export function makeContext(
   places: number,
   roundingMode: RoundingMode,
 ): FPContext {
+  assertPlaces(places);
   return {
     places,
     roundingMode,

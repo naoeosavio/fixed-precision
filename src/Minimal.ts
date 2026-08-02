@@ -116,12 +116,16 @@ export default class FixedPrecision {
   }
 
   private static resolveContext(values: FixedPrecisionValue[]): FPContext {
+    let best: FPContext | null = null;
     for (const v of values) {
       if (v instanceof FixedPrecision) {
-        return v.ctx;
+        if (!best || v.ctx.places > best.places) {
+          best = v.ctx;
+          if (best.places === 20) return best;
+        }
       }
     }
-    return FixedPrecision.defaultContext;
+    return best ?? FixedPrecision.defaultContext;
   }
 
   private static normalizeTo(
