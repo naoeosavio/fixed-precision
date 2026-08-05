@@ -1,27 +1,7 @@
-export function isZeroValue(value: bigint): boolean {
-  return value === 0n;
-}
-
-export function isPositiveValue(value: bigint): boolean {
-  return value > 0n;
-}
-
-export function isNegativeValue(value: bigint): boolean {
-  return value < 0n;
-}
-
-export function logicalNotValue(value: bigint): boolean {
-  return value === 0n;
-}
-
-export function logicalAndValues(left: bigint, right: bigint): boolean {
-  return left !== 0n && right !== 0n;
-}
-
-export function logicalOrValues(left: bigint, right: bigint): boolean {
-  return left !== 0n || right !== 0n;
-}
-
-export function logicalXorValues(left: bigint, right: bigint): boolean {
-  return (left !== 0n) !== (right !== 0n);
-}
+export { isNegativeValue } from "./isNegative";
+export { isPositiveValue } from "./isPositive";
+export { isZeroValue } from "./isZero";
+export { logicalAndValues } from "./logicalAnd";
+export { logicalNotValue } from "./logicalNot";
+export { logicalOrValues } from "./logicalOr";
+export { logicalXorValues } from "./logicalXor";

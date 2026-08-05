@@ -1,29 +1,7 @@
-import type { Comparison } from "../FixedPrecision";
-
-export function compareValues(left: bigint, right: bigint): Comparison {
-  return left < right ? -1 : left > right ? 1 : 0;
-}
-
-export function equalsValue(left: bigint, right: bigint): boolean {
-  return left === right;
-}
-
-export function notEqualsValue(left: bigint, right: bigint): boolean {
-  return left !== right;
-}
-
-export function greaterThanValue(left: bigint, right: bigint): boolean {
-  return left > right;
-}
-
-export function greaterThanOrEqualValue(left: bigint, right: bigint): boolean {
-  return left >= right;
-}
-
-export function lessThanValue(left: bigint, right: bigint): boolean {
-  return left < right;
-}
-
-export function lessThanOrEqualValue(left: bigint, right: bigint): boolean {
-  return left <= right;
-}
+export { compareValues } from "./compare";
+export { equalsValue } from "./equals";
+export { greaterThanValue } from "./greaterThan";
+export { greaterThanOrEqualValue } from "./greaterThanOrEqual";
+export { lessThanValue } from "./lessThan";
+export { lessThanOrEqualValue } from "./lessThanOrEqual";
+export { notEqualsValue } from "./notEquals";

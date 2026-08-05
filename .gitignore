@@ -170,3 +170,4 @@ example_complete
 example_complete.o
 fixed_precision.o
 fixed_precision_example
+.*

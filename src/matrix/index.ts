@@ -1,2 +1,2 @@
-export { cross_product } from "./cross_product";
-export { dot_product } from "./dot_product";
+export { cross_product } from "./crossProduct";
+export { dot_product } from "./dotProduct";
