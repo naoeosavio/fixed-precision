@@ -1,4 +1,5 @@
 import { describe, expect, test } from "vitest";
+import type { RoundingMode } from "../src/FixedPrecision";
 import { abs } from "../src/abs";
 import { acos } from "../src/acos";
 import { acosh } from "../src/acosh";
@@ -20,6 +21,7 @@ import { clamp } from "../src/clamp";
 import { cleanTrailingZeros } from "../src/cleanTrailingZeros";
 import { combinations } from "../src/combinations";
 import { compare } from "../src/compare";
+import { createFactory } from "../src/createFactory";
 import { cos } from "../src/cos";
 import { cosh } from "../src/cosh";
 import { cot } from "../src/cot";
@@ -150,6 +152,40 @@ describe("functions: arithmetic", () => {
     expect(() => FP8("1").add(FP4("1"))).toThrow(
       "Cannot operate on different precisions",
     );
+  });
+});
+
+describe("functions: factories", () => {
+  test("createFactory fixes the places of every produced value", () => {
+    const FP20 = createFactory({ places: 20 });
+
+    expect(FP20("1.1").places()).toBe(20);
+    expect(add(FP20("1.1"), FP20("2.2")).toString()).toBe("3.3");
+    expect(add(FP20("1.1"), FP20("2.2")).places()).toBe(20);
+  });
+
+  test("createFactory applies the configured rounding mode", () => {
+    const FP3 = createFactory({ places: 3, roundingMode: 6 });
+
+    expect(scale(FP3("1.005"), 2, 6).toString()).toBe("1");
+    expect(scale(FP3("1.015"), 2, 6).toString()).toBe("1.02");
+  });
+
+  test("createFactory is lenient when mixed with other precisions", () => {
+    const FP20 = createFactory({ places: 20 });
+    const FP4 = createFactory({ places: 4 });
+
+    expect(add(FP20("1.23456789"), FP4("2.5")).places()).toBe(20);
+    expect(add(FP20("1.23456789"), FP4("2.5")).toString()).toBe("3.73456789");
+  });
+
+  test("createFactory rejects invalid configs", () => {
+    expect(() => createFactory({ places: 21 })).toThrow(
+      "Decimal places must be an integer between 0 and 20",
+    );
+    expect(() =>
+      createFactory({ places: 2, roundingMode: 9 as RoundingMode }),
+    ).toThrow("Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8");
   });
 });
 

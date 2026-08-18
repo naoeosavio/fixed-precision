@@ -24,11 +24,12 @@ import { ceil } from "./ceil";
 import { clamp } from "./clamp";
 import { combinations } from "./combinations";
 import { compare } from "./compare";
-import { configureContext, FactoryContext, makeContext } from "./core/context";
+import { configureContext, makeContext } from "./core/context";
 import { cos } from "./cos";
 import { cosh } from "./cosh";
 import { cot } from "./cot";
 import { coth } from "./coth";
+import { createFactory } from "./createFactory";
 import { cross } from "./cross";
 import { csc } from "./csc";
 import { csch } from "./csch";
@@ -169,8 +170,7 @@ export default class FixedPrecision {
   public static create(
     config: FixedPrecisionConfig,
   ): (val: FixedPrecisionValue) => FixedPrecision {
-    const ctx = FactoryContext(config);
-    return (val: FixedPrecisionValue) => new FixedPrecision(val, ctx);
+    return createFactory(config);
   }
 
   public static isFixedPrecision(value: unknown): value is FixedPrecision {
