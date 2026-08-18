@@ -66,16 +66,6 @@
         "default": "./dist/exp.cjs"
       }
     },
-    "./gcd": {
-      "import": {
-        "types": "./dist/gcd.d.ts",
-        "default": "./dist/gcd.js"
-      },
-      "require": {
-        "types": "./dist/gcd.d.cts",
-        "default": "./dist/gcd.cjs"
-      }
-    },
     "./log": {
       "import": {
         "types": "./dist/log.d.ts",
@@ -134,16 +124,6 @@
       "require": {
         "types": "./dist/precision.d.cts",
         "default": "./dist/precision.cjs"
-      }
-    },
-    "./roundToScale": {
-      "import": {
-        "types": "./dist/roundToScale.d.ts",
-        "default": "./dist/roundToScale.js"
-      },
-      "require": {
-        "types": "./dist/roundToScale.d.cts",
-        "default": "./dist/roundToScale.cjs"
       }
     },
     "./round": {
@@ -754,46 +734,6 @@
       "require": {
         "types": "./dist/lessThanOrEqual.d.cts",
         "default": "./dist/lessThanOrEqual.cjs"
-      }
-    },
-    "./powerOfTen": {
-      "import": {
-        "types": "./dist/powerOfTen.d.ts",
-        "default": "./dist/powerOfTen.js"
-      },
-      "require": {
-        "types": "./dist/powerOfTen.d.cts",
-        "default": "./dist/powerOfTen.cjs"
-      }
-    },
-    "./precisionPowerOfTen": {
-      "import": {
-        "types": "./dist/precisionPowerOfTen.d.ts",
-        "default": "./dist/precisionPowerOfTen.js"
-      },
-      "require": {
-        "types": "./dist/precisionPowerOfTen.d.cts",
-        "default": "./dist/precisionPowerOfTen.cjs"
-      }
-    },
-    "./cleanTrailingZeros": {
-      "import": {
-        "types": "./dist/cleanTrailingZeros.d.ts",
-        "default": "./dist/cleanTrailingZeros.js"
-      },
-      "require": {
-        "types": "./dist/cleanTrailingZeros.d.cts",
-        "default": "./dist/cleanTrailingZeros.cjs"
-      }
-    },
-    "./countDigits": {
-      "import": {
-        "types": "./dist/countDigits.d.ts",
-        "default": "./dist/countDigits.js"
-      },
-      "require": {
-        "types": "./dist/countDigits.d.cts",
-        "default": "./dist/countDigits.cjs"
       }
     }
   },
