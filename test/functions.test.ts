@@ -132,6 +132,25 @@ describe("functions: arithmetic", () => {
     expect(divide("10", "4").toString()).toBe("2.5");
     expect(divide("1", "3").toFixed(8)).toBe("0.33333333");
   });
+
+  test("functions are lenient across different precisions", () => {
+    const FP8 = FixedPrecision.create({ places: 8 });
+    const FP4 = FixedPrecision.create({ places: 4 });
+
+    expect(add(FP8("1.23456789"), FP4("2.5")).toString()).toBe("3.73456789");
+    expect(equals(FP8("1.5"), FP4("1.5"))).toBe(true);
+    expect(compare(FP8("2"), FP4("1"))).toBe(1);
+    expect(toString(FP4("1.5"))).toBe("1.5");
+  });
+
+  test("instance methods keep strict context checks", () => {
+    const FP8 = FixedPrecision.create({ places: 8 });
+    const FP4 = FixedPrecision.create({ places: 4 });
+
+    expect(() => FP8("1").add(FP4("1"))).toThrow(
+      "Cannot operate on different precisions",
+    );
+  });
 });
 
 describe("functions: arithmetic — powers and logs", () => {
