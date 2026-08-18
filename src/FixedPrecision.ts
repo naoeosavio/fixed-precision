@@ -21,7 +21,7 @@ import {
 } from "./combinatorics";
 import { collectValues } from "./construction/values";
 import { configureContext, FactoryContext, makeContext } from "./core/context";
-import { fraction_value, get_denominator, get_numerator } from "./fraction";
+import { fraction_value, get_denominator, get_numerator } from "./fractions/";
 import {
   isNegativeValue,
   isPositiveValue,
@@ -1345,6 +1345,10 @@ export default class FixedPrecision {
 
   public toHexadecimal(sd?: number, rm?: RoundingMode): string {
     return this.toHex(sd, rm);
+  }
+
+  public toBase(base: 2 | 8 | 16, sd?: number, rm?: RoundingMode): string {
+    return to_base_with_ctx(this.value, this.ctx, base, sd, rm);
   }
 
   public valueOf(): string {

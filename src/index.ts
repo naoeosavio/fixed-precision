@@ -8,7 +8,7 @@ export type {
   RoundingMode,
 } from "./FixedPrecision.js";
 export { default, fixedconfig } from "./FixedPrecision.js";
-export * from "./fraction";
+export * from "./fractions";
 export * from "./logical";
 export * from "./matrix";
 export * from "./numeric";
