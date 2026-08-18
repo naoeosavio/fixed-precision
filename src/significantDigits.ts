@@ -1,9 +1,9 @@
 import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { precision } from "./precision";
 
 export function significantDigits(
   value: FixedPrecisionValue,
   includeZeros = false,
 ): number {
-  return new FixedPrecision(value).precision(includeZeros);
+  return precision(value, includeZeros);
 }

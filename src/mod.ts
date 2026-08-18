@@ -5,5 +5,10 @@ export function mod(
   value: FixedPrecisionValue,
   amount: FixedPrecisionValue,
 ): FixedPrecision {
-  return FixedPrecision.mod(value, amount);
+  const ctx = FixedPrecision.resolveContext([value, amount]);
+  return FixedPrecision.fromRawWithContext(
+    (FixedPrecision.toScaled(value, ctx) * ctx.SCALE) %
+      FixedPrecision.toScaled(amount, ctx),
+    ctx,
+  );
 }

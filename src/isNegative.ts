@@ -1,6 +1,8 @@
 import type { FixedPrecisionValue } from "./FixedPrecision";
 import FixedPrecision from "./FixedPrecision";
+import { isNegativeValue } from "./logical/isNegative";
 
 export function isNegative(value: FixedPrecisionValue): boolean {
-  return new FixedPrecision(value).isNegative();
+  const ctx = FixedPrecision.resolveContext([value]);
+  return isNegativeValue(FixedPrecision.toScaled(value, ctx));
 }

@@ -1,3 +1,4 @@
+import { significant_digits_value } from "./arithmetic/significantDigits";
 import type { FixedPrecisionValue } from "./FixedPrecision";
 import FixedPrecision from "./FixedPrecision";
 
@@ -5,5 +6,10 @@ export function precision(
   value: FixedPrecisionValue,
   includeZeros = false,
 ): number {
-  return new FixedPrecision(value).precision(includeZeros);
+  const ctx = FixedPrecision.resolveContext([value]);
+  return significant_digits_value(
+    FixedPrecision.toScaled(value, ctx),
+    ctx,
+    includeZeros,
+  );
 }

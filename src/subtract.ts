@@ -5,5 +5,9 @@ export function subtract(
   value: FixedPrecisionValue,
   amount: FixedPrecisionValue,
 ): FixedPrecision {
-  return FixedPrecision.sub(value, amount);
+  const ctx = FixedPrecision.resolveContext([value, amount]);
+  return FixedPrecision.fromRawWithContext(
+    FixedPrecision.toScaled(value, ctx) - FixedPrecision.toScaled(amount, ctx),
+    ctx,
+  );
 }

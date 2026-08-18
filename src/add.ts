@@ -5,5 +5,9 @@ export function add(
   value: FixedPrecisionValue,
   amount: FixedPrecisionValue,
 ): FixedPrecision {
-  return FixedPrecision.add(value, amount);
+  const ctx = FixedPrecision.resolveContext([value, amount]);
+  return FixedPrecision.fromRawWithContext(
+    FixedPrecision.toScaled(value, ctx) + FixedPrecision.toScaled(amount, ctx),
+    ctx,
+  );
 }

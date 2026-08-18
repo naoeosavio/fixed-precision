@@ -1,10 +1,11 @@
+import type FixedPrecision from "./FixedPrecision";
 import type { FixedPrecisionValue, RoundingMode } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { scale } from "./scale";
 
 export function roundToScale(
   value: FixedPrecisionValue,
   places: number,
   rm?: RoundingMode,
 ): FixedPrecision {
-  return new FixedPrecision(value).scale(places, rm);
+  return scale(value, places, rm);
 }

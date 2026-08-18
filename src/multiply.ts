@@ -5,5 +5,11 @@ export function multiply(
   value: FixedPrecisionValue,
   amount: FixedPrecisionValue,
 ): FixedPrecision {
-  return FixedPrecision.mul(value, amount);
+  const ctx = FixedPrecision.resolveContext([value, amount]);
+  return FixedPrecision.fromRawWithContext(
+    (FixedPrecision.toScaled(value, ctx) *
+      FixedPrecision.toScaled(amount, ctx)) /
+      ctx.SCALE,
+    ctx,
+  );
 }

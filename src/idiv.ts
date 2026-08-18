@@ -5,5 +5,11 @@ export function idiv(
   value: FixedPrecisionValue,
   other: FixedPrecisionValue,
 ): FixedPrecision {
-  return new FixedPrecision(value).idiv(other);
+  const ctx = FixedPrecision.resolveContext([value, other]);
+  return FixedPrecision.fromRawWithContext(
+    (FixedPrecision.toScaled(value, ctx) /
+      FixedPrecision.toScaled(other, ctx)) *
+      ctx.SCALE,
+    ctx,
+  );
 }

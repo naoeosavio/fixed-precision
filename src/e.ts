@@ -1,5 +1,5 @@
 import FixedPrecision from "./FixedPrecision";
 
 export function e(): FixedPrecision {
-  return FixedPrecision.e();
+  return new FixedPrecision("2.71828182845904523536");
 }
