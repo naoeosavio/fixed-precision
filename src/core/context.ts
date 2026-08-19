@@ -1,8 +1,4 @@
-import type {
-  FixedPrecisionConfig,
-  FPContext,
-  RoundingMode,
-} from "../FixedPrecision";
+import type { FixedPrecisionConfig, FPContext, RoundingMode } from "../types";
 import { powerOfTen } from "../utils";
 
 export function makeContext(

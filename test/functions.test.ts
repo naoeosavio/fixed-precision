@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import type { RoundingMode } from "../src/FixedPrecision";
+import type { RoundingMode } from "../src/index";
 import { abs } from "../src/abs";
 import { acos } from "../src/acos";
 import { acosh } from "../src/acosh";
@@ -37,7 +37,7 @@ import { dot } from "../src/dot";
 import { e } from "../src/e";
 import { equals } from "../src/equals";
 import { exp } from "../src/exp";
-import FixedPrecision from "../src/FixedPrecision";
+import FixedPrecision from "../src/index";
 import { factorial } from "../src/factorial";
 import { floor } from "../src/floor";
 import { fraction } from "../src/fraction";

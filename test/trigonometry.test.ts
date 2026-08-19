@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import FixedPrecision, { fixedconfig } from "../src/FixedPrecision";
+import FixedPrecision, { fixedconfig } from "../src/index";
 
 const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
 const FP16 = FixedPrecision.create({ places: 16, roundingMode: 4 });

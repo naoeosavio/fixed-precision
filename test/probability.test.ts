@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import FixedPrecision from "../src/FixedPrecision";
+import FixedPrecision from "../src/index";
 
 describe("Probability", () => {
   test("random in range", () => {

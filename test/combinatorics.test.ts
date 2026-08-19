@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import FixedPrecision from "../src/FixedPrecision";
+import FixedPrecision from "../src/index";
 
 import { factorial_value } from "../src/combinatorics/factorial";
 import { permutations_value } from "../src/combinatorics/permutations";
