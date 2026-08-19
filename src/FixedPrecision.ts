@@ -1,81 +1,14 @@
-import { abs } from "./abs";
-import { acos } from "./acos";
-import { acosh } from "./acosh";
-import { acot } from "./acot";
-import { acoth } from "./acoth";
-import { acsc } from "./acsc";
-import { acsch } from "./acsch";
-import { add } from "./add";
 import { precision_value } from "./arithmetic/precision";
-import { scale_value } from "./arithmetic/scale";
-import { asec } from "./asec";
-import { asech } from "./asech";
-import { asin } from "./asin";
-import { asinh } from "./asinh";
-import { atan } from "./atan";
-import { atan2 } from "./atan2";
-import { atanh } from "./atanh";
-import { bitAnd } from "./bitAnd";
-import { bitNot } from "./bitNot";
-import { bitOr } from "./bitOr";
-import { bitXor } from "./bitXor";
-import { cbrt } from "./cbrt";
-import { ceil } from "./ceil";
-import { clamp } from "./clamp";
-import { combinations } from "./combinations";
-import { compare } from "./compare";
-import { configureContext, makeContext } from "./core/context";
-import { cos } from "./cos";
-import { cosh } from "./cosh";
-import { cot } from "./cot";
-import { coth } from "./coth";
-import { createFactory } from "./createFactory";
-import { cross } from "./cross";
-import { csc } from "./csc";
-import { csch } from "./csch";
-import { cube } from "./cube";
-import { divide } from "./divide";
-import { divmod } from "./divmod";
-import { dot } from "./dot";
-import { e } from "./e";
-import { equals } from "./equals";
-import { exp } from "./exp";
-import { factorial } from "./factorial";
-import { floor } from "./floor";
-import { fraction } from "./fraction";
-import { getDenominator } from "./getDenominator";
-import { getNumerator } from "./getNumerator";
-import { greaterThan } from "./greaterThan";
-import { greaterThanOrEqual } from "./greaterThanOrEqual";
-import { hypot } from "./hypot";
-import { idiv } from "./idiv";
-import { idivmod } from "./idivmod";
-import { isNegative } from "./isNegative";
-import { isPositive } from "./isPositive";
-import { isZero } from "./isZero";
-import { leftShift } from "./leftShift";
-import { lessThan } from "./lessThan";
-import { lessThanOrEqual } from "./lessThanOrEqual";
-import { log } from "./log";
-import { log2 } from "./log2";
-import { log10 } from "./log10";
-import { logicalAnd } from "./logicalAnd";
-import { logicalNot } from "./logicalNot";
-import { logicalOr } from "./logicalOr";
-import { logicalXor } from "./logicalXor";
-import { max } from "./max";
-import { min } from "./min";
-import { mod } from "./mod";
-import { multiply } from "./multiply";
-import { naturalLog } from "./naturalLog";
-import { neg } from "./neg";
-import { from_number_with_ctx } from "./numeric";
-import { permutations } from "./permutations";
-import { phi } from "./phi";
-import { pi } from "./pi";
-import { pow } from "./pow";
-import { precision } from "./precision";
-import { random } from "./random";
+import {
+  configureDefaultContext,
+  fromContextValue,
+  getDefaultContext,
+  getFunction,
+  isFixedPrecisionLike,
+  normalizeTo,
+  resolveContext,
+  toScaled,
+} from "./core/value";
 import {
   compareValues,
   equalsValue,
@@ -84,97 +17,51 @@ import {
   lessThanOrEqualValue,
   lessThanValue,
 } from "./relational";
-import { rightArithShift } from "./rightArithShift";
-import { round } from "./round";
-import { scale } from "./scale";
-import { sec } from "./sec";
-import { sech } from "./sech";
-import { shiftedBy } from "./shiftedBy";
-import { sign } from "./sign";
-import { sin } from "./sin";
-import { sinh } from "./sinh";
-import { sqrt } from "./sqrt";
-import { sqrt2 } from "./sqrt2";
-import { square } from "./square";
-import { from_string_with_ctx } from "./string";
-import { subtract } from "./subtract";
-import { sum } from "./sum";
-import { tan } from "./tan";
-import { tanh } from "./tanh";
-import { toBase } from "./toBase";
-import { toExponential } from "./toExponential";
-import { toFixed } from "./toFixed";
-import { toNearest } from "./toNearest";
-import { toNumber } from "./toNumber";
-import { toPrecision } from "./toPrecision";
-// biome-ignore lint/suspicious/noShadowRestrictedNames: nome da API pública
-import { toString } from "./toString";
-import { trunc } from "./trunc";
+import { to_string_with_ctx } from "./string/toString";
+import type {
+  Comparison,
+  FixedPrecisionConfig,
+  FixedPrecisionLike,
+  FixedPrecisionValue,
+  FPContext,
+  RoundingMode,
+} from "./types";
+import { FP_BRAND } from "./types";
 
-export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-export type Comparison = -1 | 0 | 1;
+export type {
+  Comparison,
+  FixedPrecisionConfig,
+  FixedPrecisionLike,
+  FixedPrecisionValue,
+  FPContext,
+  RoundingMode,
+} from "./types";
 
-export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
-
-export type FPContext = {
-  places: number;
-  roundingMode: RoundingMode;
-  SCALE: bigint;
-  SCALENUMBER: number;
-};
-
-/**
- *  FixedPrecision Configuration System
- */
-export interface FixedPrecisionConfig {
-  /**
-   * Number of decimal places to use (0-20)
-   * @default 8
-   */
-  places: number;
-
-  /**
-   * Default rounding mode for decimal operations:
-   * 0: ROUND_UP
-   * 1: ROUND_DOWN
-   * 2: ROUND_CEIL
-   * 3: ROUND_FLOOR
-   * 4: ROUND_HALF_UP
-   * 5: ROUND_HALF_DOWN
-   * 6: ROUND_HALF_EVEN
-   * 7: ROUND_HALF_CEIL
-   * 8: ROUND_HALF_FLOOR
-   * @default 4
-   */
-  roundingMode?: RoundingMode;
-}
-
-export default class FixedPrecision {
+export default class FixedPrecision implements FixedPrecisionLike {
   private value: bigint = 0n;
   private readonly ctx!: FPContext;
 
-  private static defaultContext: FPContext = makeContext(8, 4);
+  readonly [FP_BRAND] = true as const;
 
   public static configure(config: FixedPrecisionConfig): void {
-    FixedPrecision.defaultContext = configureContext(
-      config,
-      FixedPrecision.defaultContext,
-    );
+    configureDefaultContext(config);
   }
 
   constructor(value: FixedPrecisionValue, ctx?: FPContext) {
-    this.ctx = ctx ?? FixedPrecision.defaultContext;
+    this.ctx = ctx ?? getDefaultContext();
     this.value = FixedPrecision.toScaled(value, this.ctx);
   }
 
   public static create(
     config: FixedPrecisionConfig,
   ): (val: FixedPrecisionValue) => FixedPrecision {
-    return createFactory(config);
+    return getFunction("createFactory")(config) as (
+      val: FixedPrecisionValue,
+    ) => FixedPrecision;
   }
 
   public static isFixedPrecision(value: unknown): value is FixedPrecision {
-    return value instanceof FixedPrecision;
+    return isFixedPrecisionLike(value);
   }
 
   protected fromRaw(rawValue: bigint): FixedPrecision {
@@ -193,14 +80,15 @@ export default class FixedPrecision {
   }
 
   private coerce(value: FixedPrecisionValue): FixedPrecision {
-    if (value instanceof FixedPrecision) {
+    if (isFixedPrecisionLike(value)) {
+      const valueCtx = value.context();
       if (
-        this.ctx.places !== value.ctx.places ||
-        this.ctx.roundingMode !== value.ctx.roundingMode
+        this.ctx.places !== valueCtx.places ||
+        this.ctx.roundingMode !== valueCtx.roundingMode
       ) {
         throw new Error("Cannot operate on different precisions");
       } else {
-        return value;
+        return value as FixedPrecision;
       }
     } else {
       return new FixedPrecision(value, this.ctx);
@@ -208,54 +96,51 @@ export default class FixedPrecision {
   }
 
   public static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
-    if (value instanceof FixedPrecision) {
-      if (value.ctx.places === ctx.places) return value.value;
-      return scale_value(value.value, ctx.places, ctx.roundingMode, value.ctx);
-    }
-    if (typeof value === "bigint") return value;
-    if (typeof value === "number") return from_number_with_ctx(value, ctx);
-    if (typeof value === "string") return from_string_with_ctx(value, ctx);
-    throw new Error(`Invalid value type: ${typeof value}`);
+    return toScaled(value, ctx);
   }
 
   private toScaledValue(value: FixedPrecisionValue): bigint {
     return FixedPrecision.toScaled(value, this.ctx);
   }
 
+  public context(): FPContext {
+    return this.ctx;
+  }
+
   public toNumber(places?: number): number {
-    return toNumber(this, places);
+    return getFunction("toNumber")(this, places);
   }
 
   public toString(trimZeros = true): string {
-    return toString(this, trimZeros);
+    return to_string_with_ctx(this.value, this.ctx, trimZeros);
   }
 
   public abs(): FixedPrecision {
-    return abs(this);
+    return getFunction("abs")(this) as FixedPrecision;
   }
 
   public cmp(other: FixedPrecisionValue): Comparison {
-    return compare(this, this.coerce(other));
+    return getFunction("compare")(this, this.coerce(other));
   }
 
   public eq(other: FixedPrecisionValue): boolean {
-    return equals(this, this.coerce(other));
+    return getFunction("equals")(this, this.coerce(other));
   }
 
   public gt(other: FixedPrecisionValue): boolean {
-    return greaterThan(this, this.coerce(other));
+    return getFunction("greaterThan")(this, this.coerce(other));
   }
 
   public gte(other: FixedPrecisionValue): boolean {
-    return greaterThanOrEqual(this, this.coerce(other));
+    return getFunction("greaterThanOrEqual")(this, this.coerce(other));
   }
 
   public lt(other: FixedPrecisionValue): boolean {
-    return lessThan(this, this.coerce(other));
+    return getFunction("lessThan")(this, this.coerce(other));
   }
 
   public lte(other: FixedPrecisionValue): boolean {
-    return lessThanOrEqual(this, this.coerce(other));
+    return getFunction("lessThanOrEqual")(this, this.coerce(other));
   }
 
   public cmpRaw(other: FixedPrecisionValue): Comparison {
@@ -283,31 +168,31 @@ export default class FixedPrecision {
   }
 
   public isZero(): boolean {
-    return isZero(this);
+    return getFunction("isZero")(this);
   }
 
   public isPositive(): boolean {
-    return isPositive(this);
+    return getFunction("isPositive")(this);
   }
 
   public isNegative(): boolean {
-    return isNegative(this);
+    return getFunction("isNegative")(this);
   }
 
   public not(): boolean {
-    return logicalNot(this);
+    return getFunction("logicalNot")(this);
   }
 
   public and(other: FixedPrecisionValue): boolean {
-    return logicalAnd(this, this.coerce(other));
+    return getFunction("logicalAnd")(this, this.coerce(other));
   }
 
   public or(other: FixedPrecisionValue): boolean {
-    return logicalOr(this, this.coerce(other));
+    return getFunction("logicalOr")(this, this.coerce(other));
   }
 
   public xor(other: FixedPrecisionValue): boolean {
-    return logicalXor(this, this.coerce(other));
+    return getFunction("logicalXor")(this, this.coerce(other));
   }
 
   public isInteger(): boolean {
@@ -323,7 +208,7 @@ export default class FixedPrecision {
   }
 
   public precision(includeZeros = false): number {
-    return precision(this, includeZeros);
+    return getFunction("precision")(this, includeZeros);
   }
 
   public sd(includeZeros = false): number {
@@ -331,7 +216,7 @@ export default class FixedPrecision {
   }
 
   public add(other: FixedPrecisionValue): FixedPrecision {
-    return add(this, this.coerce(other));
+    return getFunction("add")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public plus(other: FixedPrecisionValue): FixedPrecision {
@@ -339,7 +224,7 @@ export default class FixedPrecision {
   }
 
   public sub(other: FixedPrecisionValue): FixedPrecision {
-    return subtract(this, this.coerce(other));
+    return getFunction("subtract")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public minus(other: FixedPrecisionValue): FixedPrecision {
@@ -347,7 +232,7 @@ export default class FixedPrecision {
   }
 
   public mul(other: FixedPrecisionValue): FixedPrecision {
-    return multiply(this, this.coerce(other));
+    return getFunction("multiply")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public times(other: FixedPrecisionValue): FixedPrecision {
@@ -355,7 +240,7 @@ export default class FixedPrecision {
   }
 
   public div(other: FixedPrecisionValue): FixedPrecision {
-    return divide(this, this.coerce(other));
+    return getFunction("divide")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public ratio(other: FixedPrecisionValue): FixedPrecision {
@@ -363,7 +248,7 @@ export default class FixedPrecision {
   }
 
   public mod(other: FixedPrecisionValue): FixedPrecision {
-    return mod(this, this.coerce(other));
+    return getFunction("mod")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public rem(other: FixedPrecisionValue): FixedPrecision {
@@ -371,21 +256,27 @@ export default class FixedPrecision {
   }
 
   public idiv(other: FixedPrecisionValue): FixedPrecision {
-    return idiv(this, this.coerce(other));
+    return getFunction("idiv")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public divmod(other: FixedPrecisionValue): {
     quotient: FixedPrecision;
     remainder: FixedPrecision;
   } {
-    return divmod(this, this.coerce(other));
+    return getFunction("divmod")(this, this.coerce(other)) as {
+      quotient: FixedPrecision;
+      remainder: FixedPrecision;
+    };
   }
 
   public idivmod(other: FixedPrecisionValue): {
     quotient: FixedPrecision;
     remainder: FixedPrecision;
   } {
-    return idivmod(this, this.coerce(other));
+    return getFunction("idivmod")(this, this.coerce(other)) as {
+      quotient: FixedPrecision;
+      remainder: FixedPrecision;
+    };
   }
 
   public rest(other: FixedPrecisionValue): FixedPrecision {
@@ -401,7 +292,11 @@ export default class FixedPrecision {
     min: FixedPrecisionValue,
     max: FixedPrecisionValue,
   ): FixedPrecision {
-    return clamp(this, this.coerce(min), this.coerce(max));
+    return getFunction("clamp")(
+      this,
+      this.coerce(min),
+      this.coerce(max),
+    ) as FixedPrecision;
   }
 
   public clampedTo(
@@ -415,55 +310,59 @@ export default class FixedPrecision {
     increment: FixedPrecisionValue,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    return toNearest(this, this.coerce(increment), rm);
+    return getFunction("toNearest")(
+      this,
+      this.coerce(increment),
+      rm,
+    ) as FixedPrecision;
   }
 
   public bitAnd(other: FixedPrecisionValue): FixedPrecision {
-    return bitAnd(this, this.coerce(other));
+    return getFunction("bitAnd")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public bitOr(other: FixedPrecisionValue): FixedPrecision {
-    return bitOr(this, this.coerce(other));
+    return getFunction("bitOr")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public bitXor(other: FixedPrecisionValue): FixedPrecision {
-    return bitXor(this, this.coerce(other));
+    return getFunction("bitXor")(this, this.coerce(other)) as FixedPrecision;
   }
 
   public bitNot(): FixedPrecision {
-    return bitNot(this);
+    return getFunction("bitNot")(this) as FixedPrecision;
   }
 
   public leftShift(n: number): FixedPrecision {
-    return leftShift(this, n);
+    return getFunction("leftShift")(this, n) as FixedPrecision;
   }
 
   public rightArithShift(n: number): FixedPrecision {
-    return rightArithShift(this, n);
+    return getFunction("rightArithShift")(this, n) as FixedPrecision;
   }
 
   public neg(): FixedPrecision {
-    return neg(this);
+    return getFunction("neg")(this) as FixedPrecision;
   }
 
   public pow(exp: number): FixedPrecision {
-    return pow(this, exp);
+    return getFunction("pow")(this, exp) as FixedPrecision;
   }
 
   public square(): FixedPrecision {
-    return square(this);
+    return getFunction("square")(this) as FixedPrecision;
   }
 
   public cube(): FixedPrecision {
-    return cube(this);
+    return getFunction("cube")(this) as FixedPrecision;
   }
 
   public sqrt(): FixedPrecision {
-    return sqrt(this);
+    return getFunction("sqrt")(this) as FixedPrecision;
   }
 
   public cbrt(): FixedPrecision {
-    return cbrt(this);
+    return getFunction("cbrt")(this) as FixedPrecision;
   }
 
   public cubeRoot(): FixedPrecision {
@@ -471,154 +370,157 @@ export default class FixedPrecision {
   }
 
   public ln(): FixedPrecision {
-    return naturalLog(this);
+    return getFunction("naturalLog")(this) as FixedPrecision;
   }
 
   public log(base?: FixedPrecisionValue): FixedPrecision {
-    return log(this, base === undefined ? undefined : this.coerce(base));
+    return getFunction("log")(
+      this,
+      base === undefined ? undefined : this.coerce(base),
+    ) as FixedPrecision;
   }
 
   public log10(): FixedPrecision {
-    return log10(this);
+    return getFunction("log10")(this) as FixedPrecision;
   }
 
   public log2(): FixedPrecision {
-    return log2(this);
+    return getFunction("log2")(this) as FixedPrecision;
   }
 
   public exp(): FixedPrecision {
-    return exp(this);
+    return getFunction("exp")(this) as FixedPrecision;
   }
 
   public sin(): FixedPrecision {
-    return sin(this);
+    return getFunction("sin")(this) as FixedPrecision;
   }
 
   public cos(): FixedPrecision {
-    return cos(this);
+    return getFunction("cos")(this) as FixedPrecision;
   }
 
   public tan(): FixedPrecision {
-    return tan(this);
+    return getFunction("tan")(this) as FixedPrecision;
   }
 
   public sec(): FixedPrecision {
-    return sec(this);
+    return getFunction("sec")(this) as FixedPrecision;
   }
 
   public csc(): FixedPrecision {
-    return csc(this);
+    return getFunction("csc")(this) as FixedPrecision;
   }
 
   public cot(): FixedPrecision {
-    return cot(this);
+    return getFunction("cot")(this) as FixedPrecision;
   }
 
   public asin(): FixedPrecision {
-    return asin(this);
+    return getFunction("asin")(this) as FixedPrecision;
   }
 
   public acos(): FixedPrecision {
-    return acos(this);
+    return getFunction("acos")(this) as FixedPrecision;
   }
 
   public atan(): FixedPrecision {
-    return atan(this);
+    return getFunction("atan")(this) as FixedPrecision;
   }
 
   public atan2(x: FixedPrecisionValue): FixedPrecision {
-    return atan2(this, this.coerce(x));
+    return getFunction("atan2")(this, this.coerce(x)) as FixedPrecision;
   }
 
   public acot(): FixedPrecision {
-    return acot(this);
+    return getFunction("acot")(this) as FixedPrecision;
   }
 
   public asec(): FixedPrecision {
-    return asec(this);
+    return getFunction("asec")(this) as FixedPrecision;
   }
 
   public acsc(): FixedPrecision {
-    return acsc(this);
+    return getFunction("acsc")(this) as FixedPrecision;
   }
 
   public sinh(): FixedPrecision {
-    return sinh(this);
+    return getFunction("sinh")(this) as FixedPrecision;
   }
 
   public cosh(): FixedPrecision {
-    return cosh(this);
+    return getFunction("cosh")(this) as FixedPrecision;
   }
 
   public tanh(): FixedPrecision {
-    return tanh(this);
+    return getFunction("tanh")(this) as FixedPrecision;
   }
 
   public sech(): FixedPrecision {
-    return sech(this);
+    return getFunction("sech")(this) as FixedPrecision;
   }
 
   public csch(): FixedPrecision {
-    return csch(this);
+    return getFunction("csch")(this) as FixedPrecision;
   }
 
   public coth(): FixedPrecision {
-    return coth(this);
+    return getFunction("coth")(this) as FixedPrecision;
   }
 
   public asinh(): FixedPrecision {
-    return asinh(this);
+    return getFunction("asinh")(this) as FixedPrecision;
   }
 
   public acosh(): FixedPrecision {
-    return acosh(this);
+    return getFunction("acosh")(this) as FixedPrecision;
   }
 
   public atanh(): FixedPrecision {
-    return atanh(this);
+    return getFunction("atanh")(this) as FixedPrecision;
   }
 
   public asech(): FixedPrecision {
-    return asech(this);
+    return getFunction("asech")(this) as FixedPrecision;
   }
 
   public acsch(): FixedPrecision {
-    return acsch(this);
+    return getFunction("acsch")(this) as FixedPrecision;
   }
 
   public acoth(): FixedPrecision {
-    return acoth(this);
+    return getFunction("acoth")(this) as FixedPrecision;
   }
 
   public num(): FixedPrecision {
-    return getNumerator(this);
+    return getFunction("getNumerator")(this) as FixedPrecision;
   }
 
   public den(): FixedPrecision {
-    return getDenominator(this);
+    return getFunction("getDenominator")(this) as FixedPrecision;
   }
 
   public fraction(
     maxDen?: FixedPrecisionValue,
   ): [FixedPrecision, FixedPrecision] {
-    return fraction(
+    return getFunction("fraction")(
       this,
       maxDen === undefined ? undefined : this.coerce(maxDen),
-    );
+    ) as [FixedPrecision, FixedPrecision];
   }
 
   public round(
     dp: number = this.ctx.places,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    return round(this, dp, rm);
+    return getFunction("round")(this, dp, rm) as FixedPrecision;
   }
 
   public scale(
     newScale: number,
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
-    return scale(this, newScale, rm);
+    return getFunction("scale")(this, newScale, rm) as FixedPrecision;
   }
 
   public prec(
@@ -633,129 +535,122 @@ export default class FixedPrecision {
   }
 
   public ceil(): FixedPrecision {
-    return ceil(this);
+    return getFunction("ceil")(this) as FixedPrecision;
   }
 
   public floor(): FixedPrecision {
-    return floor(this);
+    return getFunction("floor")(this) as FixedPrecision;
   }
 
   public trunc(): FixedPrecision {
-    return trunc(this);
+    return getFunction("trunc")(this) as FixedPrecision;
   }
 
   public shiftedBy(n: number): FixedPrecision {
-    return shiftedBy(this, n);
+    return getFunction("shiftedBy")(this, n) as FixedPrecision;
   }
 
   public static sign(value: FixedPrecisionValue): number {
-    return sign(value);
+    return getFunction("sign")(value);
   }
 
   public static not(value: FixedPrecisionValue): boolean {
-    return logicalNot(value);
+    return getFunction("logicalNot")(value);
   }
 
   public static and(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): boolean {
-    return logicalAnd(left, right);
+    return getFunction("logicalAnd")(left, right);
   }
 
   public static or(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): boolean {
-    return logicalOr(left, right);
+    return getFunction("logicalOr")(left, right);
   }
 
   public static xor(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): boolean {
-    return logicalXor(left, right);
+    return getFunction("logicalXor")(left, right);
   }
 
   public static fromContextValue(
     value: FixedPrecisionValue,
     operation: (value: bigint, ctx: FPContext) => bigint,
   ): FixedPrecision {
-    const ctx =
-      value instanceof FixedPrecision
-        ? value.ctx
-        : FixedPrecision.defaultContext;
-    return FixedPrecision.fromRawWithContext(
-      operation(FixedPrecision.toScaled(value, ctx), ctx),
-      ctx,
-    );
+    return fromContextValue(value, operation) as FixedPrecision;
   }
 
   public static PI(): FixedPrecision {
-    return pi();
+    return getFunction("pi")() as FixedPrecision;
   }
 
   public static e(): FixedPrecision {
-    return e();
+    return getFunction("e")() as FixedPrecision;
   }
 
   public static exp(value: FixedPrecisionValue): FixedPrecision {
-    return exp(value);
+    return getFunction("exp")(value) as FixedPrecision;
   }
 
   public static abs(value: FixedPrecisionValue): FixedPrecision {
-    return abs(value);
+    return getFunction("abs")(value) as FixedPrecision;
   }
 
   public static add(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return add(left, right);
+    return getFunction("add")(left, right) as FixedPrecision;
   }
 
   public static sub(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return subtract(left, right);
+    return getFunction("subtract")(left, right) as FixedPrecision;
   }
 
   public static mul(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return multiply(left, right);
+    return getFunction("multiply")(left, right) as FixedPrecision;
   }
 
   public static div(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return divide(left, right);
+    return getFunction("divide")(left, right) as FixedPrecision;
   }
 
   public static mod(
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    return mod(left, right);
+    return getFunction("mod")(left, right) as FixedPrecision;
   }
 
   public static pow(value: FixedPrecisionValue, exp: number): FixedPrecision {
-    return pow(value, exp);
+    return getFunction("pow")(value, exp) as FixedPrecision;
   }
 
   public static ceil(value: FixedPrecisionValue): FixedPrecision {
-    return ceil(value);
+    return getFunction("ceil")(value) as FixedPrecision;
   }
 
   public static floor(value: FixedPrecisionValue): FixedPrecision {
-    return floor(value);
+    return getFunction("floor")(value) as FixedPrecision;
   }
 
   public static trunc(value: FixedPrecisionValue): FixedPrecision {
-    return trunc(value);
+    return getFunction("trunc")(value) as FixedPrecision;
   }
 
   public static round(
@@ -763,26 +658,26 @@ export default class FixedPrecision {
     dp?: number,
     rm?: RoundingMode,
   ): FixedPrecision {
-    return round(value, dp, rm);
+    return getFunction("round")(value, dp, rm) as FixedPrecision;
   }
 
   public static ln(value: FixedPrecisionValue): FixedPrecision {
-    return naturalLog(value);
+    return getFunction("naturalLog")(value) as FixedPrecision;
   }
 
   public static log(
     value: FixedPrecisionValue,
     base?: FixedPrecisionValue,
   ): FixedPrecision {
-    return log(value, base);
+    return getFunction("log")(value, base) as FixedPrecision;
   }
 
   public static log2(value: FixedPrecisionValue): FixedPrecision {
-    return log2(value);
+    return getFunction("log2")(value) as FixedPrecision;
   }
 
   public static log10(value: FixedPrecisionValue): FixedPrecision {
-    return log10(value);
+    return getFunction("log10")(value) as FixedPrecision;
   }
 
   public static clamp(
@@ -790,252 +685,233 @@ export default class FixedPrecision {
     min: FixedPrecisionValue,
     max: FixedPrecisionValue,
   ): FixedPrecision {
-    return clamp(value, min, max);
+    return getFunction("clamp")(value, min, max) as FixedPrecision;
   }
 
   public static square(value: FixedPrecisionValue): FixedPrecision {
-    return square(value);
+    return getFunction("square")(value) as FixedPrecision;
   }
 
   public static cube(value: FixedPrecisionValue): FixedPrecision {
-    return cube(value);
+    return getFunction("cube")(value) as FixedPrecision;
   }
 
   public static sqrt(value: FixedPrecisionValue): FixedPrecision {
-    return sqrt(value);
+    return getFunction("sqrt")(value) as FixedPrecision;
   }
 
   public static cbrt(value: FixedPrecisionValue): FixedPrecision {
-    return cbrt(value);
+    return getFunction("cbrt")(value) as FixedPrecision;
   }
 
   public static sin(value: FixedPrecisionValue): FixedPrecision {
-    return sin(value);
+    return getFunction("sin")(value) as FixedPrecision;
   }
 
   public static cos(value: FixedPrecisionValue): FixedPrecision {
-    return cos(value);
+    return getFunction("cos")(value) as FixedPrecision;
   }
 
   public static tan(value: FixedPrecisionValue): FixedPrecision {
-    return tan(value);
+    return getFunction("tan")(value) as FixedPrecision;
   }
 
   public static sec(value: FixedPrecisionValue): FixedPrecision {
-    return sec(value);
+    return getFunction("sec")(value) as FixedPrecision;
   }
 
   public static csc(value: FixedPrecisionValue): FixedPrecision {
-    return csc(value);
+    return getFunction("csc")(value) as FixedPrecision;
   }
 
   public static cot(value: FixedPrecisionValue): FixedPrecision {
-    return cot(value);
+    return getFunction("cot")(value) as FixedPrecision;
   }
 
   public static asin(value: FixedPrecisionValue): FixedPrecision {
-    return asin(value);
+    return getFunction("asin")(value) as FixedPrecision;
   }
 
   public static acos(value: FixedPrecisionValue): FixedPrecision {
-    return acos(value);
+    return getFunction("acos")(value) as FixedPrecision;
   }
 
   public static atan(value: FixedPrecisionValue): FixedPrecision {
-    return atan(value);
+    return getFunction("atan")(value) as FixedPrecision;
   }
 
   public static atan2(
     y: FixedPrecisionValue,
     x: FixedPrecisionValue,
   ): FixedPrecision {
-    return atan2(y, x);
+    return getFunction("atan2")(y, x) as FixedPrecision;
   }
 
   public static acot(value: FixedPrecisionValue): FixedPrecision {
-    return acot(value);
+    return getFunction("acot")(value) as FixedPrecision;
   }
 
   public static asec(value: FixedPrecisionValue): FixedPrecision {
-    return asec(value);
+    return getFunction("asec")(value) as FixedPrecision;
   }
 
   public static acsc(value: FixedPrecisionValue): FixedPrecision {
-    return acsc(value);
+    return getFunction("acsc")(value) as FixedPrecision;
   }
 
   public static sinh(value: FixedPrecisionValue): FixedPrecision {
-    return sinh(value);
+    return getFunction("sinh")(value) as FixedPrecision;
   }
 
   public static cosh(value: FixedPrecisionValue): FixedPrecision {
-    return cosh(value);
+    return getFunction("cosh")(value) as FixedPrecision;
   }
 
   public static tanh(value: FixedPrecisionValue): FixedPrecision {
-    return tanh(value);
+    return getFunction("tanh")(value) as FixedPrecision;
   }
 
   public static sech(value: FixedPrecisionValue): FixedPrecision {
-    return sech(value);
+    return getFunction("sech")(value) as FixedPrecision;
   }
 
   public static csch(value: FixedPrecisionValue): FixedPrecision {
-    return csch(value);
+    return getFunction("csch")(value) as FixedPrecision;
   }
 
   public static coth(value: FixedPrecisionValue): FixedPrecision {
-    return coth(value);
+    return getFunction("coth")(value) as FixedPrecision;
   }
 
   public static asinh(value: FixedPrecisionValue): FixedPrecision {
-    return asinh(value);
+    return getFunction("asinh")(value) as FixedPrecision;
   }
 
   public static acosh(value: FixedPrecisionValue): FixedPrecision {
-    return acosh(value);
+    return getFunction("acosh")(value) as FixedPrecision;
   }
 
   public static atanh(value: FixedPrecisionValue): FixedPrecision {
-    return atanh(value);
+    return getFunction("atanh")(value) as FixedPrecision;
   }
 
   public static asech(value: FixedPrecisionValue): FixedPrecision {
-    return asech(value);
+    return getFunction("asech")(value) as FixedPrecision;
   }
 
   public static acsch(value: FixedPrecisionValue): FixedPrecision {
-    return acsch(value);
+    return getFunction("acsch")(value) as FixedPrecision;
   }
 
   public static acoth(value: FixedPrecisionValue): FixedPrecision {
-    return acoth(value);
+    return getFunction("acoth")(value) as FixedPrecision;
   }
 
   public static phi(): FixedPrecision {
-    return phi();
+    return getFunction("phi")() as FixedPrecision;
   }
 
   public static sqrt2(): FixedPrecision {
-    return sqrt2();
+    return getFunction("sqrt2")() as FixedPrecision;
   }
 
   public static random(decimalPlaces?: number): FixedPrecision {
-    return random(decimalPlaces);
+    return getFunction("random")(decimalPlaces) as FixedPrecision;
   }
 
   public static resolveContext(values: FixedPrecisionValue[]): FPContext {
-    let best: FPContext | null = null;
-    for (const v of values) {
-      if (v instanceof FixedPrecision) {
-        if (!best || v.ctx.places > best.places) {
-          best = v.ctx;
-          if (best.places === 20) return best;
-        }
-      }
-    }
-    return best ?? FixedPrecision.defaultContext;
+    return resolveContext(values);
   }
 
   public static normalizeTo(
     v: FixedPrecisionValue,
     ctx: FPContext,
   ): FixedPrecision {
-    if (v instanceof FixedPrecision) {
-      if (
-        v.ctx.places === ctx.places &&
-        v.ctx.roundingMode === ctx.roundingMode
-      ) {
-        return v;
-      }
-      return v.scale(ctx.places, ctx.roundingMode);
-    } else {
-      return new FixedPrecision(v, ctx);
-    }
+    return normalizeTo(v, ctx) as FixedPrecision;
   }
 
   public static dot(
     a: FixedPrecisionValue[],
     b: FixedPrecisionValue[],
   ): FixedPrecision {
-    return dot(a, b);
+    return getFunction("dot")(a, b) as FixedPrecision;
   }
 
   public static cross(
     a: FixedPrecisionValue[],
     b: FixedPrecisionValue[],
   ): FixedPrecision[] {
-    return cross(a, b);
+    return getFunction("cross")(a, b) as FixedPrecision[];
   }
 
   public static min(
     val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    return min(val, ...vals);
+    return getFunction("min")(val, ...vals) as FixedPrecision;
   }
 
   public static max(
     val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    return max(val, ...vals);
+    return getFunction("max")(val, ...vals) as FixedPrecision;
   }
 
   public static sum(
     val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    return sum(val, ...vals);
+    return getFunction("sum")(val, ...vals) as FixedPrecision;
   }
 
   public static hypot(
     val?: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    return hypot(val, ...vals);
+    return getFunction("hypot")(val, ...vals) as FixedPrecision;
   }
 
   public static factorial(n: number | FixedPrecision): FixedPrecision {
-    return factorial(n);
+    return getFunction("factorial")(n) as FixedPrecision;
   }
 
   public static permutations(
     n: number | FixedPrecision,
     k: number | FixedPrecision,
   ): FixedPrecision {
-    return permutations(n, k);
+    return getFunction("permutations")(n, k) as FixedPrecision;
   }
 
   public static combinations(
     n: number | FixedPrecision,
     k: number | FixedPrecision,
   ): FixedPrecision {
-    return combinations(n, k);
+    return getFunction("combinations")(n, k) as FixedPrecision;
   }
 
   public toExponential(dp?: number, rm?: RoundingMode): string {
-    return toExponential(this, dp, rm);
+    return getFunction("toExponential")(this, dp, rm);
   }
 
   public toPrecision(sd: number, rm?: RoundingMode): string {
-    return toPrecision(this, sd, rm);
+    return getFunction("toPrecision")(this, sd, rm);
   }
 
   public toFixed(places = 0, rm?: RoundingMode): string {
-    return toFixed(this, places, rm);
+    return getFunction("toFixed")(this, places, rm);
   }
 
   public toBinary(sd?: number, rm?: RoundingMode): string {
-    return toBase(this, 2, sd, rm);
+    return getFunction("toBase")(this, 2, sd, rm);
   }
 
   public toOctal(sd?: number, rm?: RoundingMode): string {
-    return toBase(this, 8, sd, rm);
+    return getFunction("toBase")(this, 8, sd, rm);
   }
 
   public toHex(sd?: number, rm?: RoundingMode): string {
-    return toBase(this, 16, sd, rm);
+    return getFunction("toBase")(this, 16, sd, rm);
   }
 
   public toHexadecimal(sd?: number, rm?: RoundingMode): string {
@@ -1043,7 +919,7 @@ export default class FixedPrecision {
   }
 
   public toBase(base: 2 | 8 | 16, sd?: number, rm?: RoundingMode): string {
-    return toBase(this, base, sd, rm);
+    return getFunction("toBase")(this, base, sd, rm);
   }
 
   public valueOf(): string {
