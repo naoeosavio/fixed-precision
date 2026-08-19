@@ -1,14 +1,16 @@
 import { factorial_value } from "./combinatorics/factorial";
-import FixedPrecision from "./FixedPrecision";
+import {
+  fromRawWithContext,
+  isFixedPrecisionLike,
+  registerFunction,
+  resolveContext,
+} from "./core/value";
+import type { FixedPrecisionLike } from "./types";
 
-export function factorial(n: number | FixedPrecision): FixedPrecision {
-  const ctx = FixedPrecision.resolveContext(
-    n instanceof FixedPrecision ? [n] : [],
-  );
-  const val =
-    n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
-  return FixedPrecision.fromRawWithContext(
-    factorial_value(val) * ctx.SCALE,
-    ctx,
-  );
+export function factorial(n: number | FixedPrecisionLike): FixedPrecisionLike {
+  const ctx = resolveContext(isFixedPrecisionLike(n) ? [n] : []);
+  const val = isFixedPrecisionLike(n) ? n.trunc().toNumber() : Math.trunc(n);
+  return fromRawWithContext(factorial_value(val) * ctx.SCALE, ctx);
 }
+
+registerFunction("factorial", factorial);

@@ -1,22 +1,29 @@
 import { collectValues } from "./construction/values";
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import {
+  construct,
+  fromRawWithContext,
+  normalizeTo,
+  registerFunction,
+  resolveContext,
+  toScaled,
+} from "./core/value";
 import { sum_values } from "./statistics/sum";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
 export function sum(
   value: FixedPrecisionValue | FixedPrecisionValue[],
   ...values: FixedPrecisionValue[]
-): FixedPrecision {
+): FixedPrecisionLike {
   const all = collectValues(value, values);
   const firstValue = all[0];
   if (firstValue === undefined) {
-    return new FixedPrecision(0n);
+    return construct(0n);
   }
 
-  const ctx = FixedPrecision.resolveContext(all);
-  const first = FixedPrecision.normalizeTo(firstValue, ctx);
-  const total = sum_values(all.slice(1), first.raw(), (v) =>
-    FixedPrecision.toScaled(v, ctx),
-  );
-  return FixedPrecision.fromRawWithContext(total, ctx);
+  const ctx = resolveContext(all);
+  const first = normalizeTo(firstValue, ctx);
+  const total = sum_values(all.slice(1), first.raw(), (v) => toScaled(v, ctx));
+  return fromRawWithContext(total, ctx);
 }
+
+registerFunction("sum", sum);

@@ -1,14 +1,21 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import {
+  fromRawWithContext,
+  registerFunction,
+  resolveContext,
+  toScaled,
+} from "./core/value";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
 export function bitOr(
   left: FixedPrecisionValue,
   right: FixedPrecisionValue,
-): FixedPrecision {
-  const ctx = FixedPrecision.resolveContext([left, right]);
-  return FixedPrecision.fromRawWithContext(
+): FixedPrecisionLike {
+  const ctx = resolveContext([left, right]);
+  return fromRawWithContext(
     // biome-ignore lint/suspicious/noBitwiseOperators: operação bitwise intencional
-    FixedPrecision.toScaled(left, ctx) | FixedPrecision.toScaled(right, ctx),
+    toScaled(left, ctx) | toScaled(right, ctx),
     ctx,
   );
 }
+
+registerFunction("bitOr", bitOr);

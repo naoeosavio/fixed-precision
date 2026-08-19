@@ -1,13 +1,17 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import {
+  fromRawWithContext,
+  registerFunction,
+  resolveContext,
+  toScaled,
+} from "./core/value";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
 export function add(
   value: FixedPrecisionValue,
   amount: FixedPrecisionValue,
-): FixedPrecision {
-  const ctx = FixedPrecision.resolveContext([value, amount]);
-  return FixedPrecision.fromRawWithContext(
-    FixedPrecision.toScaled(value, ctx) + FixedPrecision.toScaled(amount, ctx),
-    ctx,
-  );
+): FixedPrecisionLike {
+  const ctx = resolveContext([value, amount]);
+  return fromRawWithContext(toScaled(value, ctx) + toScaled(amount, ctx), ctx);
 }
+
+registerFunction("add", add);

@@ -1,7 +1,8 @@
-import type { FixedPrecisionValue, RoundingMode } from "./FixedPrecision";
+import { registerFunction } from "./core/value";
 import { scale } from "./scale";
 // biome-ignore lint/suspicious/noShadowRestrictedNames: nome da API pública
 import { toString } from "./toString";
+import type { FixedPrecisionValue, RoundingMode } from "./types";
 
 export function toFixed(
   value: FixedPrecisionValue,
@@ -10,3 +11,5 @@ export function toFixed(
 ): string {
   return toString(scale(value, places, rm), false);
 }
+
+registerFunction("toFixed", toFixed);

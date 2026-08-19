@@ -1,17 +1,17 @@
-import type { FixedPrecisionValue, RoundingMode } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { registerFunction, resolveContext } from "./core/value";
 import { round } from "./round";
 import { shiftedBy } from "./shiftedBy";
 import { toFixed } from "./toFixed";
 // biome-ignore lint/suspicious/noShadowRestrictedNames: nome da API pública
 import { toString } from "./toString";
+import type { FixedPrecisionValue, RoundingMode } from "./types";
 
 export function toExponential(
   value: FixedPrecisionValue,
   dp?: number,
   rm?: RoundingMode,
 ): string {
-  const ctx = FixedPrecision.resolveContext([value]);
+  const ctx = resolveContext([value]);
   const effDp = dp ?? ctx.places;
   const rounded = round(value, effDp, rm);
   const [int = "", frac = ""] = toString(rounded).split(".");
@@ -27,3 +27,5 @@ export function toExponential(
     .replace(/\.0+e/, "e")
     .replace(/(\.\d+?)0+e/, "$1e");
 }
+
+registerFunction("toExponential", toExponential);

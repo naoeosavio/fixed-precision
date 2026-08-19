@@ -1,14 +1,13 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { registerFunction, resolveContext, toScaled } from "./core/value";
 import { logicalXorValues } from "./logical/logicalXor";
+import type { FixedPrecisionValue } from "./types";
 
 export function logicalXor(
   left: FixedPrecisionValue,
   right: FixedPrecisionValue,
 ): boolean {
-  const ctx = FixedPrecision.resolveContext([left, right]);
-  return logicalXorValues(
-    FixedPrecision.toScaled(left, ctx),
-    FixedPrecision.toScaled(right, ctx),
-  );
+  const ctx = resolveContext([left, right]);
+  return logicalXorValues(toScaled(left, ctx), toScaled(right, ctx));
 }
+
+registerFunction("logicalXor", logicalXor);

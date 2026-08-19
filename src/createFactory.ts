@@ -1,13 +1,16 @@
+import { FactoryContext } from "./core/context";
+import { construct, registerFunction } from "./core/value";
 import type {
   FixedPrecisionConfig,
+  FixedPrecisionLike,
   FixedPrecisionValue,
-} from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
-import { FactoryContext } from "./core/context";
+} from "./types";
 
 export function createFactory(
   config: FixedPrecisionConfig,
-): (value: FixedPrecisionValue) => FixedPrecision {
+): (value: FixedPrecisionValue) => FixedPrecisionLike {
   const ctx = FactoryContext(config);
-  return (value: FixedPrecisionValue) => new FixedPrecision(value, ctx);
+  return (value: FixedPrecisionValue) => construct(value, ctx);
 }
+
+registerFunction("createFactory", createFactory);

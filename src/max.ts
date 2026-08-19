@@ -1,18 +1,20 @@
 import { collectValues } from "./construction/values";
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { normalizeTo, registerFunction, resolveContext } from "./core/value";
 import { greaterThan } from "./greaterThan";
 import { max_values } from "./statistics/max";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
 export function max(
   value: FixedPrecisionValue | FixedPrecisionValue[],
   ...values: FixedPrecisionValue[]
-): FixedPrecision {
+): FixedPrecisionLike {
   const all = collectValues(value, values);
-  const ctx = FixedPrecision.resolveContext(all);
+  const ctx = resolveContext(all);
   return max_values(
     all,
-    (v) => FixedPrecision.normalizeTo(v, ctx),
+    (v) => normalizeTo(v, ctx),
     (left, right) => greaterThan(left, right),
   );
 }
+
+registerFunction("max", max);

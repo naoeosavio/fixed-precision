@@ -1,7 +1,9 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { fromContextValue, registerFunction } from "./core/value";
 import { acsch_value } from "./trigonometry/acsch";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
-export function acsch(value: FixedPrecisionValue): FixedPrecision {
-  return FixedPrecision.fromContextValue(value, acsch_value);
+export function acsch(value: FixedPrecisionValue): FixedPrecisionLike {
+  return fromContextValue(value, acsch_value);
 }
+
+registerFunction("acsch", acsch);

@@ -1,8 +1,10 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { registerFunction, resolveContext, toScaled } from "./core/value";
 import { isZeroValue } from "./logical/isZero";
+import type { FixedPrecisionValue } from "./types";
 
 export function isZero(value: FixedPrecisionValue): boolean {
-  const ctx = FixedPrecision.resolveContext([value]);
-  return isZeroValue(FixedPrecision.toScaled(value, ctx));
+  const ctx = resolveContext([value]);
+  return isZeroValue(toScaled(value, ctx));
 }
+
+registerFunction("isZero", isZero);

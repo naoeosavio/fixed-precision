@@ -1,6 +1,11 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import {
+  getDefaultContext,
+  isFixedPrecisionLike,
+  registerFunction,
+  toScaled,
+} from "./core/value";
 import { compareValues } from "./relational/compare";
+import type { FixedPrecisionValue } from "./types";
 
 function signNumber(value: number): number {
   if (Number.isNaN(value)) {
@@ -21,17 +26,14 @@ function signString(value: string): number {
   }
 
   try {
-    return compareValues(
-      FixedPrecision.toScaled(value, FixedPrecision.resolveContext([])),
-      0n,
-    );
+    return compareValues(toScaled(value, getDefaultContext()), 0n);
   } catch {
     return numericValue < 0 ? -1 : 1;
   }
 }
 
 export function sign(value: FixedPrecisionValue): number {
-  if (value instanceof FixedPrecision) {
+  if (isFixedPrecisionLike(value)) {
     return compareValues(value.raw(), 0n);
   }
 
@@ -45,3 +47,5 @@ export function sign(value: FixedPrecisionValue): number {
 
   return signString(value);
 }
+
+registerFunction("sign", sign);

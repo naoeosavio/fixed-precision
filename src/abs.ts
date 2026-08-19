@@ -1,8 +1,8 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { fromContextValue, registerFunction } from "./core/value";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
-export function abs(value: FixedPrecisionValue): FixedPrecision {
-  return FixedPrecision.fromContextValue(value, (raw) =>
-    raw < 0n ? -raw : raw,
-  );
+export function abs(value: FixedPrecisionValue): FixedPrecisionLike {
+  return fromContextValue(value, (raw) => (raw < 0n ? -raw : raw));
 }
+
+registerFunction("abs", abs);

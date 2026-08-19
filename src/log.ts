@@ -1,23 +1,26 @@
 import { log_value } from "./arithmetic/log";
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import {
+  fromRawWithContext,
+  registerFunction,
+  resolveContext,
+  toScaled,
+} from "./core/value";
 import { naturalLog } from "./naturalLog";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
 export function log(
   value: FixedPrecisionValue,
   base?: FixedPrecisionValue,
-): FixedPrecision {
+): FixedPrecisionLike {
   if (base === undefined) {
     return naturalLog(value);
   }
 
-  const ctx = FixedPrecision.resolveContext([value, base]);
-  return FixedPrecision.fromRawWithContext(
-    log_value(
-      FixedPrecision.toScaled(value, ctx),
-      FixedPrecision.toScaled(base, ctx),
-      ctx,
-    ),
+  const ctx = resolveContext([value, base]);
+  return fromRawWithContext(
+    log_value(toScaled(value, ctx), toScaled(base, ctx), ctx),
     ctx,
   );
 }
+
+registerFunction("log", log);

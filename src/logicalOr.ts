@@ -1,14 +1,13 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { registerFunction, resolveContext, toScaled } from "./core/value";
 import { logicalOrValues } from "./logical/logicalOr";
+import type { FixedPrecisionValue } from "./types";
 
 export function logicalOr(
   left: FixedPrecisionValue,
   right: FixedPrecisionValue,
 ): boolean {
-  const ctx = FixedPrecision.resolveContext([left, right]);
-  return logicalOrValues(
-    FixedPrecision.toScaled(left, ctx),
-    FixedPrecision.toScaled(right, ctx),
-  );
+  const ctx = resolveContext([left, right]);
+  return logicalOrValues(toScaled(left, ctx), toScaled(right, ctx));
 }
+
+registerFunction("logicalOr", logicalOr);

@@ -1,18 +1,23 @@
 import { precision_value } from "./arithmetic/precision";
 import { shifted_by_value } from "./arithmetic/shiftedBy";
-import type { FixedPrecisionValue, RoundingMode } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import {
+  fromRawWithContext,
+  registerFunction,
+  resolveContext,
+  toScaled,
+} from "./core/value";
 import { toFixed } from "./toFixed";
 // biome-ignore lint/suspicious/noShadowRestrictedNames: nome da API pública
 import { toString } from "./toString";
+import type { FixedPrecisionValue, RoundingMode } from "./types";
 
 export function toPrecision(
   value: FixedPrecisionValue,
   sd: number,
   rm?: RoundingMode,
 ): string {
-  const ctx = FixedPrecision.resolveContext([value]);
-  const rawValue = FixedPrecision.toScaled(value, ctx);
+  const ctx = resolveContext([value]);
+  const rawValue = toScaled(value, ctx);
   if (rawValue === 0n) {
     return "0";
   }
@@ -32,10 +37,7 @@ export function toPrecision(
   }
 
   if (exp < -6 || exp >= sd) {
-    const mantissa = FixedPrecision.fromRawWithContext(
-      shifted_by_value(raw, -exp),
-      ctx,
-    );
+    const mantissa = fromRawWithContext(shifted_by_value(raw, -exp), ctx);
     const dp = sd - 1;
     let formatted = toFixed(mantissa, dp, rm);
     const expSign = exp > 0 ? "+" : "";
@@ -43,7 +45,9 @@ export function toPrecision(
     return formatted;
   }
 
-  return toString(FixedPrecision.fromRawWithContext(raw, ctx))
+  return toString(fromRawWithContext(raw, ctx))
     .replace(/(\.\d*?)0+$/, "$1")
     .replace(/\.$/, "");
 }
+
+registerFunction("toPrecision", toPrecision);

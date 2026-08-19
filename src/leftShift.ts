@@ -1,13 +1,15 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { fromContextValue, registerFunction } from "./core/value";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
 export function leftShift(
   value: FixedPrecisionValue,
   n: number,
-): FixedPrecision {
+): FixedPrecisionLike {
   if (!Number.isInteger(n) || n < 0) {
     throw new Error("Shift amount must be a non-negative integer");
   }
   // biome-ignore lint/suspicious/noBitwiseOperators: operação bitwise intencional
-  return FixedPrecision.fromContextValue(value, (raw) => raw << BigInt(n));
+  return fromContextValue(value, (raw) => raw << BigInt(n));
 }
+
+registerFunction("leftShift", leftShift);

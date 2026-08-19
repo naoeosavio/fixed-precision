@@ -1,5 +1,5 @@
 import { equals } from "./equals";
-import type { FixedPrecisionValue } from "./FixedPrecision";
+import type { FixedPrecisionValue } from "./types";
 
 export function notEquals(
   left: FixedPrecisionValue,

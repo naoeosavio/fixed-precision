@@ -1,6 +1,6 @@
-import type { FixedPrecisionValue, RoundingMode } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { registerFunction, resolveContext, toScaled } from "./core/value";
 import { to_base_with_ctx } from "./string/toBase";
+import type { FixedPrecisionValue, RoundingMode } from "./types";
 
 export function toBase(
   value: FixedPrecisionValue,
@@ -8,12 +8,8 @@ export function toBase(
   sd?: number,
   rm?: RoundingMode,
 ): string {
-  const ctx = FixedPrecision.resolveContext([value]);
-  return to_base_with_ctx(
-    FixedPrecision.toScaled(value, ctx),
-    ctx,
-    base,
-    sd,
-    rm,
-  );
+  const ctx = resolveContext([value]);
+  return to_base_with_ctx(toScaled(value, ctx), ctx, base, sd, rm);
 }
+
+registerFunction("toBase", toBase);

@@ -1,7 +1,9 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { fromContextValue, registerFunction } from "./core/value";
 import { cot_value } from "./trigonometry/cot";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
-export function cot(value: FixedPrecisionValue): FixedPrecision {
-  return FixedPrecision.fromContextValue(value, cot_value);
+export function cot(value: FixedPrecisionValue): FixedPrecisionLike {
+  return fromContextValue(value, cot_value);
 }
+
+registerFunction("cot", cot);

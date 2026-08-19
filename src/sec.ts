@@ -1,7 +1,9 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { fromContextValue, registerFunction } from "./core/value";
 import { sec_value } from "./trigonometry/sec";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
-export function sec(value: FixedPrecisionValue): FixedPrecision {
-  return FixedPrecision.fromContextValue(value, sec_value);
+export function sec(value: FixedPrecisionValue): FixedPrecisionLike {
+  return fromContextValue(value, sec_value);
 }
+
+registerFunction("sec", sec);

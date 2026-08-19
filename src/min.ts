@@ -1,18 +1,20 @@
 import { collectValues } from "./construction/values";
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { normalizeTo, registerFunction, resolveContext } from "./core/value";
 import { lessThan } from "./lessThan";
 import { min_values } from "./statistics/min";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
 export function min(
   value: FixedPrecisionValue | FixedPrecisionValue[],
   ...values: FixedPrecisionValue[]
-): FixedPrecision {
+): FixedPrecisionLike {
   const all = collectValues(value, values);
-  const ctx = FixedPrecision.resolveContext(all);
+  const ctx = resolveContext(all);
   return min_values(
     all,
-    (v) => FixedPrecision.normalizeTo(v, ctx),
+    (v) => normalizeTo(v, ctx),
     (left, right) => lessThan(left, right),
   );
 }
+
+registerFunction("min", min);

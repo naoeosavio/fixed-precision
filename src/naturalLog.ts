@@ -1,7 +1,9 @@
 import { natural_log_value } from "./arithmetic/naturalLog";
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { fromContextValue, registerFunction } from "./core/value";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
-export function naturalLog(value: FixedPrecisionValue): FixedPrecision {
-  return FixedPrecision.fromContextValue(value, natural_log_value);
+export function naturalLog(value: FixedPrecisionValue): FixedPrecisionLike {
+  return fromContextValue(value, natural_log_value);
 }
+
+registerFunction("naturalLog", naturalLog);

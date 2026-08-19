@@ -1,9 +1,12 @@
 import { power } from "./arithmetic/power";
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { fromContextValue, registerFunction } from "./core/value";
+import type { FixedPrecisionLike, FixedPrecisionValue } from "./types";
 
-export function pow(value: FixedPrecisionValue, exp: number): FixedPrecision {
-  return FixedPrecision.fromContextValue(value, (raw, ctx) =>
-    power(raw, exp, ctx.SCALE),
-  );
+export function pow(
+  value: FixedPrecisionValue,
+  exp: number,
+): FixedPrecisionLike {
+  return fromContextValue(value, (raw, ctx) => power(raw, exp, ctx.SCALE));
 }
+
+registerFunction("pow", pow);

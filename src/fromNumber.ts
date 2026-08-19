@@ -1,5 +1,6 @@
-import FixedPrecision from "./FixedPrecision";
+import { construct } from "./core/value";
+import type { FixedPrecisionLike } from "./types";
 
-export function fromNumber(value: number): FixedPrecision {
-  return new FixedPrecision(value);
+export function fromNumber(value: number): FixedPrecisionLike {
+  return construct(value);
 }

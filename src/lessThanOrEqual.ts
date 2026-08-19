@@ -1,14 +1,13 @@
-import type { FixedPrecisionValue } from "./FixedPrecision";
-import FixedPrecision from "./FixedPrecision";
+import { registerFunction, resolveContext, toScaled } from "./core/value";
 import { lessThanOrEqualValue } from "./relational/lessThanOrEqual";
+import type { FixedPrecisionValue } from "./types";
 
 export function lessThanOrEqual(
   left: FixedPrecisionValue,
   right: FixedPrecisionValue,
 ): boolean {
-  const ctx = FixedPrecision.resolveContext([left, right]);
-  return lessThanOrEqualValue(
-    FixedPrecision.toScaled(left, ctx),
-    FixedPrecision.toScaled(right, ctx),
-  );
+  const ctx = resolveContext([left, right]);
+  return lessThanOrEqualValue(toScaled(left, ctx), toScaled(right, ctx));
 }
+
+registerFunction("lessThanOrEqual", lessThanOrEqual);
