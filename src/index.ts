@@ -34,6 +34,7 @@ export * from "./cross";
 export * from "./csc";
 export * from "./csch";
 export * from "./cube";
+export * from "./dataOf";
 export * from "./divide";
 export * from "./divmod";
 export * from "./dot";

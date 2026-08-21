@@ -281,6 +281,24 @@ export function construct(
   return new FixedPrecision(value, ctx);
 }
 
+export function coerceValue(
+  instance: FixedPrecisionLike,
+  value: FixedPrecisionValue,
+): FixedPrecisionLike {
+  if (isFixedPrecisionLike(value)) {
+    const instanceCtx = instance.context();
+    const valueCtx = value.context();
+    if (
+      instanceCtx.places !== valueCtx.places ||
+      instanceCtx.roundingMode !== valueCtx.roundingMode
+    ) {
+      throw new Error("Cannot operate on different precisions");
+    }
+    return value;
+  }
+  return construct(value, instance.context());
+}
+
 export function fromRawWithContext(
   rawValue: bigint,
   ctx: FPContext,

@@ -22,6 +22,7 @@ import { cleanTrailingZeros } from "../src/cleanTrailingZeros";
 import { combinations } from "../src/combinations";
 import { compare } from "../src/compare";
 import { createFactory } from "../src/createFactory";
+import { dataOf } from "../src/dataOf";
 import { cos } from "../src/cos";
 import { cosh } from "../src/cosh";
 import { cot } from "../src/cot";
@@ -447,5 +448,39 @@ describe("functions: constants and random", () => {
     expect(value.places()).toBe(5);
     expect(value.gte("0")).toBe(true);
     expect(value.lt("1")).toBe(true);
+  });
+});
+
+describe("functions: dataOf", () => {
+  test("primitive uses the default context", () => {
+    expect(dataOf("1.5")).toEqual({
+      places: 8,
+      roundingMode: 4,
+      SCALE: 100000000n,
+      SCALENUMBER: 100000000,
+      value: 150000000n,
+    });
+  });
+
+  test("instance keeps its own context and value", () => {
+    const FP4 = createFactory({ places: 4 });
+    const value = FP4("1.5");
+    expect(dataOf(value)).toEqual({
+      places: 4,
+      roundingMode: 4,
+      SCALE: 10000n,
+      SCALENUMBER: 10000,
+      value: 15000n,
+    });
+  });
+
+  test("number uses the default context", () => {
+    expect(dataOf(1.5)).toEqual({
+      places: 8,
+      roundingMode: 4,
+      SCALE: 100000000n,
+      SCALENUMBER: 100000000,
+      value: 150000000n,
+    });
   });
 });

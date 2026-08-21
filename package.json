@@ -346,6 +346,16 @@
         "default": "./dist/createFactory.cjs"
       }
     },
+    "./dataOf": {
+      "import": {
+        "types": "./dist/dataOf.d.ts",
+        "default": "./dist/dataOf.js"
+      },
+      "require": {
+        "types": "./dist/dataOf.d.cts",
+        "default": "./dist/dataOf.cjs"
+      }
+    },
     "./cross": {
       "import": {
         "types": "./dist/cross.d.ts",

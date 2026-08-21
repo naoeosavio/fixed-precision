@@ -133,10 +133,9 @@ export interface FixedPrecisionLike {
 
   num(): FixedPrecisionLike;
   den(): FixedPrecisionLike;
-  fraction(maxDen?: FixedPrecisionValue): [
-    FixedPrecisionLike,
-    FixedPrecisionLike,
-  ];
+  fraction(
+    maxDen?: FixedPrecisionValue,
+  ): [FixedPrecisionLike, FixedPrecisionLike];
 
   round(dp?: number, rm?: RoundingMode): FixedPrecisionLike;
   scale(newScale: number, rm?: RoundingMode): FixedPrecisionLike;
