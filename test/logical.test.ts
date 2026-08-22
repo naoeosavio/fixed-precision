@@ -34,8 +34,5 @@ describe("Logical", () => {
     expect(FixedPrecision.xor(FP8("0"), FP8("3"))).toBe(true);
     expect(FixedPrecision.xor(FP4("1"), FP4("3"))).toBe(false);
     expect(FixedPrecision.and(FP4("0.0001"), FP4("1"))).toBe(true);
-    expect(() => FixedPrecision.and(FP8("2"), FP16("2"))).toThrow(
-      "Cannot operate on different precisions",
-    );
   });
 });

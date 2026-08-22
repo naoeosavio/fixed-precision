@@ -300,9 +300,6 @@ describe("Arithmetic", () => {
     expect(FixedPrecision.div(FP20("7.5"), FP20("2.5")).toString()).toBe("3");
     expect(FixedPrecision.mod(FP4("10"), FP4("3")).toString()).toBe("1");
     expect(FixedPrecision.pow(FP16("2"), 3).toString()).toBe("8");
-    expect(() => FixedPrecision.add(FP8("1.5"), FP6("2.25"))).toThrow(
-      "Cannot operate on different precisions",
-    );
   });
 
   test("static rounding wrappers", () => {

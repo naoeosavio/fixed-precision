@@ -77,7 +77,6 @@ import {
   tanh_value,
 } from "./core/trigonometry/index";
 
-export const FP_BRAND: unique symbol = Symbol("fixed-precision");
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
@@ -89,16 +88,35 @@ export type FPContext = {
   SCALENUMBER: number;
 };
 
+/**
+ *  FixedPrecision Configuration System
+ */
 export interface FixedPrecisionConfig {
+  /**
+   * Number of decimal places to use (0-20)
+   * @default 8
+   */
   places: number;
+
+  /**
+   * Default rounding mode for decimal operations:
+   * 0: ROUND_UP
+   * 1: ROUND_DOWN
+   * 2: ROUND_CEIL
+   * 3: ROUND_FLOOR
+   * 4: ROUND_HALF_UP
+   * 5: ROUND_HALF_DOWN
+   * 6: ROUND_HALF_EVEN
+   * 7: ROUND_HALF_CEIL
+   * 8: ROUND_HALF_FLOOR
+   * @default 4
+   */
   roundingMode?: RoundingMode;
 }
 
 export default class FixedPrecision {
   private value: bigint = 0n;
   private readonly ctx!: FPContext;
-
-  readonly [FP_BRAND] = true as const;
 
   private static defaultContext: FPContext = makeContext(8, 4);
 
@@ -122,11 +140,7 @@ export default class FixedPrecision {
   }
 
   public static isFixedPrecision(value: unknown): value is FixedPrecision {
-    return (
-      typeof value === "object" &&
-      value !== null &&
-      (value as FixedPrecision)[FP_BRAND] === true
-    );
+    return value instanceof FixedPrecision;
   }
 
   protected fromRaw(rawValue: bigint): FixedPrecision {
@@ -135,13 +149,26 @@ export default class FixedPrecision {
     return instance;
   }
 
-  public static fromRawWithContext(
+  private static fromRawWithContext(
     rawValue: bigint,
     ctx: FPContext,
   ): FixedPrecision {
     const instance = new FixedPrecision(0n, ctx);
     instance.value = rawValue;
     return instance;
+  }
+
+  private coerce(value: FixedPrecisionValue): FixedPrecision {
+    if (value instanceof FixedPrecision) {
+      if (
+        this.ctx.places !== value.ctx.places ||
+        this.ctx.roundingMode !== value.ctx.roundingMode
+      ) {
+        throw new Error("Cannot operate on different precisions");
+      }
+      return value;
+    }
+    return new FixedPrecision(value, this.ctx);
   }
 
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
@@ -162,36 +189,6 @@ export default class FixedPrecision {
 
   private toScaledValue(value: FixedPrecisionValue): bigint {
     return FixedPrecision.toScaled(value, this.ctx);
-  }
-
-  private coerce(value: FixedPrecisionValue): FixedPrecision {
-    if (value instanceof FixedPrecision) {
-      if (
-        this.ctx.places !== value.ctx.places ||
-        this.ctx.roundingMode !== value.ctx.roundingMode
-      ) {
-        throw new Error("Cannot operate on different precisions");
-      }
-      return value;
-    }
-    return new FixedPrecision(value, this.ctx);
-  }
-
-  private static strictCtx(values: FixedPrecisionValue[]): FPContext {
-    let target: FPContext | null = null;
-    for (const v of values) {
-      if (v instanceof FixedPrecision) {
-        if (target === null) {
-          target = v.ctx;
-        } else if (
-          target.places !== v.ctx.places ||
-          target.roundingMode !== v.ctx.roundingMode
-        ) {
-          throw new Error("Cannot operate on different precisions");
-        }
-      }
-    }
-    return target ?? FixedPrecision.defaultContext;
   }
 
   private static resolveContext(values: FixedPrecisionValue[]): FPContext {
@@ -846,7 +843,7 @@ export default class FixedPrecision {
 
   public static not(value: FixedPrecisionValue): boolean {
     return logicalNotValue(
-      FixedPrecision.toScaled(value, FixedPrecision.strictCtx([value])),
+      FixedPrecision.toScaled(value, FixedPrecision.resolveContext([value])),
     );
   }
 
@@ -854,7 +851,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): boolean {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return logicalAndValues(
       FixedPrecision.toScaled(left, ctx),
       FixedPrecision.toScaled(right, ctx),
@@ -865,7 +862,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): boolean {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return logicalOrValues(
       FixedPrecision.toScaled(left, ctx),
       FixedPrecision.toScaled(right, ctx),
@@ -876,7 +873,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): boolean {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return logicalXorValues(
       FixedPrecision.toScaled(left, ctx),
       FixedPrecision.toScaled(right, ctx),
@@ -892,7 +889,7 @@ export default class FixedPrecision {
   }
 
   public static exp(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       exp_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -900,7 +897,7 @@ export default class FixedPrecision {
   }
 
   public static abs(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     const raw = FixedPrecision.toScaled(value, ctx);
     return FixedPrecision.fromRawWithContext(raw < 0n ? -raw : raw, ctx);
   }
@@ -909,7 +906,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return FixedPrecision.fromRawWithContext(
       FixedPrecision.toScaled(left, ctx) + FixedPrecision.toScaled(right, ctx),
       ctx,
@@ -920,7 +917,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return FixedPrecision.fromRawWithContext(
       FixedPrecision.toScaled(left, ctx) - FixedPrecision.toScaled(right, ctx),
       ctx,
@@ -931,7 +928,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return FixedPrecision.fromRawWithContext(
       (FixedPrecision.toScaled(left, ctx) *
         FixedPrecision.toScaled(right, ctx)) /
@@ -944,7 +941,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return FixedPrecision.fromRawWithContext(
       (FixedPrecision.toScaled(left, ctx) * ctx.SCALE) /
         FixedPrecision.toScaled(right, ctx),
@@ -956,7 +953,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return FixedPrecision.fromRawWithContext(
       (FixedPrecision.toScaled(left, ctx) * ctx.SCALE) %
         FixedPrecision.toScaled(right, ctx),
@@ -968,7 +965,7 @@ export default class FixedPrecision {
     left: FixedPrecisionValue,
     right: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([left, right]);
+    const ctx = FixedPrecision.resolveContext([left, right]);
     return FixedPrecision.fromRawWithContext(
       (FixedPrecision.toScaled(left, ctx) /
         FixedPrecision.toScaled(right, ctx)) *
@@ -978,7 +975,7 @@ export default class FixedPrecision {
   }
 
   public static pow(value: FixedPrecisionValue, exp: number): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       power(FixedPrecision.toScaled(value, ctx), exp, ctx.SCALE),
       ctx,
@@ -986,7 +983,7 @@ export default class FixedPrecision {
   }
 
   public static ceil(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       round_value(FixedPrecision.toScaled(value, ctx), 0, 2, ctx),
       ctx,
@@ -994,7 +991,7 @@ export default class FixedPrecision {
   }
 
   public static floor(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       round_value(FixedPrecision.toScaled(value, ctx), 0, 3, ctx),
       ctx,
@@ -1002,7 +999,7 @@ export default class FixedPrecision {
   }
 
   public static trunc(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       round_value(FixedPrecision.toScaled(value, ctx), 0, 1, ctx),
       ctx,
@@ -1014,7 +1011,7 @@ export default class FixedPrecision {
     dp?: number,
     rm?: RoundingMode,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       round_value(
         FixedPrecision.toScaled(value, ctx),
@@ -1027,7 +1024,7 @@ export default class FixedPrecision {
   }
 
   public static ln(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       natural_log_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1039,25 +1036,22 @@ export default class FixedPrecision {
     base?: FixedPrecisionValue,
   ): FixedPrecision {
     if (base === undefined) {
-      const ctx = FixedPrecision.strictCtx([value]);
+      return FixedPrecision.ln(value);
+    } else {
+      const ctx = FixedPrecision.resolveContext([value, base]);
       return FixedPrecision.fromRawWithContext(
-        natural_log_value(FixedPrecision.toScaled(value, ctx), ctx),
+        log_value(
+          FixedPrecision.toScaled(value, ctx),
+          FixedPrecision.toScaled(base, ctx),
+          ctx,
+        ),
         ctx,
       );
     }
-    const ctx = FixedPrecision.strictCtx([value, base]);
-    return FixedPrecision.fromRawWithContext(
-      log_value(
-        FixedPrecision.toScaled(value, ctx),
-        FixedPrecision.toScaled(base, ctx),
-        ctx,
-      ),
-      ctx,
-    );
   }
 
   public static log2(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       log2_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1065,7 +1059,7 @@ export default class FixedPrecision {
   }
 
   public static log10(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       log10_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1077,7 +1071,7 @@ export default class FixedPrecision {
     min: FixedPrecisionValue,
     max: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value, min, max]);
+    const ctx = FixedPrecision.resolveContext([value, min, max]);
     const raw = FixedPrecision.toScaled(value, ctx);
     const minRaw = FixedPrecision.toScaled(min, ctx);
     const maxRaw = FixedPrecision.toScaled(max, ctx);
@@ -1091,7 +1085,7 @@ export default class FixedPrecision {
   }
 
   public static square(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       power(FixedPrecision.toScaled(value, ctx), 2, ctx.SCALE),
       ctx,
@@ -1099,7 +1093,7 @@ export default class FixedPrecision {
   }
 
   public static cube(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       power(FixedPrecision.toScaled(value, ctx), 3, ctx.SCALE),
       ctx,
@@ -1107,7 +1101,7 @@ export default class FixedPrecision {
   }
 
   public static sqrt(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       sqrt_value(FixedPrecision.toScaled(value, ctx), ctx.SCALE),
       ctx,
@@ -1115,7 +1109,7 @@ export default class FixedPrecision {
   }
 
   public static cbrt(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       cbrt_value(FixedPrecision.toScaled(value, ctx), ctx.SCALE),
       ctx,
@@ -1123,7 +1117,7 @@ export default class FixedPrecision {
   }
 
   public static sin(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       sin_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1131,7 +1125,7 @@ export default class FixedPrecision {
   }
 
   public static cos(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       cos_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1139,7 +1133,7 @@ export default class FixedPrecision {
   }
 
   public static tan(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       tan_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1147,7 +1141,7 @@ export default class FixedPrecision {
   }
 
   public static sec(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       sec_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1155,7 +1149,7 @@ export default class FixedPrecision {
   }
 
   public static csc(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       csc_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1163,7 +1157,7 @@ export default class FixedPrecision {
   }
 
   public static cot(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       cot_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1171,7 +1165,7 @@ export default class FixedPrecision {
   }
 
   public static asin(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       asin_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1179,7 +1173,7 @@ export default class FixedPrecision {
   }
 
   public static acos(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       acos_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1187,7 +1181,7 @@ export default class FixedPrecision {
   }
 
   public static atan(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       atan_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1198,7 +1192,7 @@ export default class FixedPrecision {
     y: FixedPrecisionValue,
     x: FixedPrecisionValue,
   ): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([y, x]);
+    const ctx = FixedPrecision.resolveContext([y, x]);
     return FixedPrecision.fromRawWithContext(
       atan2_value(
         FixedPrecision.toScaled(y, ctx),
@@ -1210,7 +1204,7 @@ export default class FixedPrecision {
   }
 
   public static acot(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       acot_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1218,7 +1212,7 @@ export default class FixedPrecision {
   }
 
   public static asec(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       asec_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1226,7 +1220,7 @@ export default class FixedPrecision {
   }
 
   public static acsc(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       acsc_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1234,7 +1228,7 @@ export default class FixedPrecision {
   }
 
   public static sinh(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       sinh_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1242,7 +1236,7 @@ export default class FixedPrecision {
   }
 
   public static cosh(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       cosh_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1250,7 +1244,7 @@ export default class FixedPrecision {
   }
 
   public static tanh(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       tanh_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1258,7 +1252,7 @@ export default class FixedPrecision {
   }
 
   public static sech(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       sech_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1266,7 +1260,7 @@ export default class FixedPrecision {
   }
 
   public static csch(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       csch_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1274,7 +1268,7 @@ export default class FixedPrecision {
   }
 
   public static coth(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       coth_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1282,7 +1276,7 @@ export default class FixedPrecision {
   }
 
   public static asinh(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       asinh_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1290,7 +1284,7 @@ export default class FixedPrecision {
   }
 
   public static acosh(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       acosh_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1298,7 +1292,7 @@ export default class FixedPrecision {
   }
 
   public static atanh(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       atanh_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1306,7 +1300,7 @@ export default class FixedPrecision {
   }
 
   public static asech(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       asech_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1314,7 +1308,7 @@ export default class FixedPrecision {
   }
 
   public static acsch(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       acsch_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1322,7 +1316,7 @@ export default class FixedPrecision {
   }
 
   public static acoth(value: FixedPrecisionValue): FixedPrecision {
-    const ctx = FixedPrecision.strictCtx([value]);
+    const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       acoth_value(FixedPrecision.toScaled(value, ctx), ctx),
       ctx,
@@ -1378,14 +1372,14 @@ export default class FixedPrecision {
     val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    const items = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
-    const first = items[0];
+    const values = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
+    const first = values[0];
     if (first === undefined) {
       throw new Error("FixedPrecision.min requires at least one argument");
     }
-    const ctx = FixedPrecision.resolveContext(items);
+    const ctx = FixedPrecision.resolveContext(values);
     let result = FixedPrecision.normalizeTo(first, ctx);
-    for (const item of items.slice(1)) {
+    for (const item of values.slice(1)) {
       const next = FixedPrecision.normalizeTo(item, ctx);
       if (next.lt(result)) result = next;
     }
@@ -1396,14 +1390,14 @@ export default class FixedPrecision {
     val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    const items = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
-    const first = items[0];
+    const values = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
+    const first = values[0];
     if (first === undefined) {
       throw new Error("FixedPrecision.max requires at least one argument");
     }
-    const ctx = FixedPrecision.resolveContext(items);
+    const ctx = FixedPrecision.resolveContext(values);
     let result = FixedPrecision.normalizeTo(first, ctx);
-    for (const item of items.slice(1)) {
+    for (const item of values.slice(1)) {
       const next = FixedPrecision.normalizeTo(item, ctx);
       if (next.gt(result)) result = next;
     }
@@ -1414,14 +1408,15 @@ export default class FixedPrecision {
     val: FixedPrecisionValue | FixedPrecisionValue[],
     ...vals: FixedPrecisionValue[]
   ): FixedPrecision {
-    const items = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
-    const first = items[0];
-    if (first === undefined) {
+    const values = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
+    const firstValue = values[0];
+    if (firstValue === undefined) {
       return new FixedPrecision(0n);
     }
-    const ctx = FixedPrecision.resolveContext(items);
+
+    const ctx = FixedPrecision.resolveContext(values);
     let total = 0n;
-    for (const item of items) {
+    for (const item of values) {
       total += FixedPrecision.normalizeTo(item, ctx).value;
     }
     return FixedPrecision.fromRawWithContext(total, ctx);
@@ -1434,24 +1429,22 @@ export default class FixedPrecision {
     if (val === undefined) {
       return new FixedPrecision(0n);
     }
-    const items = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
-    const ctx = FixedPrecision.resolveContext(items);
+
+    const values = Array.isArray(val) ? [...val, ...vals] : [val, ...vals];
+    const ctx = FixedPrecision.resolveContext(values);
     let total = 0n;
-    for (const item of items) {
-      const raw = FixedPrecision.toScaled(item, ctx);
-      total += (raw * raw) / ctx.SCALE;
+    for (const value of values) {
+      const rawValue = FixedPrecision.toScaled(value, ctx);
+      total += (rawValue * rawValue) / ctx.SCALE;
     }
     return FixedPrecision.fromRawWithContext(sqrt_value(total, ctx.SCALE), ctx);
   }
 
   public static factorial(n: number | FixedPrecision): FixedPrecision {
-    const ctx = FixedPrecision.resolveContext(
-      n instanceof FixedPrecision ? [n] : [],
-    );
+    const ctx =
+      n instanceof FixedPrecision ? n.ctx : FixedPrecision.defaultContext;
     const val =
-      n instanceof FixedPrecision
-        ? Number(toTruncatedInteger(n))
-        : Math.trunc(n);
+      n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
     return FixedPrecision.fromRawWithContext(
       factorial_value(val) * ctx.SCALE,
       ctx,
@@ -1462,17 +1455,12 @@ export default class FixedPrecision {
     n: number | FixedPrecision,
     k: number | FixedPrecision,
   ): FixedPrecision {
-    const ctx = FixedPrecision.resolveContext(
-      n instanceof FixedPrecision ? [n] : [],
-    );
+    const ctx =
+      n instanceof FixedPrecision ? n.ctx : FixedPrecision.defaultContext;
     const valN =
-      n instanceof FixedPrecision
-        ? Number(toTruncatedInteger(n))
-        : Math.trunc(n);
+      n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
     const valK =
-      k instanceof FixedPrecision
-        ? Number(toTruncatedInteger(k))
-        : Math.trunc(k);
+      k instanceof FixedPrecision ? k.trunc().toNumber() : Math.trunc(k);
     return FixedPrecision.fromRawWithContext(
       permutations_value(valN, valK) * ctx.SCALE,
       ctx,
@@ -1483,26 +1471,17 @@ export default class FixedPrecision {
     n: number | FixedPrecision,
     k: number | FixedPrecision,
   ): FixedPrecision {
-    const ctx = FixedPrecision.resolveContext(
-      n instanceof FixedPrecision ? [n] : [],
-    );
+    const ctx =
+      n instanceof FixedPrecision ? n.ctx : FixedPrecision.defaultContext;
     const valN =
-      n instanceof FixedPrecision
-        ? Number(toTruncatedInteger(n))
-        : Math.trunc(n);
+      n instanceof FixedPrecision ? n.trunc().toNumber() : Math.trunc(n);
     const valK =
-      k instanceof FixedPrecision
-        ? Number(toTruncatedInteger(k))
-        : Math.trunc(k);
+      k instanceof FixedPrecision ? k.trunc().toNumber() : Math.trunc(k);
     return FixedPrecision.fromRawWithContext(
       combinations_value(valN, valK) * ctx.SCALE,
       ctx,
     );
   }
-}
-
-function toTruncatedInteger(instance: FixedPrecision): bigint {
-  return instance.raw() / instance.context().SCALE;
 }
 
 export const fixedconfig = {
