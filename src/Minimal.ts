@@ -4,11 +4,11 @@ import {
   round_value,
   scale_value,
   sqrt_value,
-} from "./arithmetic/index";
-import { makeContext } from "./core/context";
-import { from_number_with_ctx, to_number_with_ctx } from "./numeric/index";
-import { from_string_with_ctx, to_string_with_ctx } from "./string/index";
-import { precisionPowerOfTen } from "./utils";
+} from "./core/arithmetic/index";
+import { makeContext } from "./core/construction/context";
+import { from_number_with_ctx, to_number_with_ctx } from "./core/numeric/index";
+import { from_string_with_ctx, to_string_with_ctx } from "./core/string/index";
+import { precisionPowerOfTen } from "./core/utils";
 
 export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
 export type Comparison = -1 | 0 | 1;
