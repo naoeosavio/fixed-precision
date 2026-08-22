@@ -1,9 +1,10 @@
 import { describe, expect, test } from "vitest";
-import { combinations_value } from "../src/core/combinatorics/combinations";
+
+import FixedPrecision from "../src/FixedPrecision";
 
 import { factorial_value } from "../src/core/combinatorics/factorial";
 import { permutations_value } from "../src/core/combinatorics/permutations";
-import FixedPrecision from "../src/FixedPrecision";
+import { combinations_value } from "../src/core/combinatorics/combinations";
 
 describe("Combinatorics", () => {
   describe("factorial_value", () => {
@@ -24,8 +25,10 @@ describe("Combinatorics", () => {
     test("P(5,5) = 120", () => expect(permutations_value(5, 5)).toBe(120n));
     test("P(5,0) = 1", () => expect(permutations_value(5, 0)).toBe(1n));
     test("P(0,0) = 1", () => expect(permutations_value(0, 0)).toBe(1n));
-    test("P(3,5) = 0 (k > n)", () => expect(permutations_value(3, 5)).toBe(0n));
-    test("P(10,4) = 5040", () => expect(permutations_value(10, 4)).toBe(5040n));
+    test("P(3,5) = 0 (k > n)", () =>
+      expect(permutations_value(3, 5)).toBe(0n));
+    test("P(10,4) = 5040", () =>
+      expect(permutations_value(10, 4)).toBe(5040n));
     test("throws on negative n", () =>
       expect(() => permutations_value(-1, 2)).toThrow());
     test("throws on negative k", () =>
@@ -44,7 +47,8 @@ describe("Combinatorics", () => {
     test("C(5,5) = 1", () => expect(combinations_value(5, 5)).toBe(1n));
     test("C(6,3) = 20", () => expect(combinations_value(6, 3)).toBe(20n));
     test("C(10,4) = 210", () => expect(combinations_value(10, 4)).toBe(210n));
-    test("C(5,6) = 0 (k > n)", () => expect(combinations_value(5, 6)).toBe(0n));
+    test("C(5,6) = 0 (k > n)", () =>
+      expect(combinations_value(5, 6)).toBe(0n));
     test("C(52,5) = 2598960", () =>
       expect(combinations_value(52, 5)).toBe(2598960n));
     test("throws on negative n", () =>

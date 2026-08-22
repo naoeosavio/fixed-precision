@@ -24,6 +24,7 @@ import { neg } from "../src/FP/arithmetic/neg";
 import { pow } from "../src/FP/arithmetic/pow";
 import { precision } from "../src/FP/arithmetic/precision";
 import { round } from "../src/FP/arithmetic/round";
+import { root } from "../src/FP/arithmetic/root";
 import { scale } from "../src/FP/arithmetic/scale";
 import { shiftedBy } from "../src/FP/arithmetic/shiftedBy";
 import { sign } from "../src/FP/arithmetic/sign";
@@ -191,6 +192,14 @@ describe("functions: arithmetic — powers and logs", () => {
     expect(stringify(sqrt("16"))).toBe("4");
     expect(stringify(round(sqrt("2"), 6))).toBe("1.414214");
     expect(stringify(cbrt("27"))).toBe("3");
+  });
+
+  test("root generalizes sqrt and cbrt", () => {
+    expect(stringify(root("16", 2))).toBe("4");
+    expect(stringify(root("2", 2))).toBe(stringify(sqrt("2")));
+    expect(stringify(root("27", 3))).toBe("3");
+    expect(stringify(root("16", 4))).toBe("2");
+    expect(stringify(root("-8", 3))).toBe("-2");
   });
 
   test("exp matches the e constant", () => {
