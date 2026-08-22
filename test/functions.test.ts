@@ -11,7 +11,6 @@ import { divide } from "../src/FP/arithmetic/divide";
 import { divmod } from "../src/FP/arithmetic/divmod";
 import { exp } from "../src/FP/arithmetic/exp";
 import { floor } from "../src/FP/arithmetic/floor";
-import { gcd } from "../src/FP/arithmetic/gcd";
 import { hypot } from "../src/FP/arithmetic/hypot";
 import { idiv } from "../src/FP/arithmetic/idiv";
 import { idivmod } from "../src/FP/arithmetic/idivmod";
@@ -23,10 +22,8 @@ import { multiply } from "../src/FP/arithmetic/multiply";
 import { naturalLog } from "../src/FP/arithmetic/naturalLog";
 import { neg } from "../src/FP/arithmetic/neg";
 import { pow } from "../src/FP/arithmetic/pow";
-import { power } from "../src/FP/arithmetic/power";
 import { precision } from "../src/FP/arithmetic/precision";
 import { round } from "../src/FP/arithmetic/round";
-import { roundToScale } from "../src/FP/arithmetic/roundToScale";
 import { scale } from "../src/FP/arithmetic/scale";
 import { shiftedBy } from "../src/FP/arithmetic/shiftedBy";
 import { sign } from "../src/FP/arithmetic/sign";
@@ -217,8 +214,8 @@ describe("functions: arithmetic — rounding and scaling", () => {
     expect(stringify(trunc("-1.9"))).toBe("-1");
   });
 
-  test("roundToScale and scale", () => {
-    expect(stringify(roundToScale("1.005", 2))).toBe("1.01");
+  test("scale", () => {
+    expect(stringify(scale("1.005", 2))).toBe("1.01");
     expect(stringify(scale("1.23456789", 2))).toBe("1.23");
   });
 
@@ -261,13 +258,6 @@ describe("functions: arithmetic — division and unary", () => {
   test("square and cube", () => {
     expect(stringify(square("3"))).toBe("9");
     expect(stringify(cube("2"))).toBe("8");
-  });
-});
-
-describe("functions: bigint utilities", () => {
-  test("gcd, power, powerOfTen and precisionPowerOfTen", () => {
-    expect(gcd(48n, 36n)).toBe(12n);
-    expect(power(2n, 10, 1n)).toBe(1024n);
   });
 });
 

@@ -256,16 +256,6 @@
         "default": "./dist/clamp.cjs"
       }
     },
-    "./cleanTrailingZeros": {
-      "import": {
-        "types": "./dist/cleanTrailingZeros.d.ts",
-        "default": "./dist/cleanTrailingZeros.js"
-      },
-      "require": {
-        "types": "./dist/cleanTrailingZeros.d.cts",
-        "default": "./dist/cleanTrailingZeros.cjs"
-      }
-    },
     "./combinations": {
       "import": {
         "types": "./dist/combinations.d.ts",
@@ -324,16 +314,6 @@
       "require": {
         "types": "./dist/coth.d.cts",
         "default": "./dist/coth.cjs"
-      }
-    },
-    "./countDigits": {
-      "import": {
-        "types": "./dist/countDigits.d.ts",
-        "default": "./dist/countDigits.js"
-      },
-      "require": {
-        "types": "./dist/countDigits.d.cts",
-        "default": "./dist/countDigits.cjs"
       }
     },
     "./createFactory": {
@@ -524,16 +504,6 @@
       "require": {
         "types": "./dist/fromString.d.cts",
         "default": "./dist/fromString.cjs"
-      }
-    },
-    "./gcd": {
-      "import": {
-        "types": "./dist/gcd.d.ts",
-        "default": "./dist/gcd.js"
-      },
-      "require": {
-        "types": "./dist/gcd.d.cts",
-        "default": "./dist/gcd.cjs"
       }
     },
     "./getDenominator": {
@@ -846,26 +816,6 @@
         "default": "./dist/pow.cjs"
       }
     },
-    "./power": {
-      "import": {
-        "types": "./dist/power.d.ts",
-        "default": "./dist/power.js"
-      },
-      "require": {
-        "types": "./dist/power.d.cts",
-        "default": "./dist/power.cjs"
-      }
-    },
-    "./powerOfTen": {
-      "import": {
-        "types": "./dist/powerOfTen.d.ts",
-        "default": "./dist/powerOfTen.js"
-      },
-      "require": {
-        "types": "./dist/powerOfTen.d.cts",
-        "default": "./dist/powerOfTen.cjs"
-      }
-    },
     "./precision": {
       "import": {
         "types": "./dist/precision.d.ts",
@@ -874,16 +824,6 @@
       "require": {
         "types": "./dist/precision.d.cts",
         "default": "./dist/precision.cjs"
-      }
-    },
-    "./precisionPowerOfTen": {
-      "import": {
-        "types": "./dist/precisionPowerOfTen.d.ts",
-        "default": "./dist/precisionPowerOfTen.js"
-      },
-      "require": {
-        "types": "./dist/precisionPowerOfTen.d.cts",
-        "default": "./dist/precisionPowerOfTen.cjs"
       }
     },
     "./random": {
@@ -914,16 +854,6 @@
       "require": {
         "types": "./dist/round.d.cts",
         "default": "./dist/round.cjs"
-      }
-    },
-    "./roundToScale": {
-      "import": {
-        "types": "./dist/roundToScale.d.ts",
-        "default": "./dist/roundToScale.js"
-      },
-      "require": {
-        "types": "./dist/roundToScale.d.cts",
-        "default": "./dist/roundToScale.cjs"
       }
     },
     "./scale": {
@@ -1136,14 +1066,14 @@
         "default": "./dist/toPrecision.cjs"
       }
     },
-    "./toString": {
+    "./stringify": {
       "import": {
-        "types": "./dist/toString.d.ts",
-        "default": "./dist/toString.js"
+        "types": "./dist/stringify.d.ts",
+        "default": "./dist/stringify.js"
       },
       "require": {
-        "types": "./dist/toString.d.cts",
-        "default": "./dist/toString.cjs"
+        "types": "./dist/stringify.d.cts",
+        "default": "./dist/stringify.cjs"
       }
     },
     "./trunc": {
