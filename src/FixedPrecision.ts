@@ -818,9 +818,17 @@ export default class FixedPrecision {
       return compareValues(value, 0n);
     }
     if (typeof value === "number") {
-      if (Number.isNaN(value)) return NaN;
-      return value === 0 ? value : value < 0 ? -1 : 1;
+      return FixedPrecision.signOfNumber(value);
     }
+    return FixedPrecision.signOfString(value);
+  }
+
+  private static signOfNumber(value: number): number {
+    if (Number.isNaN(value)) return NaN;
+    return value === 0 ? value : value < 0 ? -1 : 1;
+  }
+
+  private static signOfString(value: string): number {
     const numericValue = Number(value);
     if (Number.isNaN(numericValue)) return NaN;
     if (numericValue === 0) {

@@ -12,4 +12,3 @@ export * from "./relational";
 export * from "./statistics";
 export * from "./string";
 export * from "./trigonometry";
-export * from "./utils";
