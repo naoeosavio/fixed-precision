@@ -5,16 +5,22 @@ import {
   scale_value,
   sqrt_value,
 } from "./core/arithmetic";
-import { makeContext, type Comparison, type FixedPrecisionConfig, type FPContext, type RoundingMode } from "./core/construction";
+import {
+  type Comparison,
+  type FixedPrecisionConfig,
+  type FPContext,
+  makeContext,
+  type RoundingMode,
+} from "./core/construction";
 import { from_number_with_ctx, to_number_with_ctx } from "./core/numeric";
 import { from_string_with_ctx, to_string_with_ctx } from "./core/string";
 import { precisionPowerOfTen } from "./core/utils";
 
-export {
-  type Comparison,
-  type FixedPrecisionConfig,
-  type FPContext,
-  type RoundingMode,
+export type {
+  Comparison,
+  FixedPrecisionConfig,
+  FPContext,
+  RoundingMode,
 } from "./core/construction";
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;

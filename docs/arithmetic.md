@@ -222,6 +222,29 @@ try {
 }
 ```
 
+### N-th Root (`root`)
+
+Generalization of `sqrt` and `cbrt` to any integer index.
+
+```typescript
+const value = new FixedPrecision("16.00");
+
+value.root(2);  // "4.00000000" (same as sqrt)
+value.root(4);  // "2.00000000"
+value.root(10); // "1.31950791"
+
+// Odd roots accept negative values
+new FixedPrecision("-32.00").root(5); // "-2.00000000"
+
+// Even roots of negative numbers throw error, as do invalid indexes
+new FixedPrecision("-16.00").root(4); // throws "Even root of negative number"
+new FixedPrecision("9.00").root(0);   // throws "Root index must be greater than 0"
+new FixedPrecision("9.00").root(1.5); // throws "Root index must be an integer"
+
+// Also available as static and standalone function
+FixedPrecision.root("81.00", 4); // "3.00000000"
+```
+
 ### Negation (`neg`)
 
 ```typescript

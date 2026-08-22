@@ -824,6 +824,16 @@
         "default": "./dist/rightArithShift.cjs"
       }
     },
+    "./root": {
+      "import": {
+        "types": "./dist/root.d.ts",
+        "default": "./dist/root.js"
+      },
+      "require": {
+        "types": "./dist/root.d.cts",
+        "default": "./dist/root.cjs"
+      }
+    },
     "./round": {
       "import": {
         "types": "./dist/round.d.ts",

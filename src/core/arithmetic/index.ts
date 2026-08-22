@@ -8,6 +8,7 @@ export { log10_value } from "./log10";
 export { natural_log_value } from "./naturalLog";
 export { power } from "./power";
 export { precision_value } from "./precision";
+export { root_value } from "./root";
 export { round_value } from "./round";
 export { round_to_scale_value } from "./roundToScale";
 export { scale_value } from "./scale";

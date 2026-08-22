@@ -6,6 +6,7 @@ import { log10_value } from "./core/arithmetic/log10";
 import { natural_log_value } from "./core/arithmetic/naturalLog";
 import { power } from "./core/arithmetic/power";
 import { precision_value } from "./core/arithmetic/precision";
+import { root_value } from "./core/arithmetic/root";
 import { round_value } from "./core/arithmetic/round";
 import { round_to_scale_value } from "./core/arithmetic/roundToScale";
 import { scale_value } from "./core/arithmetic/scale";
@@ -83,11 +84,11 @@ import {
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
 
-export {
-  type Comparison,
-  type FixedPrecisionConfig,
-  type FPContext,
-  type RoundingMode,
+export type {
+  Comparison,
+  FixedPrecisionConfig,
+  FPContext,
+  RoundingMode,
 } from "./core/construction";
 
 export default class FixedPrecision {
@@ -492,6 +493,10 @@ export default class FixedPrecision {
 
   public cubeRoot(): FixedPrecision {
     return this.cbrt();
+  }
+
+  public root(n: number): FixedPrecision {
+    return this.fromRaw(root_value(this.value, n, this.ctx.SCALE));
   }
 
   public ln(): FixedPrecision {
@@ -1088,6 +1093,14 @@ export default class FixedPrecision {
     const ctx = FixedPrecision.resolveContext([value]);
     return FixedPrecision.fromRawWithContext(
       cbrt_value(FixedPrecision.toScaled(value, ctx), ctx.SCALE),
+      ctx,
+    );
+  }
+
+  public static root(value: FixedPrecisionValue, n: number): FixedPrecision {
+    const ctx = FixedPrecision.resolveContext([value]);
+    return FixedPrecision.fromRawWithContext(
+      root_value(FixedPrecision.toScaled(value, ctx), n, ctx.SCALE),
       ctx,
     );
   }

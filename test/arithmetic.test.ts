@@ -203,6 +203,24 @@ describe("Arithmetic", () => {
     expect(FixedPrecision.cbrt("64").toString()).toBe("4");
   });
 
+  test("root", () => {
+    expect(FP20("16").root(2).toString()).toBe("4");
+    expect(FP20("27").root(3).toString()).toBe("3");
+    expect(FP20("16").root(4).toString()).toBe("2");
+    expect(FP20("32").root(5).toString()).toBe("2");
+    expect(FP20("1024").root(10).toString()).toBe("2");
+    expect(FP20("1").root(7).toString()).toBe("1");
+    expect(FP20("0").root(5).toString()).toBe("0");
+    expect(FP20("-8").root(3).toString()).toBe("-2");
+    expect(FP20("-32").root(5).toString()).toBe("-2");
+    expect(FP20("9").root(1).toString()).toBe("9");
+    expect(FixedPrecision.root("81", 4).toString()).toBe("3");
+    expect(() => FP20("-16").root(4)).toThrow();
+    expect(() => FP20("9").root(0)).toThrow();
+    expect(() => FP20("9").root(-2)).toThrow();
+    expect(() => FP20("9").root(1.5)).toThrow();
+  });
+
   test("exp", () => {
     expect(FP20("1").exp().toNumber()).toBeCloseTo(Math.E, 14);
     expect(FP20("1").exp().toString()).toBe("2.71828182845904523536");
