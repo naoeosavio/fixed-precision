@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import FixedPrecision, { fixedconfig } from "../src/index";
+import FixedPrecision, { fixedconfig } from "../src/FixedPrecision";
 
 const FP2 = FixedPrecision.create({ places: 2, roundingMode: 4 });
 const FP4 = FixedPrecision.create({ places: 4, roundingMode: 4 });
@@ -54,9 +54,7 @@ describe("Arithmetic", () => {
     expect(FP8("100000000").times("100000000").toString()).toBe(
       "1000000000000000000000000",
     );
-    expect(FP8("10.5").times(1).toString()).toBe(
-      "1050000000",
-    );
+    expect(FP8("10.5").times(1).toString()).toBe("1050000000");
   });
 
   test("idiv", () => {
@@ -68,8 +66,7 @@ describe("Arithmetic", () => {
   });
 
   test("ratio", () => {
-    expect( FP8("10").ratio("0.00000002").toString(),
-    ).toBe("5");
+    expect(FP8("10").ratio("0.00000002").toString()).toBe("5");
   });
 
   test("rem", () => {
@@ -95,9 +92,7 @@ describe("Arithmetic", () => {
     expect(e.quotient.toString()).toBe("2");
     expect(e.remainder.toString()).toBe("0");
 
-    expect(() => FP8("10").divmod("0")).toThrow(
-      "Division by zero",
-    );
+    expect(() => FP8("10").divmod("0")).toThrow("Division by zero");
     expect(() => FP8("10").divmod(FP4("3"))).toThrow(
       "Cannot operate on different precisions",
     );
@@ -133,9 +128,7 @@ describe("Arithmetic", () => {
     expect(FP8("5.5").toNearest(2).toString()).toBe("6");
     expect(FP8("5").toNearest(2, 1).toString()).toBe("4");
     expect(FP8("-5").toNearest(2).toString()).toBe("-6");
-    expect(() => FP8("5").toNearest(0)).toThrow(
-      "Increment must be non-zero",
-    );
+    expect(() => FP8("5").toNearest(0)).toThrow("Increment must be non-zero");
   });
 
   test("ceil", () => {
@@ -190,10 +183,7 @@ describe("Arithmetic", () => {
 
   test("sqrt", () => {
     expect(FP20("9").sqrt().toString()).toBe("3");
-    expect(FP20(Math.PI).sqrt().toNumber()).toBeCloseTo(
-      Math.sqrt(Math.PI),
-      12,
-    );
+    expect(FP20(Math.PI).sqrt().toNumber()).toBeCloseTo(Math.sqrt(Math.PI), 12);
     expect(FP20(0).sqrt().toString()).toBe("0");
     expect(FixedPrecision.sqrt("9").toString()).toBe("3");
     expect(FixedPrecision.sqrt("2").toNumber()).toBeCloseTo(Math.sqrt(2), 7);
@@ -205,13 +195,8 @@ describe("Arithmetic", () => {
 
   test("cbrt", () => {
     expect(FP20("27").cbrt().toString()).toBe("3");
-    expect(FP20(Math.E).cbrt().toNumber()).toBeCloseTo(
-      Math.cbrt(Math.E),
-      12,
-    );
-    expect(FP20("-8").cbrt().toString()).toBe(
-      "-2",
-    );
+    expect(FP20(Math.E).cbrt().toNumber()).toBeCloseTo(Math.cbrt(Math.E), 12);
+    expect(FP20("-8").cbrt().toString()).toBe("-2");
     expect(FP20("125").cubeRoot().toString()).toBe(
       FP20("125").cbrt().toString(),
     );
@@ -235,9 +220,7 @@ describe("Arithmetic", () => {
     expect(r.toNumber()).toBeCloseTo(1, 14);
     expect(r.toString()).toBe("0.99999999999999999999");
     expect(FP20("10").ln().toString()).toBe("2.30258509299404568401");
-    expect(FP20("123.456789").ln().toString()).toBe(
-      "4.81589120820374401402",
-    );
+    expect(FP20("123.456789").ln().toString()).toBe("4.81589120820374401402");
     expect(FP16("1").ln().toString()).toBe("0");
     expect(FP16("2.7182818284590452").ln().toString()).toBe(
       "0.9999999999999999",
@@ -311,12 +294,15 @@ describe("Arithmetic", () => {
 
   test("static wrappers", () => {
     expect(FixedPrecision.abs("-2.5").toString()).toBe("2.5");
-    expect(FixedPrecision.add(FP8("1.5"), FP6("2.25")).toString()).toBe("3.75");
-    expect(FixedPrecision.sub(FP16("5"), FP6("2.5")).toString()).toBe("2.5");
-    expect(FixedPrecision.mul(FP8("2.5"), FP4("4")).toString()).toBe("10");
-    expect(FixedPrecision.div(FP20("7.5"), FP8("2.5")).toString()).toBe("3");
-    expect(FixedPrecision.mod(FP4("10"), FP20("3")).toString()).toBe("1");
+    expect(FixedPrecision.add(FP8("1.5"), FP8("2.25")).toString()).toBe("3.75");
+    expect(FixedPrecision.sub(FP16("5"), FP16("2.5")).toString()).toBe("2.5");
+    expect(FixedPrecision.mul(FP8("2.5"), FP8("4")).toString()).toBe("10");
+    expect(FixedPrecision.div(FP20("7.5"), FP20("2.5")).toString()).toBe("3");
+    expect(FixedPrecision.mod(FP4("10"), FP4("3")).toString()).toBe("1");
     expect(FixedPrecision.pow(FP16("2"), 3).toString()).toBe("8");
+    expect(() => FixedPrecision.add(FP8("1.5"), FP6("2.25"))).toThrow(
+      "Cannot operate on different precisions",
+    );
   });
 
   test("static rounding wrappers", () => {
@@ -329,29 +315,29 @@ describe("Arithmetic", () => {
 
   test("static log wrappers", () => {
     expect(FixedPrecision.ln(FP20("1")).toString()).toBe("0");
-    expect(FixedPrecision.log(FP8("8"), FP16("2")).toString()).toBe("3");
+    expect(FixedPrecision.log(FP8("8"), FP8("2")).toString()).toBe("3");
     expect(FixedPrecision.log2(FP8("8")).toString()).toBe("3");
     expect(FixedPrecision.log10(FP20("100")).toString()).toBe("2");
   });
 
   test("static clamp", () => {
-    expect(FixedPrecision.clamp(FP4("12"), FP8("0"), FP20("10")).toString()).toBe("10");
+    expect(
+      FixedPrecision.clamp(FP4("12"), FP4("0"), FP4("10")).toString(),
+    ).toBe("10");
   });
 
   test("static clamp validates min <= max", () => {
-    expect(() =>
-      FixedPrecision.clamp(FP8("5"), FP8("10"), FP8("0")),
-    ).toThrow("min must be less than or equal to max");
+    expect(() => FixedPrecision.clamp(FP8("5"), FP8("10"), FP8("0"))).toThrow(
+      "min must be less than or equal to max",
+    );
   });
 
   test("static exp", () => {
     fixedconfig.configure({ places: 20, roundingMode: 4 });
     try {
-      expect(  FixedPrecision.exp(2).toNumber()).toBeCloseTo(Math.exp(2), 14);
-      expect(  FixedPrecision.exp(2).toString()).toBe(
-        "7.38905609893065022723",
-      );
-      expect(  FixedPrecision.exp("2").toString()).toBe(
+      expect(FixedPrecision.exp(2).toNumber()).toBeCloseTo(Math.exp(2), 14);
+      expect(FixedPrecision.exp(2).toString()).toBe("7.38905609893065022723");
+      expect(FixedPrecision.exp("2").toString()).toBe(
         FP20("2").exp().toString(),
       );
     } finally {
@@ -361,8 +347,9 @@ describe("Arithmetic", () => {
 
   test("chaining", () => {
     expect(FP8(10.5).add(5).div(3).toNumber()).toBeCloseTo((10.5 + 5) / 3);
-    expect( FP8(100).add("50").sub(25).mul(2).div("5").toNumber(),
-    ).toBeCloseTo(((100 + 50 - 25) * 2) / 5);
+    expect(FP8(100).add("50").sub(25).mul(2).div("5").toNumber()).toBeCloseTo(
+      ((100 + 50 - 25) * 2) / 5,
+    );
     expect(FP8(10.5).add(5).gt(15)).toBe(true);
     expect(FP8(10).mul(2).eq(20)).toBe(true);
   });

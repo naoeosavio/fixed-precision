@@ -1,10 +1,9 @@
 import { describe, expect, test } from "vitest";
 
 import FixedPrecision, {
-  type FixedPrecisionConfig,
   fixedconfig,
   type RoundingMode,
-} from "../src/index";
+} from "../src/FixedPrecision";
 
 describe("Configuration", () => {
   test("configure places", () => {

@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 
-import FixedPrecision from "../src/index";
+import FixedPrecision from "../src/FixedPrecision";
 
 const FP = FixedPrecision.create({ places: 0 });
 const FP2 = FixedPrecision.create({ places: 2, roundingMode: 4 });
@@ -130,9 +130,9 @@ describe("Numeric", () => {
     expect(FP4("9.5").toString(false)).toBe("9.5000");
     expect(FP4("0.0099").toString()).toBe("0.0099");
     expect(FP4("0").toString()).toBe("0");
-    expect(
-      FP2("3.141592653589793238462643383279502884197169").toString(),
-    ).toBe("3.14");
+    expect(FP2("3.141592653589793238462643383279502884197169").toString()).toBe(
+      "3.14",
+    );
   });
 
   test("parse", () => {

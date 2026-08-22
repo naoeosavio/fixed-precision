@@ -1,7 +1,6 @@
 import { describe, expect, test } from "vitest";
-
-import FixedPrecision from "../src/index";
-import type { RoundingMode } from "../src/index";
+import type { RoundingMode } from "../src/core/construction/types";
+import FixedPrecision from "../src/FixedPrecision";
 
 const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
 
