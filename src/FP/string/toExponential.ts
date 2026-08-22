@@ -5,8 +5,8 @@ import type {
 import { resolveContext } from "../../core/construction/value";
 import { round } from "../arithmetic/round";
 import { shiftedBy } from "../arithmetic/shiftedBy";
+import { stringify } from "./stringify";
 import { toFixed } from "./toFixed";
-import { toString } from "./toString";
 
 export function toExponential(
   value: FixedPrecisionOperand,
@@ -16,7 +16,7 @@ export function toExponential(
   const ctx = resolveContext([value]);
   const effDp = dp ?? ctx.places;
   const rounded = round(value, effDp, rm);
-  const [int = "", frac = ""] = toString(rounded).split(".");
+  const [int = "", frac = ""] = stringify(rounded).split(".");
   const absInt = int.replace(/^-/, "");
   const exp =
     absInt.length > 1

@@ -9,8 +9,8 @@ import {
   resolveContext,
   toScaled,
 } from "../../core/construction/value";
+import { stringify } from "./stringify";
 import { toFixed } from "./toFixed";
-import { toString } from "./toString";
 
 export function toPrecision(
   value: FixedPrecisionOperand,
@@ -46,7 +46,7 @@ export function toPrecision(
     return formatted;
   }
 
-  return toString(fromRawWithContext(raw, ctx))
+  return stringify(fromRawWithContext(raw, ctx))
     .replace(/(\.\d*?)0+$/, "$1")
     .replace(/\.$/, "");
 }

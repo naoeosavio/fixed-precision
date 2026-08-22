@@ -3,12 +3,12 @@ import type {
   RoundingMode,
 } from "../../core/construction/types";
 import { scale } from "../arithmetic/scale";
-import { toString } from "./toString";
+import { stringify } from "./stringify";
 
 export function toFixed(
   value: FixedPrecisionOperand,
   places = 0,
   rm?: RoundingMode,
 ): string {
-  return toString(scale(value, places, rm), false);
+  return stringify(scale(value, places, rm), false);
 }
