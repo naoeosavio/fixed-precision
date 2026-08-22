@@ -16,12 +16,16 @@ import {
   combinations_value,
   factorial_value,
   permutations_value,
-} from "./core/combinatorics/index";
+} from "./core/combinatorics";
 import {
+  type Comparison,
   configureContext,
   FactoryContext,
+  type FixedPrecisionConfig,
+  type FPContext,
   makeContext,
-} from "./core/construction/context";
+  type RoundingMode,
+} from "./core/construction";
 import { fraction_value } from "./core/fractions/fraction";
 import { get_denominator } from "./core/fractions/getDenominator";
 import { get_numerator } from "./core/fractions/getNumerator";
@@ -33,7 +37,7 @@ import {
   logicalNotValue,
   logicalOrValues,
   logicalXorValues,
-} from "./core/logical/index";
+} from "./core/logical";
 import { cross_product } from "./core/matrix/crossProduct";
 import { dot_product } from "./core/matrix/dotProduct";
 import { from_number_with_ctx } from "./core/numeric/fromNumber";
@@ -45,7 +49,7 @@ import {
   greaterThanValue,
   lessThanOrEqualValue,
   lessThanValue,
-} from "./core/relational/index";
+} from "./core/relational";
 import { from_string_with_ctx } from "./core/string/fromString";
 import { to_base_with_ctx } from "./core/string/toBase";
 import { to_string_with_ctx } from "./core/string/toString";
@@ -75,44 +79,16 @@ import {
   sinh_value,
   tan_value,
   tanh_value,
-} from "./core/trigonometry/index";
+} from "./core/trigonometry";
 
-export type RoundingMode = 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
-export type Comparison = -1 | 0 | 1;
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
 
-export type FPContext = {
-  places: number;
-  roundingMode: RoundingMode;
-  SCALE: bigint;
-  SCALENUMBER: number;
-};
-
-/**
- *  FixedPrecision Configuration System
- */
-export interface FixedPrecisionConfig {
-  /**
-   * Number of decimal places to use (0-20)
-   * @default 8
-   */
-  places: number;
-
-  /**
-   * Default rounding mode for decimal operations:
-   * 0: ROUND_UP
-   * 1: ROUND_DOWN
-   * 2: ROUND_CEIL
-   * 3: ROUND_FLOOR
-   * 4: ROUND_HALF_UP
-   * 5: ROUND_HALF_DOWN
-   * 6: ROUND_HALF_EVEN
-   * 7: ROUND_HALF_CEIL
-   * 8: ROUND_HALF_FLOOR
-   * @default 4
-   */
-  roundingMode?: RoundingMode;
-}
+export {
+  type Comparison,
+  type FixedPrecisionConfig,
+  type FPContext,
+  type RoundingMode,
+} from "./core/construction";
 
 export default class FixedPrecision {
   private value: bigint = 0n;

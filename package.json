@@ -9,8 +9,6 @@
   "files": [
     "dist",
     "src",
-    "minimal.js",
-    "minimal.d.ts",
     "README.md",
     "LICENSE"
   ],
@@ -346,16 +344,6 @@
         "default": "./dist/cross.cjs"
       }
     },
-    "./crossProduct": {
-      "import": {
-        "types": "./dist/crossProduct.d.ts",
-        "default": "./dist/crossProduct.js"
-      },
-      "require": {
-        "types": "./dist/crossProduct.d.cts",
-        "default": "./dist/crossProduct.cjs"
-      }
-    },
     "./csc": {
       "import": {
         "types": "./dist/csc.d.ts",
@@ -414,16 +402,6 @@
       "require": {
         "types": "./dist/dot.d.cts",
         "default": "./dist/dot.cjs"
-      }
-    },
-    "./dotProduct": {
-      "import": {
-        "types": "./dist/dotProduct.d.ts",
-        "default": "./dist/dotProduct.js"
-      },
-      "require": {
-        "types": "./dist/dotProduct.d.cts",
-        "default": "./dist/dotProduct.cjs"
       }
     },
     "./e": {
@@ -1106,7 +1084,7 @@
   "author": "it is not savio",
   "license": "MIT",
   "scripts": {
-    "build": "NODE_OPTIONS=--max-old-space-size=8192 tsup",
+    "build": "NODE_OPTIONS=--max-old-space-size=8192 node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
     "lint": "tsc",
     "format": "biome check --write src",
     "check:format": "biome check src",
