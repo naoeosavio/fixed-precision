@@ -3,19 +3,18 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromContextValue,
-  type RoundingMode,
+  type PlacesOptions,
 } from "../construction";
 
 export function round(
   value: FixedPrecisionOperand,
-  dp?: number,
-  rm?: RoundingMode,
+  options?: PlacesOptions,
 ): FixedPrecisionData {
   return fromContextValue(value, (raw, ctx) =>
     round_value(
       raw,
-      dp !== undefined ? dp : ctx.places,
-      rm !== undefined ? rm : ctx.roundingMode,
+      options?.places ?? ctx.places,
+      options?.roundingMode ?? ctx.roundingMode,
       ctx,
     ),
   );

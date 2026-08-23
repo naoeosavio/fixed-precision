@@ -8,12 +8,12 @@ import {
 
 export function toNumber(
   value: FixedPrecisionOperand,
-  places?: number,
+  options?: { places?: number },
 ): number {
-  if (places === undefined) {
+  if (options?.places === undefined) {
     const ctx = resolveContext([value]);
     return to_number_with_ctx(toScaled(value, ctx), ctx);
   }
 
-  return toNumber(scale(value, places));
+  return toNumber(scale(value, { places: options.places }));
 }

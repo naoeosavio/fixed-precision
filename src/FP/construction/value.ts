@@ -1,22 +1,17 @@
 import { scale_value } from "../../core/arithmetic/scale";
 import { from_number_with_ctx } from "../../core/numeric/fromNumber";
 import { from_string_with_ctx } from "../../core/string/fromString";
-import { configureContext, makeContext } from "./context";
+import { makeContext } from "./context";
 import type {
-  FixedPrecisionConfig,
   FixedPrecisionData,
   FixedPrecisionOperand,
   FPContext,
 } from "./types";
 
-let defaultContext: FPContext = makeContext(8, 4);
+const DEFAULT_CONTEXT: FPContext = Object.freeze(makeContext(8, 4));
 
 export function getDefaultContext(): FPContext {
-  return defaultContext;
-}
-
-export function configureDefaultContext(config: FixedPrecisionConfig): void {
-  defaultContext = configureContext(config, defaultContext);
+  return DEFAULT_CONTEXT;
 }
 
 export function isFixedPrecisionData(
@@ -89,7 +84,7 @@ export function resolveContext(values: FixedPrecisionOperand[]): FPContext {
       }
     }
   }
-  return best ?? defaultContext;
+  return best ?? DEFAULT_CONTEXT;
 }
 
 export function normalizeTo(

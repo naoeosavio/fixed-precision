@@ -4,18 +4,25 @@ import {
   type FixedPrecisionOperand,
   fromRawWithContext,
   makeContext,
-  type RoundingMode,
   resolveContext,
+  type ScaleOptions,
   toScaled,
 } from "../construction";
 
 export function scale(
   value: FixedPrecisionOperand,
-  places: number,
-  rm?: RoundingMode,
+  options: ScaleOptions,
 ): FixedPrecisionData {
   const ctx = resolveContext([value]);
-  const effectiveRm = rm ?? ctx.roundingMode;
-  const nextValue = scale_value(toScaled(value, ctx), places, effectiveRm, ctx);
-  return fromRawWithContext(nextValue, makeContext(places, effectiveRm));
+  const effectiveRm = options.roundingMode ?? ctx.roundingMode;
+  const nextValue = scale_value(
+    toScaled(value, ctx),
+    options.places,
+    effectiveRm,
+    ctx,
+  );
+  return fromRawWithContext(
+    nextValue,
+    makeContext(options.places, effectiveRm),
+  );
 }

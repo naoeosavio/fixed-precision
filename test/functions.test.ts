@@ -32,6 +32,7 @@ import { significantDigits } from "../src/FP/arithmetic/significantDigits";
 import { sqrt } from "../src/FP/arithmetic/sqrt";
 import { square } from "../src/FP/arithmetic/square";
 import { subtract } from "../src/FP/arithmetic/subtract";
+import { toNearest } from "../src/FP/arithmetic/toNearest";
 import { trunc } from "../src/FP/arithmetic/trunc";
 import { combinations } from "../src/FP/combinatorics/combinations";
 import { factorial } from "../src/FP/combinatorics/factorial";
@@ -42,6 +43,7 @@ import { pi } from "../src/FP/constants/pi";
 import { sqrt2 } from "../src/FP/constants/sqrt2";
 import { createFactory } from "../src/FP/construction/createFactory";
 import { dataOf } from "../src/FP/construction/dataOf";
+import { getDefaultContext } from "../src/FP/construction/value";
 import { fraction } from "../src/FP/fractions/fraction";
 import { getDenominator } from "../src/FP/fractions/getDenominator";
 import { getNumerator } from "../src/FP/fractions/getNumerator";
@@ -121,7 +123,7 @@ describe("functions: arithmetic", () => {
 
   test("divide keeps BigInt precision", () => {
     expect(stringify(divide("10", "4"))).toBe("2.5");
-    expect(toFixed(divide("1", "3"), 8)).toBe("0.33333333");
+    expect(toFixed(divide("1", "3"), { places: 8 })).toBe("0.33333333");
   });
 
   test("functions are lenient across different precisions", () => {
@@ -156,8 +158,12 @@ describe("functions: factories", () => {
   test("createFactory applies the configured rounding mode", () => {
     const FP3 = createFactory({ places: 3, roundingMode: 6 });
 
-    expect(stringify(scale(FP3("1.005"), 2, 6))).toBe("1");
-    expect(stringify(scale(FP3("1.015"), 2, 6))).toBe("1.02");
+    expect(stringify(scale(FP3("1.005"), { places: 2, roundingMode: 6 }))).toBe(
+      "1",
+    );
+    expect(stringify(scale(FP3("1.015"), { places: 2, roundingMode: 6 }))).toBe(
+      "1.02",
+    );
   });
 
   test("createFactory is lenient when mixed with other precisions", () => {
@@ -190,7 +196,7 @@ describe("functions: arithmetic — powers and logs", () => {
 
   test("sqrt and cbrt", () => {
     expect(stringify(sqrt("16"))).toBe("4");
-    expect(stringify(round(sqrt("2"), 6))).toBe("1.414214");
+    expect(stringify(round(sqrt("2"), { places: 6 }))).toBe("1.414214");
     expect(stringify(cbrt("27"))).toBe("3");
   });
 
@@ -203,12 +209,14 @@ describe("functions: arithmetic — powers and logs", () => {
   });
 
   test("exp matches the e constant", () => {
-    expect(toFixed(exp("1"), 8)).toBe(FixedPrecision.exp("1").toFixed(8));
+    expect(toFixed(exp("1"), { places: 8 })).toBe(
+      FixedPrecision.exp("1").toFixed(8),
+    );
   });
 
   test("logarithms match the class API", () => {
     expect(stringify(naturalLog("1"))).toBe("0");
-    expect(stringify(log("8", "2"))).toBe("3");
+    expect(stringify(log("8", { base: "2" }))).toBe("3");
     expect(stringify(log2("8"))).toBe("3");
     expect(stringify(log10("1000"))).toBe("3");
   });
@@ -216,7 +224,7 @@ describe("functions: arithmetic — powers and logs", () => {
 
 describe("functions: arithmetic — rounding and scaling", () => {
   test("round, ceil, floor and trunc", () => {
-    expect(stringify(round("2.567", 2))).toBe("2.57");
+    expect(stringify(round("2.567", { places: 2 }))).toBe("2.57");
     expect(stringify(ceil("1.2"))).toBe("2");
     expect(stringify(floor("1.8"))).toBe("1");
     expect(stringify(trunc("1.9"))).toBe("1");
@@ -224,8 +232,8 @@ describe("functions: arithmetic — rounding and scaling", () => {
   });
 
   test("scale", () => {
-    expect(stringify(scale("1.005", 2))).toBe("1.01");
-    expect(stringify(scale("1.23456789", 2))).toBe("1.23");
+    expect(stringify(scale("1.005", { places: 2 }))).toBe("1.01");
+    expect(stringify(scale("1.23456789", { places: 2 }))).toBe("1.23");
   });
 
   test("shiftedBy, neg, abs and sign", () => {
@@ -296,7 +304,9 @@ describe("functions: trigonometry", () => {
     expect(stringify(asin("0"))).toBe("0");
     expect(stringify(acos("1"))).toBe("0");
     expect(stringify(atan("0"))).toBe("0");
-    expect(stringify(round(atan2("1", "1"), 8))).toBe("0.78539816");
+    expect(stringify(round(atan2("1", "1"), { places: 8 }))).toBe(
+      "0.78539816",
+    );
     expect(stringify(acot("1"))).toBe(FixedPrecision.acot("1").toString());
     expect(stringify(asec("1"))).toBe("0");
     expect(stringify(acsc("1"))).toBe(FixedPrecision.acsc("1").toString());
@@ -407,11 +417,11 @@ describe("functions: string", () => {
   });
 
   test("toFixed, toExponential and toPrecision", () => {
-    expect(toFixed("123.456", 2)).toBe("123.46");
-    expect(toExponential("123456", 2)).toBe(
+    expect(toFixed("123.456", { places: 2 })).toBe("123.46");
+    expect(toExponential("123456", { places: 2 })).toBe(
       new FixedPrecision("123456").toExponential(2),
     );
-    expect(toPrecision("12345", 3)).toBe(
+    expect(toPrecision("12345", { sd: 3 })).toBe(
       new FixedPrecision("12345").toPrecision(3),
     );
   });
@@ -426,7 +436,7 @@ describe("functions: constants and random", () => {
   });
 
   test("random returns a value within the requested scale", () => {
-    const value = random(5);
+    const value = random({ places: 5 });
     expect(value.places).toBe(5);
     expect(greaterThanOrEqual(value, "0")).toBe(true);
     expect(lessThan(value, "1")).toBe(true);
@@ -469,5 +479,85 @@ describe("functions: dataOf", () => {
   test("data passes through unchanged", () => {
     const data = createFactory({ places: 4 })("1.5");
     expect(dataOf(data)).toEqual(data);
+  });
+});
+
+describe("functions: options object", () => {
+  test("round uses places and roundingMode from options", () => {
+    expect(stringify(round("2.567", { places: 2 }))).toBe("2.57");
+    expect(stringify(round("2.567", { places: 1, roundingMode: 1 }))).toBe(
+      "2.5",
+    );
+    expect(stringify(round("2.567"))).toBe(stringify(round("2.567", {})));
+  });
+
+  test("scale requires places and accepts roundingMode", () => {
+    expect(scale("1.23456789", { places: 2 }).places).toBe(2);
+    expect(scale("9.99", { places: 0, roundingMode: 4 }).value).toBe(10n);
+  });
+
+  test("toNearest accepts optional roundingMode", () => {
+    expect(toNearest("3.14159", "0.01").value).toBe(314000000n);
+    expect(
+      toNearest("3.14159", "0.01", { roundingMode: 4 }).value,
+    ).toBe(toNearest("3.14159", "0.01").value);
+  });
+
+  test("log takes base only via options", () => {
+    expect(log("8", { base: "2" }).value).toBe(300000000n);
+    const two = createFactory({ places: 8 })("2");
+    expect(log("8", { base: two }).value).toBe(300000000n);
+    expect(log("8").value).toBe(naturalLog("8").value);
+  });
+
+  test("toFixed takes places and roundingMode via options", () => {
+    expect(toFixed("123.456", { places: 2 })).toBe("123.46");
+    expect(toFixed("123.456")).toBe(toFixed("123.456", {}));
+  });
+
+  test("toExponential takes places via options", () => {
+    expect(toExponential("123456", { places: 2 })).toBe(
+      new FixedPrecision("123456").toExponential(2),
+    );
+  });
+
+  test("toPrecision requires sd and accepts roundingMode", () => {
+    expect(toPrecision("12345", { sd: 3 })).toBe(
+      new FixedPrecision("12345").toPrecision(3),
+    );
+    expect(toPrecision("12345", { sd: 3, roundingMode: 1 })).toBe(
+      new FixedPrecision("12345").toPrecision(3, 1),
+    );
+  });
+
+  test("toBase keeps base positional and sd/roundingMode in options", () => {
+    expect(toBase("255", 16, { sd: 8 })).toBe(new FixedPrecision("255").toHex());
+    expect(toBase("255", 16, {})).toBe(toBase("255", 16));
+  });
+
+  test("toNumber takes places via options", () => {
+    const data = createFactory({ places: 4 })("1.23456789");
+    expect(toNumber(data)).toBeCloseTo(1.2346);
+    expect(toNumber(data, { places: 2 })).toBeCloseTo(1.23);
+    expect(toNumber("1.5", { places: 3 })).toBe(1.5);
+  });
+
+  test("fraction takes maxDen via options", () => {
+    const [n, d] = fraction("0.125", { maxDen: "100" });
+    expect([n.value, d.value]).toEqual([100000000n, 800000000n]);
+  });
+
+  test("random takes places via options", () => {
+    expect(random({ places: 3 }).places).toBe(3);
+    expect(random().places).toBe(getDefaultContext().places);
+    expect(random({}).places).toBe(getDefaultContext().places);
+  });
+
+  test("default context is frozen and stable", () => {
+    const ctx = getDefaultContext();
+    expect(Object.isFrozen(ctx)).toBe(true);
+    expect(ctx.places).toBe(8);
+    expect(ctx.roundingMode).toBe(4);
+    expect(getDefaultContext()).toBe(ctx);
   });
 });

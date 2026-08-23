@@ -3,7 +3,7 @@ import { shifted_by_value } from "../../core/arithmetic/shiftedBy";
 import {
   type FixedPrecisionOperand,
   fromRawWithContext,
-  type RoundingMode,
+  type RequiredSdOptions,
   resolveContext,
   toScaled,
 } from "../construction";
@@ -12,15 +12,15 @@ import { toFixed } from "./toFixed";
 
 export function toPrecision(
   value: FixedPrecisionOperand,
-  sd: number,
-  rm?: RoundingMode,
+  options: RequiredSdOptions,
 ): string {
   const ctx = resolveContext([value]);
+  const { sd, roundingMode: mode } = options;
   const rawValue = toScaled(value, ctx);
   if (rawValue === 0n) {
     return "0";
   }
-  const raw = precision_value(rawValue, sd, rm ?? ctx.roundingMode, ctx);
+  const raw = precision_value(rawValue, sd, mode ?? ctx.roundingMode, ctx);
   if (raw === 0n) return "0";
 
   const absRaw = raw < 0n ? -raw : raw;
@@ -38,7 +38,7 @@ export function toPrecision(
   if (exp < -6 || exp >= sd) {
     const mantissa = fromRawWithContext(shifted_by_value(raw, -exp), ctx);
     const dp = sd - 1;
-    let formatted = toFixed(mantissa, dp, rm);
+    let formatted = toFixed(mantissa, { places: dp, roundingMode: mode });
     const expSign = exp > 0 ? "+" : "";
     formatted += `e${expSign}${exp}`;
     return formatted;

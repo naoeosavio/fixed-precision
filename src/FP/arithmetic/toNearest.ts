@@ -11,7 +11,7 @@ import {
 export function toNearest(
   value: FixedPrecisionOperand,
   increment: FixedPrecisionOperand,
-  rm?: RoundingMode,
+  options?: { roundingMode?: RoundingMode },
 ): FixedPrecisionData {
   const ctx = resolveContext([value, increment]);
   const stepRaw = toScaled(increment, ctx);
@@ -21,8 +21,11 @@ export function toNearest(
   }
 
   return fromRawWithContext(
-    round_to_scale_value(toScaled(value, ctx), step, rm ?? ctx.roundingMode) *
+    round_to_scale_value(
+      toScaled(value, ctx),
       step,
+      options?.roundingMode ?? ctx.roundingMode,
+    ) * step,
     ctx,
   );
 }

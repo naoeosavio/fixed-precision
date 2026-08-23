@@ -5,9 +5,9 @@ import {
   makeContext,
 } from "../construction";
 
-export function random(decimalPlaces?: number): FixedPrecisionData {
+export function random(options?: { places?: number }): FixedPrecisionData {
   const defaultCtx = getDefaultContext();
-  const dec = decimalPlaces ?? defaultCtx.places;
+  const dec = options?.places ?? defaultCtx.places;
   let rand = 0n;
   for (let i = 0; i < dec; i++) {
     rand = rand * 10n + BigInt(Math.floor(Math.random() * 10));

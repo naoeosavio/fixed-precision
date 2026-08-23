@@ -26,3 +26,31 @@ export type FixedPrecisionOperand =
   | number
   | bigint
   | FixedPrecisionData;
+
+export type PlacesOptions = {
+  places?: number;
+  roundingMode?: RoundingMode;
+};
+
+export type ScaleOptions = {
+  places: number;
+  roundingMode?: RoundingMode;
+};
+
+export type SdOptions = {
+  sd?: number;
+  roundingMode?: RoundingMode;
+};
+
+export type RequiredSdOptions = {
+  sd: number;
+  roundingMode?: RoundingMode;
+};
+
+export type BaseOptions = {
+  base?: FixedPrecisionOperand;
+};
+
+export type MaxDenOptions = {
+  maxDen?: FixedPrecisionOperand;
+};

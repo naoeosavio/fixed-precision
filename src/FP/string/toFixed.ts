@@ -1,11 +1,19 @@
 import { scale } from "../arithmetic/scale";
-import type { FixedPrecisionOperand, RoundingMode } from "../construction";
+import {
+  type FixedPrecisionOperand,
+  type PlacesOptions,
+} from "../construction";
 import { stringify } from "./stringify";
 
 export function toFixed(
   value: FixedPrecisionOperand,
-  places = 0,
-  rm?: RoundingMode,
+  options?: PlacesOptions,
 ): string {
-  return stringify(scale(value, places, rm), false);
+  return stringify(
+    scale(value, {
+      places: options?.places ?? 0,
+      roundingMode: options?.roundingMode,
+    }),
+    false,
+  );
 }

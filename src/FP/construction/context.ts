@@ -28,25 +28,6 @@ function assertRoundingMode(value: number): asserts value is RoundingMode {
   }
 }
 
-export function configureContext(
-  config: FixedPrecisionConfig,
-  current: FPContext,
-): FPContext {
-  let { places, roundingMode } = current;
-
-  if (config.places !== undefined) {
-    assertPlaces(config.places);
-    places = config.places;
-  }
-
-  if (config.roundingMode !== undefined) {
-    assertRoundingMode(config.roundingMode);
-    roundingMode = config.roundingMode;
-  }
-
-  return makeContext(places, roundingMode);
-}
-
 export function FactoryContext(config: FixedPrecisionConfig): FPContext {
   if (config.places === undefined) {
     throw new Error("Decimal places must be specified in factory config");
