@@ -1,14 +1,12 @@
 import { scale_value } from "../../core/arithmetic/scale";
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
+import { fraction_value } from "../../core/fractions/fraction";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
-import { fraction_value } from "../../core/fractions/fraction";
+} from "../construction";
 
 export function fraction(
   value: FixedPrecisionOperand,

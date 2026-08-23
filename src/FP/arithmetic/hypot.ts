@@ -1,14 +1,12 @@
 import { sqrt_value } from "../../core/arithmetic/sqrt";
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
 import {
   construct,
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 
 export function hypot(
   value?: FixedPrecisionOperand | FixedPrecisionOperand[],

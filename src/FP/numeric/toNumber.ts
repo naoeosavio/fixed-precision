@@ -1,7 +1,10 @@
-import type { FixedPrecisionOperand } from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import { to_number_with_ctx } from "../../core/numeric/toNumber";
 import { scale } from "../arithmetic/scale";
+import {
+  type FixedPrecisionOperand,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function toNumber(
   value: FixedPrecisionOperand,

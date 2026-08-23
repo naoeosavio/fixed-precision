@@ -1,5 +1,4 @@
-import type { FixedPrecisionData } from "../../core/construction/types";
-import { construct } from "../../core/construction/value";
+import { construct, type FixedPrecisionData } from "../construction";
 
 export function fromNumber(value: number): FixedPrecisionData {
   return construct(value);

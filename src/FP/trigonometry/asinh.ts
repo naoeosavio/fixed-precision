@@ -1,9 +1,9 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
-import { fromContextValue } from "../../core/construction/value";
 import { asinh_value } from "../../core/trigonometry/asinh";
+import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
+  fromContextValue,
+} from "../construction";
 
 export function asinh(value: FixedPrecisionOperand): FixedPrecisionData {
   return fromContextValue(value, asinh_value);

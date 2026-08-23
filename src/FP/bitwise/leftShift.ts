@@ -1,8 +1,8 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
-import { fromContextValue } from "../../core/construction/value";
+import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
+  fromContextValue,
+} from "../construction";
 
 export function leftShift(
   value: FixedPrecisionOperand,

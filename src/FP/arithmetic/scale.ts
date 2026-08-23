@@ -1,15 +1,13 @@
 import { scale_value } from "../../core/arithmetic/scale";
-import { makeContext } from "../../core/construction/context";
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-  RoundingMode,
-} from "../../core/construction/types";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
+  makeContext,
+  type RoundingMode,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 
 export function scale(
   value: FixedPrecisionOperand,

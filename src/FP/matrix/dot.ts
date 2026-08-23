@@ -1,13 +1,11 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
+import { dot_product } from "../../core/matrix/dotProduct";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
-import { dot_product } from "../../core/matrix/dotProduct";
+} from "../construction";
 
 export function dot(
   a: FixedPrecisionOperand[],

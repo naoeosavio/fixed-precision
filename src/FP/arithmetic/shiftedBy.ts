@@ -1,13 +1,11 @@
 import { shifted_by_value } from "../../core/arithmetic/shiftedBy";
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 
 export function shiftedBy(
   value: FixedPrecisionOperand,

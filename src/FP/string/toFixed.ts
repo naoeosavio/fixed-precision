@@ -1,8 +1,5 @@
-import type {
-  FixedPrecisionOperand,
-  RoundingMode,
-} from "../../core/construction/types";
 import { scale } from "../arithmetic/scale";
+import type { FixedPrecisionOperand, RoundingMode } from "../construction";
 import { stringify } from "./stringify";
 
 export function toFixed(

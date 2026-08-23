@@ -1,11 +1,11 @@
 import { factorial_value } from "../../core/combinatorics/factorial";
-import type { FixedPrecisionData } from "../../core/construction/types";
 import {
+  type FixedPrecisionData,
   fromRawWithContext,
   isFixedPrecisionData,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 
 export function factorial(n: number | FixedPrecisionData): FixedPrecisionData {
   const ctx = resolveContext(isFixedPrecisionData(n) ? [n] : []);

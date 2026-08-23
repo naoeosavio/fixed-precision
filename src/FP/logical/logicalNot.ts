@@ -1,6 +1,9 @@
-import type { FixedPrecisionOperand } from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import { logicalNotValue } from "../../core/logical/logicalNot";
+import {
+  type FixedPrecisionOperand,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function logicalNot(value: FixedPrecisionOperand): boolean {
   const ctx = resolveContext([value]);

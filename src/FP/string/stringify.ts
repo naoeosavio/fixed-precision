@@ -1,6 +1,9 @@
-import type { FixedPrecisionOperand } from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import { to_string_with_ctx } from "../../core/string/toString";
+import {
+  type FixedPrecisionOperand,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function stringify(
   value: FixedPrecisionOperand,

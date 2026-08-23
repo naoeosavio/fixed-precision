@@ -1,13 +1,11 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
+import { cross_product } from "../../core/matrix/crossProduct";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
-import { cross_product } from "../../core/matrix/crossProduct";
+} from "../construction";
 
 export function cross(
   a: FixedPrecisionOperand[],

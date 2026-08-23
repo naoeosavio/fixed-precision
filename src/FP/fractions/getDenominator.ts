@@ -1,13 +1,11 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
+import { get_denominator } from "../../core/fractions/getDenominator";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
-import { get_denominator } from "../../core/fractions/getDenominator";
+} from "../construction";
 
 export function getDenominator(
   value: FixedPrecisionOperand,

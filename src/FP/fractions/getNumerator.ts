@@ -1,13 +1,11 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
+import { get_numerator } from "../../core/fractions/getNumerator";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
-import { get_numerator } from "../../core/fractions/getNumerator";
+} from "../construction";
 
 export function getNumerator(value: FixedPrecisionOperand): FixedPrecisionData {
   const ctx = resolveContext([value]);

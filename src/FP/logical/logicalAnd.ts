@@ -1,6 +1,9 @@
-import type { FixedPrecisionOperand } from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import { logicalAndValues } from "../../core/logical/logicalAnd";
+import {
+  type FixedPrecisionOperand,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function logicalAnd(
   left: FixedPrecisionOperand,

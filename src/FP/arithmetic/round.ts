@@ -1,10 +1,10 @@
 import { round_value } from "../../core/arithmetic/round";
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-  RoundingMode,
-} from "../../core/construction/types";
-import { fromContextValue } from "../../core/construction/value";
+import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
+  fromContextValue,
+  type RoundingMode,
+} from "../construction";
 
 export function round(
   value: FixedPrecisionOperand,

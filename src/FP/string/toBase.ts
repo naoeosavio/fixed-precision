@@ -1,9 +1,10 @@
-import type {
-  FixedPrecisionOperand,
-  RoundingMode,
-} from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import { to_base_with_ctx } from "../../core/string/toBase";
+import {
+  type FixedPrecisionOperand,
+  type RoundingMode,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function toBase(
   value: FixedPrecisionOperand,

@@ -1,9 +1,6 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import type FixedPrecision from "../../FixedPrecision";
+import type { FixedPrecisionData, FixedPrecisionOperand } from "./types";
+import { resolveContext, toScaled } from "./value";
 
 export function dataOf(
   value: FixedPrecisionOperand | FixedPrecision,

@@ -1,13 +1,11 @@
 import { log_value } from "../../core/arithmetic/log";
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 import { naturalLog } from "./naturalLog";
 
 export function log(

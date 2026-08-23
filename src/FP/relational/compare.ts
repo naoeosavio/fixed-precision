@@ -1,9 +1,10 @@
-import type {
-  Comparison,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import { compareValues } from "../../core/relational/compare";
+import {
+  type Comparison,
+  type FixedPrecisionOperand,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function compare(
   value: FixedPrecisionOperand,

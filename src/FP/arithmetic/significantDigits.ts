@@ -1,4 +1,4 @@
-import type { FixedPrecisionOperand } from "../../core/construction/types";
+import type { FixedPrecisionOperand } from "../construction";
 import { precision } from "./precision";
 
 export function significantDigits(

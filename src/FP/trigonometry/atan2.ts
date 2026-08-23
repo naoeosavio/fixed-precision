@@ -1,13 +1,11 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
+import { atan2_value } from "../../core/trigonometry/atan2";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
-import { atan2_value } from "../../core/trigonometry/atan2";
+} from "../construction";
 
 export function atan2(
   y: FixedPrecisionOperand,

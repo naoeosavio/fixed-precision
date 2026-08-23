@@ -1,9 +1,9 @@
-import { makeContext } from "../../core/construction/context";
-import type { FixedPrecisionData } from "../../core/construction/types";
 import {
+  type FixedPrecisionData,
   fromRawWithContext,
   getDefaultContext,
-} from "../../core/construction/value";
+  makeContext,
+} from "../construction";
 
 export function random(decimalPlaces?: number): FixedPrecisionData {
   const defaultCtx = getDefaultContext();

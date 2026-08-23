@@ -1,14 +1,12 @@
 import { precision_value } from "../../core/arithmetic/precision";
 import { shifted_by_value } from "../../core/arithmetic/shiftedBy";
-import type {
-  FixedPrecisionOperand,
-  RoundingMode,
-} from "../../core/construction/types";
 import {
+  type FixedPrecisionOperand,
   fromRawWithContext,
+  type RoundingMode,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 import { stringify } from "./stringify";
 import { toFixed } from "./toFixed";
 

@@ -1,6 +1,9 @@
-import type { FixedPrecisionOperand } from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
 import { lessThanOrEqualValue } from "../../core/relational/lessThanOrEqual";
+import {
+  type FixedPrecisionOperand,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function lessThanOrEqual(
   left: FixedPrecisionOperand,

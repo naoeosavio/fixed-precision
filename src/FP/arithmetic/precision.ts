@@ -1,6 +1,9 @@
 import { significant_digits_value } from "../../core/arithmetic/significantDigits";
-import type { FixedPrecisionOperand } from "../../core/construction/types";
-import { resolveContext, toScaled } from "../../core/construction/value";
+import {
+  type FixedPrecisionOperand,
+  resolveContext,
+  toScaled,
+} from "../construction";
 
 export function precision(
   value: FixedPrecisionOperand,

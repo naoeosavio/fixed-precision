@@ -1,14 +1,12 @@
 import { round_to_scale_value } from "../../core/arithmetic/roundToScale";
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-  RoundingMode,
-} from "../../core/construction/types";
 import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
+  type RoundingMode,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 
 export function toNearest(
   value: FixedPrecisionOperand,

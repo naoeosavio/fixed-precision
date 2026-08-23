@@ -1,13 +1,11 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
 import {
   construct,
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
   fromRawWithContext,
   normalizeTo,
   resolveContext,
-} from "../../core/construction/value";
+} from "../construction";
 
 export function sum(
   value: FixedPrecisionOperand | FixedPrecisionOperand[],

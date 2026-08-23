@@ -1,10 +1,10 @@
-import { FactoryContext } from "../../core/construction/context";
+import { FactoryContext } from "./context";
 import type {
   FixedPrecisionConfig,
   FixedPrecisionData,
   FixedPrecisionOperand,
-} from "../../core/construction/types";
-import { construct } from "../../core/construction/value";
+} from "./types";
+import { construct } from "./value";
 
 export function createFactory(
   config: FixedPrecisionConfig,

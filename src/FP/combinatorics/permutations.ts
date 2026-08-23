@@ -1,11 +1,11 @@
 import { permutations_value } from "../../core/combinatorics/permutations";
-import type { FixedPrecisionData } from "../../core/construction/types";
 import {
+  type FixedPrecisionData,
   fromRawWithContext,
   isFixedPrecisionData,
   resolveContext,
   toScaled,
-} from "../../core/construction/value";
+} from "../construction";
 
 export function permutations(
   n: number | FixedPrecisionData,

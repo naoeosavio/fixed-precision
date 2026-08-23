@@ -1,10 +1,10 @@
-import type { FixedPrecisionOperand } from "../../core/construction/types";
+import { compareValues } from "../../core/relational/compare";
 import {
+  type FixedPrecisionOperand,
   getDefaultContext,
   isFixedPrecisionData,
   toScaled,
-} from "../../core/construction/value";
-import { compareValues } from "../../core/relational/compare";
+} from "../construction";
 
 function signNumber(value: number): number {
   if (Number.isNaN(value)) {

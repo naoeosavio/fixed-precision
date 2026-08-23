@@ -1,8 +1,9 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
-import { normalizeTo, resolveContext } from "../../core/construction/value";
+import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
+  normalizeTo,
+  resolveContext,
+} from "../construction";
 import { lessThan } from "../relational/lessThan";
 
 export function min(

@@ -1,9 +1,9 @@
-import type {
-  FixedPrecisionData,
-  FixedPrecisionOperand,
-} from "../../core/construction/types";
-import { fromContextValue } from "../../core/construction/value";
 import { sec_value } from "../../core/trigonometry/sec";
+import {
+  type FixedPrecisionData,
+  type FixedPrecisionOperand,
+  fromContextValue,
+} from "../construction";
 
 export function sec(value: FixedPrecisionOperand): FixedPrecisionData {
   return fromContextValue(value, sec_value);

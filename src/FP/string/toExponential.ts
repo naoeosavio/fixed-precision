@@ -1,10 +1,10 @@
-import type {
-  FixedPrecisionOperand,
-  RoundingMode,
-} from "../../core/construction/types";
-import { resolveContext } from "../../core/construction/value";
 import { round } from "../arithmetic/round";
 import { shiftedBy } from "../arithmetic/shiftedBy";
+import {
+  type FixedPrecisionOperand,
+  type RoundingMode,
+  resolveContext,
+} from "../construction";
 import { stringify } from "./stringify";
 import { toFixed } from "./toFixed";
 

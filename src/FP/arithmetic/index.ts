@@ -20,6 +20,7 @@ export * from "./naturalLog";
 export * from "./neg";
 export * from "./pow";
 export * from "./precision";
+export * from "./root";
 export * from "./round";
 export * from "./scale";
 export * from "./shiftedBy";
