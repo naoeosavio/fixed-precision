@@ -19,6 +19,7 @@ Welcome to the FixedPrecision documentation! This library provides fixed-precisi
 ### Advanced Topics
 - [Raw Operations](raw-operations.md) - Operations without scaling (plus, minus, times, etc.)
 - [Precision Factories](factories.md) - Creating isolated precision contexts
+- [Functional API Design](functional-design.md) - Why the functional layer has no global context and uses `(value, options)` signatures
 - [Performance Guide](performance.md) - Performance considerations and best practices
 - [Error Handling](errors.md) - Common errors and how to handle them
 
