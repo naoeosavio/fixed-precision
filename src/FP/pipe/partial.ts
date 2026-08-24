@@ -1,4 +1,4 @@
-export function bind<A, C>(
+export function partial<A, C>(
   fn: (first: A, ...rest: any[]) => C,
   ...bound: any[]
 ): (first: A) => C {
