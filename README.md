@@ -20,7 +20,7 @@ FixedPrecision is a library for handling fixed‑precision decimal numbers in Ja
 - **Vector / matrix** — `dot`, `cross`.
 - **Fractions** — `num`, `den`, `fraction`.
 - **Bitwise operations** — `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`.
-- **Functional composition** — tree-shakeable standalone functions composed via `pipe`, `compose` and `bind` (`fixed-precision/pipe`).
+- **Functional composition** — tree-shakeable standalone functions composed via `pipe`, `compose` and `partial` (`fixed-precision/pipe`).
 - **TypeScript** — full type definitions included (`FixedPrecisionValue`, `FixedPrecisionConfig`, `RoundingMode`, `Comparison`).
 
 ## Installation
@@ -126,16 +126,16 @@ FixedPrecision.create(config: FixedPrecisionConfig): (val: FixedPrecisionValue) 
 ## Functional Composition
 
 Beyond the class API, standalone functions compose through `pipe`,
-`compose` and `bind`:
+`compose` and `partial`:
 
 ```ts
 import { add } from "fixed-precision/add";
 import { multiply, pipe, stringify } from "fixed-precision/pipe";
 
 const A = pipe(
-  bind(add, "2"),
-  bind(multiply, "3"),
-  bind(stringify),
+  partial(add, "2"),
+  partial(multiply, "3"),
+  partial(stringify),
 )("1"); // "9"
 
 // lambdas are stages too
