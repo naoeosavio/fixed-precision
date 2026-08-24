@@ -1,5 +1,3 @@
-import { bind } from "./bind";
-
 function pipeFn<A, B>(ab: (a: A) => B): (source: A) => B;
 function pipeFn<A, B, C>(ab: (a: A) => B, bc: (b: B) => C): (source: A) => C;
 function pipeFn<A, B, C, D>(
@@ -58,6 +56,7 @@ function pipeFn<A, B, C, D, E, F, G, H, I, J>(
   hi: (h: H) => I,
   ij: (i: I) => J,
 ): (source: A) => J;
+function pipeFn(...fns: Array<(input: any) => any>): (source: any) => any;
 function pipeFn(
   ...fns: Array<(input: any) => any>
 ): (source: unknown) => unknown {
@@ -65,7 +64,4 @@ function pipeFn(
     fns.reduce((accumulator, fn) => fn(accumulator), source);
 }
 
-export const pipe: typeof pipeFn & { bind: typeof bind } = Object.assign(
-  pipeFn,
-  { bind },
-);
+export const pipe: typeof pipeFn = pipeFn;

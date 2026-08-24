@@ -1,5 +1,3 @@
-import { bind } from "./bind";
-
 function composeFn<A, B>(f: (a: A) => B): (source: A) => B;
 function composeFn<A, B, C>(f: (b: B) => C, g: (a: A) => B): (source: A) => C;
 function composeFn<A, B, C, D>(
@@ -70,13 +68,12 @@ function composeFn<A, B, C, D, E, F, G, H, I, J, K>(
   n: (b: B) => C,
   o: (a: A) => B,
 ): (source: A) => K;
+function composeFn(...stages: Array<(input: any) => any>): (source: any) => any;
 function composeFn(
-  ...fns: Array<(input: any) => any>
+  ...stages: Array<(input: any) => any>
 ): (source: unknown) => unknown {
   return (source: unknown) =>
-    fns.reduceRight((accumulator, fn) => fn(accumulator), source);
+    stages.reduceRight((accumulator, stage) => stage(accumulator), source);
 }
-export const compose: typeof composeFn & { bind: typeof bind } = Object.assign(
-  composeFn,
-  { bind },
-);
+
+export const compose: typeof composeFn = composeFn;
