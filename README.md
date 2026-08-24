@@ -20,6 +20,7 @@ FixedPrecision is a library for handling fixed‑precision decimal numbers in Ja
 - **Vector / matrix** — `dot`, `cross`.
 - **Fractions** — `num`, `den`, `fraction`.
 - **Bitwise operations** — `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`.
+- **Functional composition** — tree-shakeable standalone functions composed via `pipe`, `compose` and `bind` (`fixed-precision/pipe`).
 - **TypeScript** — full type definitions included (`FixedPrecisionValue`, `FixedPrecisionConfig`, `RoundingMode`, `Comparison`).
 
 ## Installation
@@ -122,6 +123,32 @@ FixedPrecision.create(config: FixedPrecisionConfig): (val: FixedPrecisionValue) 
 - The returned function creates instances locked to that configuration.
 - `factory.format` exposes the frozen `{ places, roundingMode }` object.
 
+## Functional Composition
+
+Beyond the class API, standalone functions compose through `pipe`,
+`compose` and `bind`:
+
+```ts
+import { add } from "fixed-precision/add";
+import { multiply, pipe, stringify } from "fixed-precision/pipe";
+
+const A = pipe(
+  bind(add, "2"),
+  bind(multiply, "3"),
+  bind(stringify),
+)("1"); // "9"
+
+// lambdas are stages too
+const B = pipe(
+  (x: string) => add("2", x),
+  (data: FixedPrecisionData) => multiply("3", data),
+  stringify,
+)("1"); // "9"
+```
+
+See [Functional Design](docs/functional-design.md) and the
+[API Reference](docs/api-reference.md#functional-composition) for details.
+
 ## Documentation
 
 For more detailed guides and examples, see the [docs/](docs/) directory:
@@ -130,6 +157,7 @@ For more detailed guides and examples, see the [docs/](docs/) directory:
 |----------|--------|
 | **Getting Started** | [Quick Start](docs/quick-start.md), [Installation](docs/installation.md), [Basic Concepts](docs/concepts.md) |
 | **Core Features** | [Arithmetic](docs/arithmetic.md), [Raw Operations](docs/raw-operations.md), [Rounding & Scaling](docs/rounding-scaling.md), [Conversion](docs/conversion.md), [Minimal Build](docs/minimal.md) |
+| **Functional** | [Functional Design](docs/functional-design.md), [Composition](docs/api-reference.md#functional-composition), [Composition Examples](docs/examples/composition.md) |
 | **Configuration** | [Global Configuration](docs/configuration.md), [Precision Factories](docs/factories.md) |
 | **Advanced** | [Performance](docs/performance.md), [Error Handling](docs/errors.md), [BigInt Warning](docs/bigint-warning.md) |
 | **API** | [Full API Reference](docs/api-reference.md), [Type Definitions](docs/types.md) |

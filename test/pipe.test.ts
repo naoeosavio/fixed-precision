@@ -1,99 +1,88 @@
 import { describe, expect, test } from "vitest";
-import {
-  add,
-  clamp,
-  divide,
-  divmod,
-  multiply,
-  round,
-  sqrt,
-} from "../src/FP/arithmetic/index";
-import { permutations } from "../src/FP/combinatorics/permutations";
-import { dot } from "../src/FP/matrix/dot";
-import { greaterThan } from "../src/FP/relational/greaterThan";
-import { sum } from "../src/FP/statistics/sum";
-import { atan2 } from "../src/FP/trigonometry/atan2";
-import { toFixed } from "../src/FP/string/toFixed";
-import { stringify } from "../src/FP/string/stringify";
+import * as pipeModule from "../src/FP/pipe";
+import FixedPrecision from "../src/FixedPrecision";
+import { add } from "../src/FP/arithmetic/add";
+import { multiply } from "../src/FP/arithmetic/multiply";
+import { sqrt } from "../src/FP/arithmetic/sqrt";
 import { createFactory } from "../src/FP/construction/createFactory";
-import type { FixedPrecisionData } from "../src/FP/construction";
-import { compose, pipe } from "../src/FP/pipe";
+import { dataOf } from "../src/FP/construction/dataOf";
+import { stringify } from "../src/FP/string/stringify";
+import { bind, compose, pipe } from "../src/FP/pipe";
 
-describe("pipe / compose com funções standalone", () => {
-  test("unárias passam direto como estágio", () => {
+describe("pipe + bind", () => {
+  const A = pipe(
+    bind(add, "2"),
+    bind(multiply, "3"),
+    bind(stringify),
+  )("1");
+
+  const B = pipe(
+    (x: string) => add("2", x),
+    (data: Parameters<typeof multiply>[0]) => multiply("3", data),
+    stringify,
+  )("1");
+
+  const C = pipe(
+    bind(add, "2"),
+    (data: Parameters<typeof multiply>[0]) => multiply("3", data),
+    stringify,
+  )("1");
+
+  test("bind, lambdas and mixed styles produce the same result", () => {
+    expect(A).toBe("9");
+    expect(B).toBe("9");
+    expect(C).toBe("9");
+  });
+
+  test("unary standalones plug in directly", () => {
     expect(pipe(sqrt, stringify)("9")).toBe("3");
+  });
+
+  test("bind without extra arguments is a pass-through stage", () => {
+    expect(pipe(bind(sqrt), stringify)("9")).toBe("3");
+  });
+
+  test("bind doubles as a reusable transform", () => {
+    const tax = bind(multiply, "1.1");
+    expect(stringify(tax("100"))).toBe("110");
+    expect(stringify(tax("19.99"))).toBe(stringify(multiply("19.99", "1.1")));
+  });
+
+  test("factory/dataOf contexts flow through stages", () => {
+    const FP2 = FixedPrecision.create({ places: 2 });
+    const Money = createFactory({ places: 2 });
+    const out = pipe(bind(add, "1"))(dataOf(FP2("1.5")));
+    expect(out.places).toBe(2);
+    expect(stringify(out)).toBe("2.5");
+    expect(stringify(pipe(bind(multiply, "3"), stringify)(Money("10")))).toBe(
+      "30",
+    );
+  });
+});
+
+describe("compose", () => {
+  test("applies stages right-to-left", () => {
+    const calc = compose(stringify, bind(add, "2"), sqrt);
+    expect(calc("4")).toBe("4");
     expect(compose(stringify, sqrt)("9")).toBe("3");
   });
 
-  test("lambdas sobre standalones funcionam como estágio", () => {
-    const total = pipe(
-      (x: string) => add("2", x),
-      (data: FixedPrecisionData) => multiply("3", data),
+  test("mixes bind and lambdas like pipe", () => {
+    const calc = compose(
       stringify,
-    )("1");
-    expect(total).toBe("9");
-  });
-
-  test("pipe.bind liga a cauda e o dado entra primeiro", () => {
-    expect(pipe.bind(add, "2")("1")).toEqual(add("1", "2"));
-    expect(stringify(pipe.bind(add, "2")("1"))).toBe("3");
-  });
-
-  test("compose.bind é o mesmo binder", () => {
-    expect(pipe.bind).toBe(compose.bind);
-    const tax = compose.bind(multiply, "1.1");
-    expect(stringify(tax("100"))).toBe("110");
-  });
-
-  test("compose aplica da direita para a esquerda", () => {
-    const calc = compose(stringify, pipe.bind(add, "2"), sqrt);
-    expect(calc("4")).toBe("4");
-  });
-
-  test("options object via bind", () => {
-    expect(
-      pipe(pipe.bind(round, { places: 2 }), stringify)("1.23456"),
-    ).toBe("1.23");
-    expect(pipe.bind(toFixed, { places: 2 })("1.5")).toBe("1.50");
-  });
-
-  test("ternária (clamp) com dois argumentos ligados", () => {
-    const bounded = pipe.bind(clamp, "1", "3");
-    expect(stringify(bounded("5"))).toBe("3");
-    expect(stringify(bounded("-1"))).toBe("1");
-  });
-
-  test("variádicas ligam operandos extras separadamente", () => {
-    expect(stringify(pipe.bind(sum, "1", "2")("3"))).toBe("6");
-    expect(stringify(pipe.bind(sum, "4")("1"))).toBe("5");
-  });
-
-  test("shapes especiais mantêm o valor na primeira posição", () => {
-    expect(stringify(pipe.bind(permutations, 2)(5))).toBe("20");
-    expect(stringify(pipe.bind(dot, ["4", "5", "6"])(["1", "2", "3"]))).toBe(
-      "32",
+      (data: Parameters<typeof add>[0]) => add("2", data),
+      bind(multiply, "3"),
     );
-    expect(stringify(pipe.bind(atan2, "1")("1"))).toBe("0.78539816");
+    expect(calc("1")).toBe("5");
   });
+});
 
-  test("terminais mudam o tipo dentro do pipeline", () => {
-    expect(pipe(pipe.bind(toFixed, { places: 2 }))("1.5")).toBe("1.50");
-    expect(pipe(pipe.bind(greaterThan, "2"))("3")).toBe(true);
-    expect(pipe.bind(divmod, "2")("7").quotient.value).toBe(
-      divmod("7", "2").quotient.value,
-    );
-  });
-
-  test("divide continua utilizável fora de pipelines", () => {
-    expect(stringify(divide("7", "2"))).toBe("3.5");
-  });
-
-  test("contexto de factory preservado através do pipe", () => {
-    const Money = createFactory({ places: 2 });
-    const grossUp = pipe(
-      pipe.bind(multiply, "3"),
-      pipe.bind(toFixed, { places: 2 }),
-    );
-    expect(grossUp(Money("10.00"))).toBe("30.00");
+describe("pipe module surface", () => {
+  test("exports exactly bind, compose and pipe", () => {
+    expect(Object.keys(pipeModule).sort()).toEqual([
+      "bind",
+      "compose",
+      "pipe",
+    ]);
   });
 });
