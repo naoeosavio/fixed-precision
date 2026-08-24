@@ -16,6 +16,7 @@ Complete API documentation for FixedPrecision.
   - [Utility Methods](#utility-methods)
 - [Types](#types)
 - [Configuration](#configuration)
+- [Functional Composition](#functional-composition)
 
 ## Constructor
 
@@ -1013,3 +1014,59 @@ Each FixedPrecision instance has a context with:
 - `ctx.SCALE`: Scale factor (10^places as bigint)
 
 **Note:** These are internal properties and should not be modified directly.
+
+## Functional Composition
+
+`fixed-precision/pipe` exports exactly three functions: `pipe`, `compose`
+and `bind`.
+Pipelines consume the standalone functions (`fixed-precision/add`,
+`fixed-precision/round`, ...) directly and return plain `FixedPrecisionData`
+or whatever the terminal stage produces — no class instances, no wrappers.
+
+Three interchangeable stage styles:
+
+```ts
+import { add } from "fixed-precision/add";
+import { multiply } from "fixed-precision/multiply";
+import { sqrt, stringify } from "fixed-precision/pipe";
+import { pipe } from "fixed-precision/pipe";
+
+// A) bind(fn, ...args): binds trailing arguments, value flows first
+const A = pipe(
+  bind(add, "2"),
+  bind(multiply, "3"),
+  bind(stringify),
+)("1"); // "9"
+
+// B) raw lambdas: full control, annotate parameters for inference
+const B = pipe(
+  (x: string) => add("2", x),
+  (data: FixedPrecisionData) => multiply("3", data),
+  stringify,
+)("1"); // "9"
+
+// C) mixed — bind and lambdas compose freely
+const C = pipe(
+  bind(add, "2"),
+  (data: FixedPrecisionData) => multiply("3", data),
+  stringify,
+)("1"); // "9"
+```
+
+Unary standalones plug in as-is:
+
+```ts
+pipe(sqrt, stringify)("9"); // "3"
+```
+
+Notes:
+
+- `bind(fn)` with no extra arguments is a pass-through stage.
+- `bind(fn, ...args)` returns `(value) => fn(value, ...args)`; it doubles as a
+  reusable transform: `const tax = bind(multiply, "1.1")`.
+- Operand contexts flow through stages unchanged; factory-built values keep
+  their `places`.
+- `pipe(...stages)(value)` applies left-to-right; `compose(...stages)(value)`
+  applies right-to-left (`compose(stringify, bind(add, "2"), sqrt)("4") ===
+  "4"`). Precise typings cover up to ten pure-unary stages; pipelines
+  containing bound stages fall back to a loose overload by design.

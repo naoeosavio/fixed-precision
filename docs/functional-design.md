@@ -165,6 +165,37 @@ round("2.567", { places: 2, roundingMode: 1 });
 All other functional functions take their operands directly and need no
 options.
 
+## Composition: `pipe` and `bind`
+
+The standalone functions are the foundation; `fixed-precision/pipe` builds
+composition on top of them without changing their semantics or duplicating
+them. It exports exactly three functions:
+
+- **`pipe(...stages)`** — returns a function waiting for the value; stages run
+  left-to-right.
+- **`compose(...stages)`** — same contract, stages applied right-to-left.
+- **`bind(fn, ...args)`** — binds the trailing arguments of a standalone into
+  `(value) => fn(value, ...args)`; doubles as a reusable transform.
+
+```ts
+const withTax = pipe(bind(add, "2"), bind(multiply, "3"), stringify);
+withTax("1"); // "9"
+```
+
+Raw lambdas are equally valid stages, so any shape is reachable without extra
+API surface:
+
+```ts
+pipe(
+  (x: string) => add("2", x),
+  (data: FixedPrecisionData) => multiply("3", data),
+  stringify,
+)("1"); // "9"
+```
+
+Unary functions plug in directly (`pipe(sqrt, stringify)`), operand contexts
+flow through unchanged, and every stage speaks plain `FixedPrecisionData`.
+
 ## Next Steps
 
 - [Configuration](configuration.md) — class-level global, factory and instance configuration

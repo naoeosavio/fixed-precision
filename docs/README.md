@@ -15,6 +15,7 @@ Welcome to the FixedPrecision documentation! This library provides fixed-precisi
 - [Rounding & Scaling](rounding-scaling.md) - Rounding modes and decimal place adjustment
 - [Conversion Methods](conversion.md) - Converting between types (string, number, bigint)
 - [Minimal Build](minimal.md) - Smaller entry point for core decimal operations
+- [Composition Examples](examples/composition.md) - Same pipelines written standalone and with `pipe` + `bind`
 
 ### Advanced Topics
 - [Raw Operations](raw-operations.md) - Operations without scaling (plus, minus, times, etc.)

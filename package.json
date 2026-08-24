@@ -34,6 +34,16 @@
         "default": "./dist/Minimal.cjs"
       }
     },
+    "./pipe": {
+      "import": {
+        "types": "./dist/pipe.d.ts",
+        "default": "./dist/pipe.js"
+      },
+      "require": {
+        "types": "./dist/pipe.d.cts",
+        "default": "./dist/pipe.cjs"
+      }
+    },
     "./abs": {
       "import": {
         "types": "./dist/abs.d.ts",
