@@ -11,21 +11,25 @@ export type Work_Context = {
   ln10: bigint;
 };
 
-export function get_work_context(ctx: FPContext): Work_Context {
+export function get_work_context(
+  ctx: FPContext,
+  guard: bigint = GUARD_SCALE,
+): Work_Context {
   if (work_context_cache === undefined) {
     work_context_cache = new Map<bigint, Work_Context>();
   }
-  const existing = work_context_cache.get(ctx.SCALE);
+  const key = ctx.SCALE * guard;
+  const existing = work_context_cache.get(key);
   if (existing !== undefined) {
     return existing;
   }
-  const work = make_work_context(ctx);
-  work_context_cache.set(ctx.SCALE, work);
+  const work = make_work_context(ctx, guard);
+  work_context_cache.set(key, work);
   return work;
 }
 
-function make_work_context(ctx: FPContext): Work_Context {
-  const scale = ctx.SCALE * GUARD_SCALE;
+function make_work_context(ctx: FPContext, guard: bigint): Work_Context {
+  const scale = ctx.SCALE * guard;
   return {
     scale,
     upper_bound: scale << 1n,

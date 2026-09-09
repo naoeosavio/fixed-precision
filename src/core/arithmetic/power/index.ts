@@ -9,22 +9,23 @@ export function power(value: bigint, exp: number, scale: bigint): bigint {
     return 0n;
   }
 
-  const isNegativeExponent = exp < 0;
-  const absExp = Math.abs(exp);
+  if (exp < 0) {
+    const reciprocal = (scale * scale) / value;
+    return power_positive(reciprocal, -exp, scale);
+  }
 
-  let result: bigint;
+  return power_positive(value, exp, scale);
+}
+
+function power_positive(value: bigint, absExp: number, scale: bigint): bigint {
   if (absExp === 1) {
-    result = value;
-  } else if (absExp === 2) {
-    result = (value * value) / scale;
-  } else if (absExp === 3) {
-    result = (((value * value) / scale) * value) / scale;
-  } else {
-    result = power_by_squaring(value, absExp, scale);
+    return value;
   }
-
-  if (isNegativeExponent) {
-    return (scale * scale) / result;
+  if (absExp === 2) {
+    return (value * value) / scale;
   }
-  return result;
+  if (absExp === 3) {
+    return (((value * value) / scale) * value) / scale;
+  }
+  return power_by_squaring(value, absExp, scale);
 }
