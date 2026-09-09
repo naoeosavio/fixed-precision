@@ -11,7 +11,7 @@ export function from_long_decimal_with_small_scale_number_integer(
   const frac = Number(fac_str);
   const nP = 16 - dot_index;
   if (nP >= P) {
-    return BigInt(int * SCALE_NUM + frac);
+    return BigInt(int) * BigInt(SCALE_NUM) + BigInt(frac);
   }
 
   const Num = int * 10 ** nP;

@@ -15,6 +15,7 @@ import {
 import { from_number_with_ctx, to_number_with_ctx } from "./core/numeric";
 import { from_string_with_ctx, to_string_with_ctx } from "./core/string";
 import { precisionPowerOfTen } from "./core/utils";
+import { toExponential as toExponential_string } from "./FP/string/toExponential";
 
 export type {
   Comparison,
@@ -79,7 +80,15 @@ export default class FixedPrecision {
   }
 
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
-    if (value instanceof FixedPrecision) return value.value;
+    if (value instanceof FixedPrecision) {
+      if (
+        value.ctx.places === ctx.places &&
+        value.ctx.roundingMode === ctx.roundingMode
+      ) {
+        return value.value;
+      }
+      return scale_value(value.value, ctx.places, ctx.roundingMode, value.ctx);
+    }
     if (typeof value === "bigint") return value;
     if (typeof value === "number") return from_number_with_ctx(value, ctx);
     if (typeof value === "string") return from_string_with_ctx(value, ctx);
@@ -418,8 +427,13 @@ export default class FixedPrecision {
   }
 
   public toExponential(dp = this.ctx.places, rm?: RoundingMode): string {
-    const rounded = dp <= this.ctx.places ? this.round(dp, rm) : this;
-    return rounded.toNumber().toExponential(dp);
+    return toExponential_string(
+      { ...this.ctx, value: this.value },
+      {
+        places: dp,
+        roundingMode: rm ?? this.ctx.roundingMode,
+      },
+    );
   }
 
   public toPrecision(sd: number, rm?: RoundingMode): string {

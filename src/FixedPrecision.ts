@@ -81,6 +81,7 @@ import {
   tan_value,
   tanh_value,
 } from "./core/trigonometry";
+import { toExponential as toExponential_string } from "./FP/string/toExponential";
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
 
@@ -696,20 +697,13 @@ export default class FixedPrecision {
   }
 
   public toExponential(dp?: number, rm?: RoundingMode): string {
-    const effDp = dp ?? this.ctx.places;
-    const rounded = this.round(effDp, rm);
-    const [int = "", frac = ""] = rounded.toString().split(".");
-    const absInt = int.replace(/^-/, "");
-    const exp =
-      absInt.length > 1
-        ? absInt.length - 1
-        : absInt === "0"
-          ? -frac.search(/[1-9]/) - 1
-          : 0;
-    const shifted = rounded.shiftedBy(-exp);
-    return `${shifted.toFixed(effDp)}e${exp}`
-      .replace(/\.0+e/, "e")
-      .replace(/(\.\d+?)0+e/, "$1e");
+    return toExponential_string(
+      { ...this.ctx, value: this.value },
+      {
+        places: dp ?? this.ctx.places,
+        roundingMode: rm ?? this.ctx.roundingMode,
+      },
+    );
   }
 
   public toPrecision(sd: number, rm?: RoundingMode): string {
