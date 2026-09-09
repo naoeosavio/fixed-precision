@@ -1,6 +1,7 @@
 import { describe, expect, test } from "vitest";
 
 import FixedPrecision, { fixedconfig } from "../src/FixedPrecision";
+import { divide_rounded } from "../src/core/arithmetic/internal/divide_rounded";
 
 const FP2 = FixedPrecision.create({ places: 2, roundingMode: 4 });
 const FP4 = FixedPrecision.create({ places: 4, roundingMode: 4 });
@@ -45,9 +46,17 @@ describe("Arithmetic", () => {
     expect(FP8("10").mod("5").toString()).toBe("0");
     expect(FP6("10").mod("3").toString()).toBe("1");
     expect(FP6("-10").mod("3").toString()).toBe("-1");
-    expect(FP6("10.5").mod("3").toString()).toBe("0");
+    expect(FP6("10.5").mod("3").toString()).toBe("1.5");
     expect(FP6("10.5").mod("3.25").toString()).toBe("0.75");
-    expect(FP8("12.34").mod("5.67").toString()).toBe("1.72");
+    expect(FP8("12.34").mod("5.67").toString()).toBe("1");
+    expect(FP8("1.5").mod("0.4").toString()).toBe("0.3");
+  });
+
+  test("mod matches rem semantics", () => {
+    expect(FP8("1.5").mod("0.4").toString()).toBe(FP8("1.5").rem("0.4").toString());
+    expect(FP8("12.34").mod("5.67").toString()).toBe(
+      FP8("12.34").rem("5.67").toString(),
+    );
   });
 
   test("times", () => {
@@ -173,12 +182,28 @@ describe("Arithmetic", () => {
     expect(FP6("3.141592").round(0).toString()).toBe("3");
   });
 
+  test("round HALF_CEIL (rm=7) rounds negatives beyond the tie", () => {
+    expect(FP8("-1.6").round(0, 7).toString()).toBe("-2");
+    expect(FP8("-0.7").round(0, 7).toString()).toBe("-1");
+    expect(FP8("-2.5").round(0, 7).toString()).toBe("-2");
+    expect(FP8("-2.50000001").round(0, 7).toString()).toBe("-3");
+    expect(FP8("1.5").round(0, 7).toString()).toBe("2");
+    expect(FP8("-2.5").round(0, 7).toString()).toBe("-2");
+    expect(FP8("-2.4").round(0, 7).toString()).toBe("-2");
+  });
+
   test("pow", () => {
     expect(FP8("2").pow(3).toString()).toBe("8");
     expect(FP8("2").pow(-2).toString()).toBe("0.25");
     expect(FP20("2").pow(10).toString()).toBe("1024");
     expect(FP20("1.05").pow(24).toString()).toBe("3.22509994371369982542");
     expect(FP20("3").pow(0).toString()).toBe("1");
+  });
+
+  test("pow negative exponent with intermediate underflow", () => {
+    expect(FP8("0.00000001").pow(-2).toString()).toBe("10000000000000000");
+    expect(FP8("0.00000001").pow(-3).toString()).toBe("1000000000000000000000000");
+    expect(FP8("2").pow(-1).toString()).toBe("0.5");
   });
 
   test("square cube", () => {
@@ -240,12 +265,27 @@ describe("Arithmetic", () => {
     expect(FP20("1").exp().toNumber()).toBeCloseTo(Math.E, 14);
     expect(FP20("1").exp().toString()).toBe("2.71828182845904523536");
     expect(FP20("-1").exp().toNumber()).toBeCloseTo(Math.exp(-1), 14);
-    expect(FP20("-1").exp().toString()).toBe("0.36787944117144232159");
+    expect(FP20("-1").exp().toString()).toBe("0.3678794411714423216");
     expect(FP16("0").exp().toString()).toBe("1");
     expect(FP16("1").exp().toString()).toBe("2.7182818284590452");
     expect(FP16("2").exp().toString()).toBe("7.3890560989306502");
     expect(FP16("-1").exp().toString()).toBe("0.3678794411714423");
-    expect(FP16("10").exp().toString()).toBe("22026.465794806716519");
+    expect(FP16("10").exp().toString()).toBe("22026.465794806716517");
+  });
+
+  test("exp convergence for large arguments", () => {
+    const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+    expect(FP8("1000").exp().toString()).toBe(
+      "197007111401704699388887935224332312531693798532384578995280299138506385078244119347497807656302688993096381798752022693598298173054461289923262783660152825232320535169584566756192271567602788071422466826314006855168508653497941660316045367817938092905299728580132869945856470286534375900456564355589156220422320260518826112288638358372248724725214506150418881937494100871264232248436315760560377439930623959705844189509050047074217568.22675781",
+    );
+    expect(FP8("-1000").exp().toString()).toBe("0");
+    expect(FP8("20").exp().toString()).toBe("485165195.40979028");
+  });
+
+  test("exp overflow throws for excessively large arguments", () => {
+    const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
+    expect(() => FP8(10000000).exp()).toThrow("exp() overflow");
+    expect(() => FP8(1e30).exp()).toThrow("exp() overflow");
   });
 
   test("ln", () => {
@@ -254,7 +294,7 @@ describe("Arithmetic", () => {
     expect(r.toString()).toBe("0.99999999999999999999");
     expect(FP20("10").ln().toString()).toBe("2.30258509299404568401");
     expect(FP20("123.456789").ln().toString()).toBe(
-      "4.81589120820374401402",
+      "4.81589120820374392908",
     );
     expect(FP16("1").ln().toString()).toBe("0");
     expect(FP16("2.7182818284590452").ln().toString()).toBe(
@@ -383,5 +423,38 @@ describe("Arithmetic", () => {
     ).toBeCloseTo(((100 + 50 - 25) * 2) / 5);
     expect(FP8(10.5).add(5).gt(15)).toBe(true);
     expect(FP8(10).mul(2).eq(20)).toBe(true);
+  });
+});
+
+describe("divide_rounded (half-up)", () => {
+  const d = 10n;
+
+  test("halves round up", () => {
+    expect(divide_rounded(5n, d)).toBe(1n);
+    expect(divide_rounded(15n, d)).toBe(2n);
+    expect(divide_rounded(25n, d)).toBe(3n);
+  });
+
+  test("non-halves round to nearest", () => {
+    expect(divide_rounded(4n, d)).toBe(0n);
+    expect(divide_rounded(6n, d)).toBe(1n);
+    expect(divide_rounded(14n, d)).toBe(1n);
+    expect(divide_rounded(16n, d)).toBe(2n);
+  });
+
+  test("negatives mirror positives", () => {
+    expect(divide_rounded(-5n, d)).toBe(-1n);
+    expect(divide_rounded(-15n, d)).toBe(-2n);
+    expect(divide_rounded(-25n, d)).toBe(-3n);
+    expect(divide_rounded(-4n, d)).toBe(0n);
+    expect(divide_rounded(-6n, d)).toBe(-1n);
+    expect(divide_rounded(-14n, d)).toBe(-1n);
+    expect(divide_rounded(-16n, d)).toBe(-2n);
+  });
+
+  test("exact division is unchanged", () => {
+    expect(divide_rounded(20n, d)).toBe(2n);
+    expect(divide_rounded(-20n, d)).toBe(-2n);
+    expect(divide_rounded(0n, d)).toBe(0n);
   });
 });

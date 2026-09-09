@@ -430,8 +430,8 @@ describe("functions: string", () => {
 describe("functions: constants and random", () => {
   test("constants keep 8 places by default", () => {
     expect(stringify(pi())).toBe("3.14159265");
-    expect(stringify(e())).toBe("2.71828182");
-    expect(stringify(phi())).toBe("1.61803398");
+    expect(stringify(e())).toBe("2.71828183");
+    expect(stringify(phi())).toBe("1.61803399");
     expect(stringify(sqrt2())).toBe("1.41421356");
   });
 

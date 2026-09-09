@@ -232,8 +232,8 @@ describe("standalone surface through pipe and compose", () => {
   test("constants remain zero-arg factories usable as terminals", () => {
     const cases: Array<[Fn, string]> = [
       [constants.pi, "3.14159265"],
-      [constants.e, "2.71828182"],
-      [constants.phi, "1.61803398"],
+      [constants.e, "2.71828183"],
+      [constants.phi, "1.61803399"],
       [constants.sqrt2, "1.41421356"],
     ];
     for (const [factory, expected] of cases) {

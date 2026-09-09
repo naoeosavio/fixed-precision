@@ -5,8 +5,8 @@ import { add } from "../src/FP/arithmetic/add";
 import { dataOf } from "../src/FP/construction/dataOf";
 import { stringify } from "../src/FP/string/stringify";
 
-describe("tree-shaking / funcional-first", () => {
-  test("add standalone retorna dado puro, não instância", () => {
+describe("tree-shaking / functional-first", () => {
+  test("add standalone returns raw data, not an instance", () => {
     const result = add("1.5", "2.25");
     expect(result instanceof FixedPrecision).toBe(false);
     expect(result.value).toBe(375000000n);
@@ -14,20 +14,20 @@ describe("tree-shaking / funcional-first", () => {
     expect(stringify(result)).toBe("3.75");
   });
 
-  test("métodos da classe funcionam sem importar módulos de funções", () => {
+  test("class methods work without importing function modules", () => {
     const result = new FixedPrecision("1.5").add("2.25");
     expect(result.toString()).toBe("3.75");
     expect(new FixedPrecision("2").mul("3").toString()).toBe("6");
   });
 
-  test("dataOf é a ponte da instância para o mundo funcional", () => {
+  test("dataOf is the bridge from instance to the functional world", () => {
     const FP4 = FixedPrecision.create({ places: 4 });
     const bridged = add(dataOf(FP4("1.5")), "0");
     expect(bridged.places).toBe(4);
     expect(stringify(bridged)).toBe("1.5");
   });
 
-  test("bundle do subpath não embute a lib completa (após build)", () => {
+  test("subpath bundle does not embed the full library (after build)", () => {
     if (!existsSync("dist/add.js")) return;
     const bundle = readFileSync("dist/add.js", "utf8");
     expect(bundle.length).toBeLessThan(20000);
