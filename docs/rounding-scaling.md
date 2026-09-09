@@ -213,6 +213,22 @@ const b = Bankers("1.015"); // "1.02" (ties to even, 2 is even)
 const c = Up("1.005");      // "1.01" (ROUND_UP)
 ```
 
+## Rounding on Parse
+
+The context's rounding mode also applies when parsing strings that have more
+fractional digits than the context's `places`. Extra digits are rounded, not
+truncated:
+
+```ts
+const halfUp = FixedPrecision.create({ places: 8, roundingMode: 4 });
+const down = FixedPrecision.create({ places: 8, roundingMode: 1 });
+
+halfUp("1.123456789").toString(); // "1.12345679" (HALF_UP)
+down("1.123456789").toString();   // "1.12345678" (DOWN)
+```
+
+See [Conversion](conversion.md) for the accepted string format.
+
 ## Next Steps
 
 - [Arithmetic Operations](arithmetic.md) — add, sub, mul, div, mod

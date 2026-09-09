@@ -46,14 +46,18 @@ value.toFixed(4, 1); // "123.4567" (ROUND_DOWN)
 
 ### `toExponential(dp?, rm?)`
 
-Returns the value in exponential (scientific) notation.
+Returns the value in exponential (scientific) notation with `dp` mantissa decimals. The exponent always carries an explicit sign (`e+6` / `e-3`) and significant trailing zeros are preserved.
 
 ```ts
 const big = new FixedPrecision("1234567.89000000");
 
-big.toExponential();   // "1.23456789e6"
-big.toExponential(2);  // "1.23e6"
-big.toExponential(4);  // "1.2346e6"
+big.toExponential();   // "1.23456789e+6"
+big.toExponential(2);  // "1.23e+6"
+big.toExponential(4);  // "1.2346e+6"
+
+new FixedPrecision("0.001").toExponential(8); // "1.00000000e-3"
+new FixedPrecision("9.9999").toExponential(2); // "1.00e+1"
+new FixedPrecision("-0.0000001").toExponential(2); // "-1.00e-7"
 ```
 
 ### `toPrecision(sd, rm?)`
@@ -186,8 +190,33 @@ value.toHex(2);  // "ff.8"
 
 ```ts
 new FixedPrecision("123.45");   // "123.45000000"
-new FixedPrecision("1e-2");     // "0.01000000"
 new FixedPrecision("-0.001");   // "-0.00100000"
+new FixedPrecision(".5");       // "0.50000000"
+new FixedPrecision("+7.");      // "7.00000000"
+```
+
+Strings are validated strictly. The accepted format is `[+-]?digits[.digits]`
+(an optional sign, at least one digit, an optional fractional part). The input
+is **not** trimmed and scientific notation is **not** accepted — the following
+throw `Invalid number string` quoting the original input:
+
+```ts
+new FixedPrecision(" 1.5 ");  // throws — whitespace is not trimmed
+new FixedPrecision("0x1f");   // throws — hex prefix rejected
+new FixedPrecision("1.5e3");  // throws — exponent notation rejected
+new FixedPrecision("");       // throws — empty string
+new FixedPrecision(".");      // throws — no digits
+```
+
+When the string has more fractional digits than the context's `places`, the
+extra digits are **rounded** using the context's `roundingMode` (not truncated):
+
+```ts
+const halfUp = FixedPrecision.create({ places: 8, roundingMode: 4 });
+const down = FixedPrecision.create({ places: 8, roundingMode: 1 });
+
+halfUp("1.123456789").toString(); // "1.12345679" (HALF_UP applied)
+down("1.123456789").toString();   // "1.12345678" (DOWN applied)
 ```
 
 ### From number

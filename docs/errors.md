@@ -118,6 +118,34 @@ new FixedPrecision("16").log(0);
 // Error: Logarithm base must be positive and not equal to 1
 ```
 
+### exp overflow
+
+`exp()` converges exactly for arguments up to roughly `e^1000000`. Beyond that
+magnitude the result cannot be represented, and a clear error is thrown instead
+of silently returning garbage:
+
+```ts
+new FixedPrecision("1e30").exp();
+// Error: exp() overflow: argument exceeds the maximum supported magnitude (around 1e+1000)
+```
+
+### Parse validation
+
+Strings that do not match the accepted decimal format throw an error quoting
+the original input:
+
+```ts
+new FixedPrecision(" 1.5 ");
+// Error: Invalid number string " 1.5 ": expected an optional sign followed by
+// digits with an optional decimal point
+
+new FixedPrecision("1.5e3");
+// Error: Invalid number string "1.5e3": expected an optional sign followed by
+// digits with an optional decimal point
+```
+
+See [Conversion](conversion.md) for the accepted format.
+
 ### Factorial, permutations, combinations
 
 Only defined for non-negative integers.
