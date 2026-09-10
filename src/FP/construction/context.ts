@@ -1,17 +1,24 @@
-import { powerOfTen } from "../../core/utils";
 import type { FixedPrecisionConfig, FPContext, RoundingMode } from "./types";
+
+const CONTEXT_CACHE = new Map<number, FPContext>();
 
 export function makeContext(
   places: number,
   roundingMode: RoundingMode,
 ): FPContext {
   assertPlaces(places);
-  return {
-    places,
-    roundingMode,
-    SCALE: powerOfTen(places),
-    SCALENUMBER: 10 ** places,
-  };
+  const key = places * 16 + roundingMode;
+  let cached = CONTEXT_CACHE.get(key);
+  if (cached === undefined) {
+    cached = {
+      places,
+      roundingMode,
+      SCALE: 10n ** BigInt(places),
+      SCALENUMBER: 10 ** places,
+    };
+    CONTEXT_CACHE.set(key, cached);
+  }
+  return cached;
 }
 
 function assertPlaces(places: number): void {
