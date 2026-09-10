@@ -1,3 +1,5 @@
+import type { Work_Context } from "./work_context";
+
 type Reduced_Angle = {
   angle: bigint;
   sign: 1n | -1n;
@@ -28,13 +30,13 @@ function reduce_quadrant_sin(
 
 export function reduce_angle_quadrant_cos(
   value: bigint,
-  work: bigint,
+  work: Work_Context,
   is_cos: boolean,
 ): Reduced_Angle {
-  const pi = work;
+  const pi = work.reduction_pi;
   const two_pi = pi << 1n;
   const half_pi = pi >> 1n;
-  let angle = value % two_pi;
+  let angle = (value * work.reduction_unit) % two_pi;
 
   if (angle < 0n) {
     angle += two_pi;

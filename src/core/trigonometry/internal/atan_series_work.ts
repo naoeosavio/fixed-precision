@@ -10,15 +10,20 @@ export function atan_series_work(
   const value_squared = (value * value) / scale;
   let term = value;
   let sum = value;
+  let odd = 1n;
+  let denominator = scale * 3n;
+  const denominator_step = scale << 1n;
 
   for (let index = 1; index <= max_iterations; index += 1) {
-    term = -(term * value_squared) / scale;
+    term = -((term * value_squared * odd) / denominator);
 
     if (term === 0n) {
       break;
     }
 
-    sum += term / BigInt(2 * index + 1);
+    sum += term;
+    odd += 2n;
+    denominator += denominator_step;
   }
 
   return sum;

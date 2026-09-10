@@ -8,6 +8,9 @@ export type Work_Context = {
   guard_scale: bigint;
   max_iterations: number;
   pi: bigint;
+  weak_pi: bigint;
+  reduction_pi: bigint;
+  reduction_unit: bigint;
   half_pi: bigint;
   two_pi: bigint;
 };
@@ -30,12 +33,22 @@ function make_work_context(ctx: FPContext): Work_Context {
   const max_iterations = get_max_iterations(ctx.places);
   const scale = ctx.SCALE * guard.guard_scale;
   const pi = BigInt(PI.slice(0, guard.guard + ctx.places + 1));
+  const reduction_digits =
+    2 * ctx.places + 1 <= PI.length
+      ? 2 * ctx.places + 1
+      : guard.guard + ctx.places + 1;
+  const reduction_pi = BigInt(PI.slice(0, reduction_digits));
+  const reduction_unit =
+    BigInt(10) ** BigInt(reduction_digits - 1 - ctx.places);
 
   return {
     scale,
     guard_scale: guard.guard_scale,
     max_iterations,
     pi,
+    weak_pi: pi / guard.guard_scale,
+    reduction_pi,
+    reduction_unit,
     half_pi: pi >> 1n,
     two_pi: pi << 1n,
   };

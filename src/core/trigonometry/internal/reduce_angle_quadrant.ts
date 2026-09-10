@@ -10,10 +10,10 @@ export function reduce_angle_quadrant(
   value: bigint,
   work: Work_Context,
 ): Reduced_Angle {
-  const pi = work.pi / work.guard_scale;
-  const two_pi = work.two_pi / work.guard_scale;
-  const half_pi = work.half_pi / work.guard_scale;
-  let angle = value % two_pi;
+  const pi = work.reduction_pi;
+  const two_pi = pi << 1n;
+  const half_pi = pi >> 1n;
+  let angle = (value * work.reduction_unit) % two_pi;
 
   if (angle < 0n) {
     angle += two_pi;
