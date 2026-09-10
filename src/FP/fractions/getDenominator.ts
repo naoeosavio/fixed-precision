@@ -3,14 +3,14 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromRawWithContext,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 
 export function getDenominator(
   value: FixedPrecisionOperand,
 ): FixedPrecisionData {
-  const ctx = resolveContext([value]);
+  const ctx = resolveContextSingle(value);
   const denominator = get_denominator(toScaled(value, ctx), ctx.SCALE);
   return fromRawWithContext(denominator * ctx.SCALE, ctx);
 }

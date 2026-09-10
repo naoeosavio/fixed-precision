@@ -3,12 +3,12 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromRawWithContext,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 
 export function getNumerator(value: FixedPrecisionOperand): FixedPrecisionData {
-  const ctx = resolveContext([value]);
+  const ctx = resolveContextSingle(value);
   const numerator = get_numerator(toScaled(value, ctx), ctx.SCALE);
   return fromRawWithContext(numerator * ctx.SCALE, ctx);
 }

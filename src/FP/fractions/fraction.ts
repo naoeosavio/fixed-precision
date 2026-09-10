@@ -5,7 +5,7 @@ import {
   type FixedPrecisionOperand,
   fromRawWithContext,
   type MaxDenOptions,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 
@@ -13,7 +13,7 @@ export function fraction(
   value: FixedPrecisionOperand,
   options?: MaxDenOptions,
 ): [FixedPrecisionData, FixedPrecisionData] {
-  const ctx = resolveContext([value]);
+  const ctx = resolveContextSingle(value);
   const raw = toScaled(value, ctx);
   const maxDen = options?.maxDen;
   const result =

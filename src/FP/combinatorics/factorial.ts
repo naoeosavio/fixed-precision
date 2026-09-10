@@ -3,12 +3,12 @@ import {
   type FixedPrecisionData,
   fromRawWithContext,
   isFixedPrecisionData,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 
 export function factorial(n: number | FixedPrecisionData): FixedPrecisionData {
-  const ctx = resolveContext(isFixedPrecisionData(n) ? [n] : []);
+  const ctx = resolveContextSingle(n);
   const val = isFixedPrecisionData(n)
     ? Number(toScaled(n, ctx) / ctx.SCALE)
     : Math.trunc(n);

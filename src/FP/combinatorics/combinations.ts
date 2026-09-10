@@ -3,7 +3,7 @@ import {
   type FixedPrecisionData,
   fromRawWithContext,
   isFixedPrecisionData,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 
@@ -11,7 +11,7 @@ export function combinations(
   n: number | FixedPrecisionData,
   k: number | FixedPrecisionData,
 ): FixedPrecisionData {
-  const ctx = resolveContext(isFixedPrecisionData(n) ? [n] : []);
+  const ctx = resolveContextSingle(n);
   const valN = isFixedPrecisionData(n)
     ? Number(toScaled(n, ctx) / ctx.SCALE)
     : Math.trunc(n);
