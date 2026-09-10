@@ -35,5 +35,5 @@ export function to_base_with_significant_digits(
     ctx.SCALE,
     rounding_mode,
   );
-  return format_base_quotient(quotient, radix, fractional_places);
+  return format_base_quotient(quotient, radix, fractional_places, base_scale);
 }

@@ -1,3 +1,8 @@
+function bit_length(value: bigint): number {
+  if (value === 0n) return 0;
+  return value.toString(2).length;
+}
+
 export function base_exponent(
   value: bigint,
   scale: bigint,
@@ -5,19 +10,23 @@ export function base_exponent(
 ): number {
   const abs_value = value < 0n ? -value : value;
   const integer_part = abs_value / scale;
+  const k = radix === 2 ? 1 : radix === 8 ? 3 : 4;
 
   if (integer_part > 0n) {
-    return integer_part.toString(radix).length - 1;
+    const bits = bit_length(integer_part);
+    return radix === 2 ? bits - 1 : Math.ceil(bits / k) - 1;
   }
 
-  let scaled = abs_value;
-  let exponent = 0;
-  const base = BigInt(radix);
+  const value_bits = bit_length(abs_value);
+  const scale_bits = bit_length(scale);
+  let exponent = Math.ceil((scale_bits - value_bits) / k) - 1;
+  if (exponent < 0) exponent = 0;
 
+  let scaled = abs_value << BigInt(exponent * k);
   while (scaled < scale) {
-    scaled *= base;
-    exponent -= 1;
+    scaled <<= BigInt(k);
+    exponent += 1;
   }
 
-  return exponent;
+  return -exponent;
 }

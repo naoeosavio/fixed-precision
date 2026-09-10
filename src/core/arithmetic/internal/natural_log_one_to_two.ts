@@ -8,9 +8,9 @@ export function natural_log_one_to_two(value: bigint, scale: bigint): bigint {
   let divisor = 1n;
 
   for (
-    let index = 0n;
-    index < MAX_SERIES_ITERATIONS && term !== 0n;
-    index += 1n
+    let index = 0;
+    index < Number(MAX_SERIES_ITERATIONS) && term !== 0n;
+    index += 1
   ) {
     sum += term / divisor;
     term = (term * z_squared) / scale;

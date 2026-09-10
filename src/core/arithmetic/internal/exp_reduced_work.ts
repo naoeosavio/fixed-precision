@@ -7,13 +7,15 @@ export function exp_reduced_work(
 ): bigint {
   let sum = scale;
   let term = scale;
+  let sdiv = scale;
 
   for (let divisor = 1n; divisor <= max_iterations; divisor += 1n) {
-    term = (term * value) / (scale * divisor);
+    term = (term * value) / sdiv;
     if (term === 0n) {
       return sum;
     }
     sum += term;
+    sdiv += scale;
   }
 
   if (term !== 0n) {

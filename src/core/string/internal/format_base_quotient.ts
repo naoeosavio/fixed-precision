@@ -5,12 +5,13 @@ export function format_base_quotient(
   quotient: bigint,
   radix: 2 | 8 | 16,
   fractional_places: number,
+  base_scale?: bigint,
 ): string {
   const sign = quotient < 0n ? "-" : "";
   const abs_quotient = quotient < 0n ? -quotient : quotient;
-  const base_scale = base_power(radix, fractional_places);
-  const integer_part = abs_quotient / base_scale;
-  const fractional_part = abs_quotient - integer_part * base_scale;
+  const scale = base_scale ?? base_power(radix, fractional_places);
+  const integer_part = abs_quotient / scale;
+  const fractional_part = abs_quotient - integer_part * scale;
 
   if (fractional_part === 0n) {
     return `${sign}${integer_part.toString(radix)}`;
