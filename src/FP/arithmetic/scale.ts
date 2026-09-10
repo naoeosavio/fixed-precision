@@ -4,7 +4,7 @@ import {
   type FixedPrecisionOperand,
   fromRawWithContext,
   makeContext,
-  resolveContext,
+  resolveContextSingle,
   type ScaleOptions,
   toScaled,
 } from "../construction";
@@ -13,7 +13,7 @@ export function scale(
   value: FixedPrecisionOperand,
   options: ScaleOptions,
 ): FixedPrecisionData {
-  const ctx = resolveContext([value]);
+  const ctx = resolveContextSingle(value);
   const effectiveRm = options.roundingMode ?? ctx.roundingMode;
   const nextValue = scale_value(
     toScaled(value, ctx),

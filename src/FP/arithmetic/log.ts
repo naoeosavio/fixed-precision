@@ -4,7 +4,7 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromRawWithContext,
-  resolveContext,
+  resolveContextPair,
   toScaled,
 } from "../construction";
 import { naturalLog } from "./naturalLog";
@@ -19,7 +19,7 @@ export function log(
     return naturalLog(value);
   }
 
-  const ctx = resolveContext([value, base]);
+  const ctx = resolveContextPair(value, base);
   return fromRawWithContext(
     log_value(toScaled(value, ctx), toScaled(base, ctx), ctx),
     ctx,
