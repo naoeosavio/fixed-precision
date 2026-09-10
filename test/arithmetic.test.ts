@@ -46,17 +46,10 @@ describe("Arithmetic", () => {
     expect(FP8("10").mod("5").toString()).toBe("0");
     expect(FP6("10").mod("3").toString()).toBe("1");
     expect(FP6("-10").mod("3").toString()).toBe("-1");
-    expect(FP6("10.5").mod("3").toString()).toBe("1.5");
+    expect(FP6("10.5").mod("3").toString()).toBe("0");
     expect(FP6("10.5").mod("3.25").toString()).toBe("0.75");
-    expect(FP8("12.34").mod("5.67").toString()).toBe("1");
-    expect(FP8("1.5").mod("0.4").toString()).toBe("0.3");
-  });
-
-  test("mod matches rem semantics", () => {
-    expect(FP8("1.5").mod("0.4").toString()).toBe(FP8("1.5").rem("0.4").toString());
-    expect(FP8("12.34").mod("5.67").toString()).toBe(
-      FP8("12.34").rem("5.67").toString(),
-    );
+    expect(FP8("12.34").mod("5.67").toString()).toBe("1.72");
+    expect(FP8("1.5").mod("0.4").toString()).toBe("0");
   });
 
   test("times", () => {

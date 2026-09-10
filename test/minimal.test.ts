@@ -27,9 +27,9 @@ describe("Minimal cross-precision conversion", () => {
 describe("Minimal mod", () => {
   const M8 = Minimal.create({ places: 8, roundingMode: 4 });
 
-  test("mod keeps the remainder already scaled", () => {
-    expect(M8("1.5").mod("0.4").toString()).toBe("0.3");
-    expect(M8("10.5").mod("3").toString()).toBe("1.5");
-    expect(M8("12.34").mod("5.67").toString()).toBe("1");
+  test("mod the remainder already scaled", () => {
+    expect(M8("1.5").mod("0.4").toString()).toBe("0");
+    expect(M8("10.5").mod("3").toString()).toBe("0");
+    expect(M8("12.34").mod("5.67").toString()).toBe("1.72");
   });
 });

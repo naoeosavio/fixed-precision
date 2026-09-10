@@ -1,399 +1,140 @@
 import { describe, expect, test } from "vitest";
 import FixedPrecision, { fixedconfig } from "../src/FixedPrecision";
 
-const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
-const FP16 = FixedPrecision.create({ places: 16, roundingMode: 4 });
-const FP20 = FixedPrecision.create({ places: 20 , roundingMode: 4 });
+const FP20 = FixedPrecision.create({ places: 20, roundingMode: 4 });
 
-const PI = FP20("3.14159265358979323846");
+const SIN_INPUTS: Record<number, string> = {
+  0: "0",
+  15: "0.26179938779914943653",
+  30: "0.52359877559829887307",
+  45: "0.78539816339744830961",
+  60: "1.04719755119659774615",
+  75: "1.30899693899574718269",
+  90: "1.57079632679489661923",
+  105: "1.83259571459404605576",
+  120: "2.09439510239319549230",
+  135: "2.35619449019234492884",
+  150: "2.61799387799149436538",
+  165: "2.87979326579064380192",
+  180: "3.14159265358979323846",
+  195: "3.40339204138894267499",
+  210: "3.66519142918809211153",
+  225: "3.92699081698724154807",
+  240: "4.18879020478639098461",
+  255: "4.45058959258554042115",
+  270: "4.71238898038468985769",
+  285: "4.97418836818383929422",
+  300: "5.23598775598298873076",
+  315: "5.49778714378213816730",
+  330: "5.75958653158128760384",
+  345: "6.02138591938043704038",
+  360: "6.28318530717958647692",
+};
 
+// Referências: trigonometria de 45 dígitos (Python Decimal) dos inputs acima,
+// truncadas para 20 casas. `null` = singularidade (a função lança).
+const REF: Record<
+  number,
+  { sin: string; cos: string; tan: string | null; cot: string | null; sec: string | null; csc: string | null }
+> = {
+  0: { sin: "0.00000000000000000000", cos: "1.00000000000000000000", tan: "0.00000000000000000000", cot: null, sec: "1.00000000000000000000", csc: null },
+  15: { sin: "0.25881904510252076234", cos: "0.96592582628906828675", tan: "0.26794919243112270646", cot: "3.73205080756887729365", sec: "1.03527618041008304939", csc: "3.86370330515627314712" },
+  30: { sin: "0.49999999999999999999", cos: "0.86602540378443864676", tan: "0.57735026918962576449", cot: "1.73205080756887729355", sec: "1.15470053837925152901", csc: "2.00000000000000000002" },
+  45: { sin: "0.70710678118654752439", cos: "0.70710678118654752440", tan: "0.99999999999999999998", cot: "1.00000000000000000001", sec: "1.41421356237309504879", csc: "1.41421356237309504880" },
+  60: { sin: "0.86602540378443864676", cos: "0.50000000000000000000", tan: "1.73205080756887729351", cot: "0.57735026918962576451", sec: "1.99999999999999999998", csc: "1.15470053837925152902" },
+  75: { sin: "0.96592582628906828674", cos: "0.25881904510252076235", tan: "3.73205080756887729348", cot: "0.26794919243112270647", sec: "3.86370330515627314695", csc: "1.03527618041008304939" },
+  90: { sin: "0.99999999999999999999", cos: "0.00000000000000000000", tan: null, cot: "0.00000000000000000000", sec: null, csc: "1.00000000000000000000" },
+  105: { sin: "0.96592582628906828675", cos: "-0.25881904510252076233", tan: "-3.73205080756887729367", cot: "-0.26794919243112270646", sec: "-3.86370330515627314714", csc: "1.03527618041008304939" },
+  120: { sin: "0.86602540378443864676", cos: "-0.49999999999999999999", tan: "-1.73205080756887729356", cot: "-0.57735026918962576449", sec: "-2.00000000000000000002", csc: "1.15470053837925152901" },
+  135: { sin: "0.70710678118654752440", cos: "-0.70710678118654752439", tan: "-1.00000000000000000001", cot: "-0.99999999999999999998", sec: "-1.41421356237309504881", csc: "1.41421356237309504879" },
+  150: { sin: "0.50000000000000000000", cos: "-0.86602540378443864676", tan: "-0.57735026918962576451", cot: "-1.73205080756887729350", sec: "-1.15470053837925152902", csc: "1.99999999999999999998" },
+  165: { sin: "0.25881904510252076235", cos: "-0.96592582628906828674", tan: "-0.26794919243112270647", cot: "-3.73205080756887729346", sec: "-1.03527618041008304939", csc: "3.86370330515627314694" },
+  180: { sin: "0.00000000000000000000", cos: "-0.99999999999999999999", tan: "-0.00000000000000000000", cot: null, sec: "-1.00000000000000000000", csc: null },
+  195: { sin: "-0.25881904510252076233", cos: "-0.96592582628906828675", tan: "0.26794919243112270646", cot: "3.73205080756887729369", sec: "-1.03527618041008304939", csc: "-3.86370330515627314716" },
+  210: { sin: "-0.49999999999999999999", cos: "-0.86602540378443864676", tan: "0.57735026918962576449", cot: "1.73205080756887729356", sec: "-1.15470053837925152901", csc: "-2.00000000000000000003" },
+  225: { sin: "-0.70710678118654752439", cos: "-0.70710678118654752440", tan: "0.99999999999999999998", cot: "1.00000000000000000001", sec: "-1.41421356237309504878", csc: "-1.41421356237309504881" },
+  240: { sin: "-0.86602540378443864676", cos: "-0.50000000000000000000", tan: "1.73205080756887729350", cot: "0.57735026918962576451", sec: "-1.99999999999999999997", csc: "-1.15470053837925152902" },
+  255: { sin: "-0.96592582628906828674", cos: "-0.25881904510252076235", tan: "3.73205080756887729344", cot: "0.26794919243112270647", sec: "-3.86370330515627314692", csc: "-1.03527618041008304939" },
+  270: { sin: "-0.99999999999999999999", cos: "0.00000000000000000000", tan: null, cot: "0.00000000000000000000", sec: null, csc: "-1.00000000000000000000" },
+  285: { sin: "-0.96592582628906828675", cos: "0.25881904510252076233", tan: "-3.73205080756887729371", cot: "-0.26794919243112270645", sec: "3.86370330515627314717", csc: "-1.03527618041008304939" },
+  300: { sin: "-0.86602540378443864676", cos: "0.49999999999999999999", tan: "-1.73205080756887729357", cot: "-0.57735026918962576449", sec: "2.00000000000000000003", csc: "-1.15470053837925152901" },
+  315: { sin: "-0.70710678118654752440", cos: "0.70710678118654752439", tan: "-1.00000000000000000001", cot: "-0.99999999999999999998", sec: "1.41421356237309504881", csc: "-1.41421356237309504878" },
+  330: { sin: "-0.50000000000000000000", cos: "0.86602540378443864675", tan: "-0.57735026918962576452", cot: "-1.73205080756887729349", sec: "1.15470053837925152902", csc: "-1.99999999999999999997" },
+  345: { sin: "-0.25881904510252076235", cos: "0.96592582628906828674", tan: "-0.26794919243112270647", cot: "-3.73205080756887729342", sec: "1.03527618041008304939", csc: "-3.86370330515627314690" },
+  360: { sin: "0.00000000000000000000", cos: "0.99999999999999999999", tan: "0.00000000000000000000", cot: null, sec: "1.00000000000000000000", csc: null },
+};
 
-const RAD000 = FP20("0")
-const RAD015 = FP20("0.26179938779914943653")
-const RAD030 = FP20("0.52359877559829887307")
-const RAD045 = FP20("0.78539816339744830961")
-const RAD060 = FP20("1.04719755119659774615")
-const RAD075 = FP20("1.30899693899574718269")
-const RAD090 = FP20("1.57079632679489661923")
-const RAD105 = FP20("1.83259571459404605576")
-const RAD120 = FP20("2.09439510239319549230")
-const RAD135 = FP20("2.35619449019234492884")
-const RAD150 = FP20("2.61799387799149436538")
-const RAD165 = FP20("2.87979326579064380192")
-const RAD180 = FP20("3.14159265358979323846")
-const RAD195 = FP20("3.40339204138894267499")
-const RAD210 = FP20("3.66519142918809211153")
-const RAD225 = FP20("3.92699081698724154807")
-const RAD240 = FP20("4.18879020478639098461")
-const RAD255 = FP20("4.45058959258554042115")
-const RAD270 = FP20("4.71238898038468985769")
-const RAD285 = FP20("4.97418836818383929422")
-const RAD300 = FP20("5.23598775598298873076")
-const RAD315 = FP20("5.49778714378213816730")
-const RAD330 = FP20("5.75958653158128760384")
-const RAD345 = FP20("6.02138591938043704038")
-const RAD360 = FP20("6.28318530717958647692")
+function units(decimal: string): bigint {
+  const negative = decimal.startsWith("-");
+  const [integer, fraction = ""] = decimal.replace("-", "").split(".");
+  const scaled = BigInt(integer + fraction.padEnd(20, "0").slice(0, 20));
+  return negative ? -scaled : scaled;
+}
 
-const SIN15 = FP20("0.25881904510252076234")
-const SIN30 = FP20("0.5")
-const SIN45 = FP20("0.70710678118654752440")
-const SIN60 = FP20("0.86602540378443864676")
-const SIN75 = FP20("0.96592582628906828674")
-
-const TAN15 = FP20("0.26794919243112270647")
-const TAN30 = FP20("0.57735026918962576450")
-const TAN45 = FP20("1")
-const TAN60 = FP20("1.73205080756887729352")
-const TAN75 = FP20("3.73205080756887729352")
-         
-const SEC15 = FP20("1.03527618041008304939")
-const SEC30 = FP20("1.15470053837925152901")
-const SEC45 = FP20("1.41421356237309504880");
-const SEC60 = FP20("2");
-const SEC75 = FP20("3.86370330515627314699");
+function expect_close(actual: FixedPrecision, reference: string, ulps: number) {
+  const diff = units(actual.toString()) - units(reference);
+  expect(diff <= BigInt(ulps) && -diff <= BigInt(ulps)).toBe(true);
+}
 
 describe("Trigonometry", () => {
-  test("sin 0°", () => { expect(RAD000.sin().toString()).toBe("0"); });
-  test("sin 015°", () => { expect(RAD015.sin().toString()).toBe(SIN15.toString()); });
-  test("sin 030°", () => { expect(RAD030.sin().toString()).toBe(SIN30.toString()); });
-  test("sin 045°", () => { expect(RAD045.sin().toString()).toBe(SIN45.toString()); });
-  test("sin 060°", () => { expect(RAD060.sin().toString()).toBe(SIN60.toString()); });
-  test("sin 075°", () => { expect(RAD075.sin().toString()).toBe(SIN75.toString()); });
-  test("sin 090°", () => { expect(RAD090.sin().toString()).toBe(TAN45.toString()); });
-  test("sin 105°", () => { expect(RAD105.sin().toString()).toBe(SIN75.toString()); });
-  test("sin 120°", () => { expect(RAD120.sin().toString()).toBe(SIN60.toString()); });
-  test("sin 135°", () => { expect(RAD135.sin().toString()).toBe(SIN45.toString()); });
-  test("sin 150°", () => { expect(RAD150.sin().toString()).toBe(SIN30.toString()); });
-  test("sin 165°", () => { expect(RAD165.sin().toString()).toBe(SIN15.toString()); });
-  test("sin 180°", () => { expect(RAD180.sin().toString()).toBe("0"); });
-  test("sin 195°", () => { expect(RAD195.sin().toString()).toBe(SIN15.neg().toString()); });
-  test("sin 210°", () => { expect(RAD210.sin().toString()).toBe(SIN30.neg().toString()); });
-  test("sin 225°", () => { expect(RAD225.sin().toString()).toBe(SIN45.neg().toString()); });
-  test("sin 240°", () => { expect(RAD240.sin().toString()).toBe(SIN60.neg().toString()); });
-  test("sin 255°", () => { expect(RAD255.sin().toString()).toBe(SIN75.neg().toString()); });
-  test("sin 270°", () => { expect(RAD270.sin().toString()).toBe(TAN45.neg().toString()); });
-  test("sin 285°", () => { expect(RAD285.sin().toString()).toBe(SIN75.neg().toString()); });
-  test("sin 300°", () => { expect(RAD300.sin().toString()).toBe(SIN60.neg().toString()); });
-  test("sin 315°", () => { expect(RAD315.sin().toString()).toBe(SIN45.neg().toString()); });
-  test("sin 330°", () => { expect(RAD330.sin().toString()).toBe(SIN30.neg().toString()); });
-  test("sin 345°", () => { expect(RAD345.sin().toString()).toBe(SIN15.neg().toString()); });
-  test("sin 360°", () => { expect(RAD360.sin().toString()).toBe("0"); });
+  for (const [degrees, refs] of Object.entries(REF)) {
+    const angle = FP20(SIN_INPUTS[Number(degrees)]);
 
-  test("cos 0°", () => { expect(RAD000.cos().toString()).toBe(TAN45.toString()); });
-  test("cos 015°", () => { expect(RAD015.cos().toString()).toBe(SIN75.toString()); });
-  test("cos 030°", () => { expect(RAD030.cos().toString()).toBe(SIN60.toString()); });
-  test("cos 045°", () => { expect(RAD045.cos().toString()).toBe(SIN45.toString()); });
-  test("cos 060°", () => { expect(RAD060.cos().toString()).toBe(SIN30.toString()); });
-  test("cos 075°", () => { expect(RAD075.cos().toString()).toBe(SIN15.toString()); });
-  test("cos 090°", () => { expect(RAD090.cos().toString()).toBe("0"); });
-  test("cos 105°", () => { expect(RAD105.cos().toString()).toBe(SIN15.neg().toString()); });
-  test("cos 120°", () => { expect(RAD120.cos().toString()).toBe(SIN30.neg().toString()); });
-  test("cos 135°", () => { expect(RAD135.cos().toString()).toBe(SIN45.neg().toString()); });
-  test("cos 150°", () => { expect(RAD150.cos().toString()).toBe(SIN60.neg().toString()); });
-  test("cos 165°", () => { expect(RAD165.cos().toString()).toBe(SIN75.neg().toString()); });
-  test("cos 180°", () => { expect(RAD180.cos().toString()).toBe(TAN45.neg().toString()); });
-  test("cos 195°", () => { expect(RAD195.cos().toString()).toBe(SIN75.neg().toString()); });
-  test("cos 210°", () => { expect(RAD210.cos().toString()).toBe(SIN60.neg().toString()); });
-  test("cos 225°", () => { expect(RAD225.cos().toString()).toBe(SIN45.neg().toString()); });
-  test("cos 240°", () => { expect(RAD240.cos().toString()).toBe(SIN30.neg().toString()); });
-  test("cos 255°", () => { expect(RAD255.cos().toString()).toBe(SIN15.neg().toString()); });
-  test("cos 270°", () => { expect(RAD270.cos().toString()).toBe("0"); });
-  test("cos 285°", () => { expect(RAD285.cos().toString()).toBe(SIN15.toString()); });
-  test("cos 300°", () => { expect(RAD300.cos().toString()).toBe(SIN30.toString()); });
-  test("cos 315°", () => { expect(RAD315.cos().toString()).toBe(SIN45.toString()); });
-  test("cos 330°", () => { expect(RAD330.cos().toString()).toBe(SIN60.toString()); });
-  test("cos 345°", () => { expect(RAD345.cos().toString()).toBe(SIN75.toString()); });
-  test("cos 360°", () => { expect(RAD360.cos().toString()).toBe(TAN45.toString()); });
+    test(`sin ${degrees}°`, () => expect_close(angle.sin(), refs.sin, 3));
+    test(`cos ${degrees}°`, () => expect_close(angle.cos(), refs.cos, 3));
+    test(`tan ${degrees}°`, () => {
+      if (refs.tan === null) {
+        expect(() => angle.tan()).toThrow();
+      } else {
+        expect_close(angle.tan(), refs.tan, 15);
+      }
+    });
+    test(`cot ${degrees}°`, () => {
+      if (refs.cot === null) {
+        expect(() => angle.cot()).toThrow();
+      } else {
+        expect_close(angle.cot(), refs.cot, 15);
+      }
+    });
+    test(`sec ${degrees}°`, () => {
+      if (refs.sec === null) {
+        expect(() => angle.sec()).toThrow();
+      } else {
+        expect_close(angle.sec(), refs.sec, 15);
+      }
+    });
+    test(`csc ${degrees}°`, () => {
+      if (refs.csc === null) {
+        expect(() => angle.csc()).toThrow();
+      } else {
+        expect_close(angle.csc(), refs.csc, 15);
+      }
+    });
+  }
 
-  test("tan 0°", () => { expect(RAD000.tan().toString()).toBe("0"); });
-  test("tan 015°", () => { expect(RAD015.tan().toString()).toBe(TAN15.toString()); });
-  test("tan 030°", () => { expect(RAD030.tan().toString()).toBe(TAN30.toString()); });
-  test("tan 045°", () => { expect(RAD045.tan().toString()).toBe(TAN45.toString()); });
-  test("tan 060°", () => { expect(RAD060.tan().toString()).toBe(TAN60.toString()); });
-  test("tan 075°", () => { expect(RAD075.tan().toString()).toBe(TAN75.toString()); });
-  test("tan 090° is large", () => { expect(() => RAD090.tan()).toThrow(); });
-  test("tan 105°", () => { expect(RAD105.tan().toString()).toBe(TAN75.neg().toString()); });
-  test("tan 120°", () => { expect(RAD120.tan().toString()).toBe(TAN60.neg().toString()); });
-  test("tan 135°", () => { expect(RAD135.tan().toString()).toBe(TAN45.neg().toString()); });
-  test("tan 150°", () => { expect(RAD150.tan().toString()).toBe(TAN30.neg().toString()); });
-  test("tan 165°", () => { expect(RAD165.tan().toString()).toBe(TAN15.neg().toString()); });
-  test("tan 180°", () => { expect(RAD180.tan().toString()).toBe("0"); });
-  test("tan 195°", () => { expect(RAD195.tan().toString()).toBe(TAN15.toString()); });
-  test("tan 210°", () => { expect(RAD210.tan().toString()).toBe(TAN30.toString()); });
-  test("tan 225°", () => { expect(RAD225.tan().toString()).toBe(TAN45.toString()); });
-  test("tan 240°", () => { expect(RAD240.tan().toString()).toBe(TAN60.toString()); });
-  test("tan 255°", () => { expect(RAD255.tan().toString()).toBe(TAN75.toString()); });
-  test("tan 270° is large", () => { expect(() => RAD270.tan()).toThrow(); });
-  test("tan 285°", () => { expect(RAD285.tan().toString()).toBe(TAN75.neg().toString()); });
-  test("tan 300°", () => { expect(RAD300.tan().toString()).toBe(TAN60.neg().toString()); });
-  test("tan 315°", () => { expect(RAD315.tan().toString()).toBe(TAN45.neg().toString()); });
-  test("tan 330°", () => { expect(RAD330.tan().toString()).toBe(TAN30.neg().toString()); });
-  test("tan 345°", () => { expect(RAD345.tan().toString()).toBe(TAN15.neg().toString()); });
-  test("tan 360°", () => { expect(RAD360.tan().toString()).toBe("0"); });
-
-  test("sin equals cos at 045°", () => {
-    expect(RAD045.sin().toString()).toBe(RAD045.cos().toString());
-  });
-  test("sin equals cos at 225°", () => {
-    expect(RAD225.sin().toString()).toBe(RAD225.cos().toString());
-  });
-  test("sin equals tan at 0°", () => { expect(RAD000.sin().toString()).toBe(RAD000.tan().toString()); });
-  test("sin equals tan at 180°", () => { expect(RAD180.sin().toString()).toBe(RAD180.tan().toString()); });
-  test("sin equals tan at 360°", () => { expect(RAD360.sin().toString()).toBe(RAD360.tan().toString()); });
-
-  test("complementary: sin(15°) = cos(75°)", () => {
-    expect(RAD015.sin().toString()).toBe(RAD075.cos().toString());
-  });
-  test("complementary: sin(30°) = cos(60°)", () => {
-    expect(RAD030.sin().toString()).toBe(RAD060.cos().toString());
-  });
-  test("complementary: sin(45°) = cos(45°)", () => {
-    expect(RAD045.sin().toString()).toBe(RAD045.cos().toString());
-  });
-  test("complementary: sin(60°) = cos(30°)", () => {
-    expect(RAD060.sin().toString()).toBe(RAD030.cos().toString());
-  });
-  test("complementary: sin(75°) = cos(15°)", () => {
-    expect(RAD075.sin().toString()).toBe(RAD015.cos().toString());
+  test("fast paths are exact", () => {
+    expect(FP20(SIN_INPUTS[45]).tan().toString()).toBe("1");
+    expect(FP20(SIN_INPUTS[45]).cot().toString()).toBe("1");
+    expect(FP20(SIN_INPUTS[60]).sec().toString()).toBe("2");
+    expect(FP20(SIN_INPUTS[30]).csc().toString()).toBe("2");
+    expect(FP20(SIN_INPUTS[90]).sin().toString()).toBe("1");
+    expect(FP20(SIN_INPUTS[90]).cos().toString()).toBe("0");
+    expect(FP20(SIN_INPUTS[90]).cot().toString()).toBe("0");
+    expect(FP20(SIN_INPUTS[0]).tan().toString()).toBe("0");
   });
 
-  test("sec 0°", () => { expect(RAD000.sec().toString()).toBe(TAN45.toString()); });
-  test("sec 015°", () => { expect(RAD015.sec().toString()).toBe(SEC15.toString()); });
-  test("sec 030°", () => { expect(RAD030.sec().toString()).toBe(SEC30.toString()); });
-  test("sec 045°", () => { expect(RAD045.sec().toString()).toBe(SEC45.toString()); });
-  test("sec 060°", () => { expect(RAD060.sec().toString()).toBe(SEC60.toString()); });
-  test("sec 075°", () => { expect(RAD075.sec().toString()).toBe(SEC75.toString()); });
-  test("sec 090° is large", () => { expect(() => RAD090.sec()).toThrow(); });
-  test("sec 105°", () => { expect(RAD105.sec().toString()).toBe(SEC75.neg().toString()); });
-  test("sec 120°", () => { expect(RAD120.sec().toString()).toBe(SEC60.neg().toString()); });
-  test("sec 135°", () => { expect(RAD135.sec().toString()).toBe(SEC45.neg().toString()); });
-  test("sec 150°", () => { expect(RAD150.sec().toString()).toBe(SEC30.neg().toString()); });
-  test("sec 165°", () => { expect(RAD165.sec().toString()).toBe(SEC15.neg().toString()); });
-  test("sec 180°", () => { expect(RAD180.sec().toString()).toBe(TAN45.neg().toString()); });
-  test("sec 195°", () => { expect(RAD195.sec().toString()).toBe(SEC15.neg().toString()); });
-  test("sec 210°", () => { expect(RAD210.sec().toString()).toBe(SEC30.neg().toString()); });
-  test("sec 225°", () => { expect(RAD225.sec().toString()).toBe(SEC45.neg().toString()); });
-  test("sec 240°", () => { expect(RAD240.sec().toString()).toBe(SEC60.neg().toString()); });
-  test("sec 255°", () => { expect(RAD255.sec().toString()).toBe(SEC75.neg().toString()); });
-  test("sec 270° is large", () => { expect((() => RAD270.sec())).toThrow(); });
-  test("sec 285°", () => { expect(RAD285.sec().toString()).toBe(SEC75.toString()); });
-  test("sec 300°", () => { expect(RAD300.sec().toString()).toBe(SEC60.toString()); });
-  test("sec 315°", () => { expect(RAD315.sec().toString()).toBe(SEC45.toString()); });
-  test("sec 330°", () => { expect(RAD330.sec().toString()).toBe(SEC30.toString()); });
-  test("sec 345°", () => { expect(RAD345.sec().toString()).toBe(SEC15.toString()); });
-  test("sec 360°", () => { expect(RAD360.sec().toString()).toBe(TAN45.toString()); });
-
-  test("csc 0° throws", () => { expect(() => RAD000.csc()).toThrow(); });
-  test("csc 015°", () => { expect(RAD015.csc().toString()).toBe(SEC75.toString()); });
-  test("csc 030°", () => { expect(RAD030.csc().toString()).toBe(SEC60.toString()); });
-  test("csc 045°", () => { expect(RAD045.csc().toString()).toBe(SEC45.toString()); });
-  test("csc 060°", () => { expect(RAD060.csc().toString()).toBe(SEC30.toString()); });
-  test("csc 075°", () => { expect(RAD075.csc().toString()).toBe(SEC15.toString()); });
-  test("csc 090°", () => { expect(RAD090.csc().toString()).toBe(TAN45.toString()); });
-  test("csc 105°", () => { expect(RAD105.csc().toString()).toBe(SEC15.toString()); });
-  test("csc 120°", () => { expect(RAD120.csc().toString()).toBe(SEC30.toString()); });
-  test("csc 135°", () => { expect(RAD135.csc().toString()).toBe(SEC45.toString()); });
-  test("csc 150°", () => { expect(RAD150.csc().toString()).toBe(SEC60.toString()); });
-  test("csc 165°", () => { expect(RAD165.csc().toString()).toBe(SEC75.toString()); });
-  test("csc 180° is large", () => { expect(() => RAD180.csc()).toThrow(); });
-  test("csc 195°", () => { expect(RAD195.csc().toString()).toBe(SEC75.neg().toString()); });
-  test("csc 210°", () => { expect(RAD210.csc().toString()).toBe(SEC60.neg().toString()); });
-  test("csc 225°", () => { expect(RAD225.csc().toString()).toBe(SEC45.neg().toString()); });
-  test("csc 240°", () => { expect(RAD240.csc().toString()).toBe(SEC30.neg().toString()); });
-  test("csc 255°", () => { expect(RAD255.csc().toString()).toBe(SEC15.neg().toString()); });
-  test("csc 270°", () => { expect(RAD270.csc().toString()).toBe(TAN45.neg().toString()); });
-  test("csc 285°", () => { expect(RAD285.csc().toString()).toBe(SEC15.neg().toString()); });
-  test("csc 300°", () => { expect(RAD300.csc().toString()).toBe(SEC30.neg().toString()); });
-  test("csc 315°", () => { expect(RAD315.csc().toString()).toBe(SEC45.neg().toString()); });
-  test("csc 330°", () => { expect(RAD330.csc().toString()).toBe(SEC60.neg().toString()); });
-  test("csc 345°", () => { expect(RAD345.csc().toString()).toBe(SEC75.neg().toString()); });
-  test("csc 360° is large", () => { expect(() => RAD360.csc()).toThrow(); });
-
-  test("cot 0° throws", () => { expect(() => RAD000.cot()).toThrow(); });
-  test("cot 015°", () => { expect(RAD015.cot().toString()).toBe(TAN75.toString()); });
-  test("cot 030°", () => { expect(RAD030.cot().toString()).toBe(TAN60.toString()); });
-  test("cot 045°", () => { expect(RAD045.cot().toString()).toBe(TAN45.toString()); });
-  test("cot 060°", () => { expect(RAD060.cot().toString()).toBe(TAN30.toString()); });
-  test("cot 075°", () => { expect(RAD075.cot().toString()).toBe(TAN15.toString()); });
-  test("cot 090°", () => { expect(RAD090.cot().toString()).toBe(RAD000.toString()); });
-  test("cot 105°", () => { expect(RAD105.cot().toString()).toBe(TAN15.neg().toString()); });
-  test("cot 120°", () => { expect(RAD120.cot().toString()).toBe(TAN30.neg().toString()); });
-  test("cot 135°", () => { expect(RAD135.cot().toString()).toBe(TAN45.neg().toString()); });
-  test("cot 150°", () => { expect(RAD150.cot().toString()).toBe(TAN60.neg().toString()); });
-  test("cot 165°", () => { expect(RAD165.cot().toString()).toBe(TAN75.neg().toString()); });
-  test("cot 180° is large", () => { expect(() => RAD180.cot()).toThrow(); });
-  test("cot 195°", () => { expect(RAD195.cot().toString()).toBe(TAN75.toString()); });
-  test("cot 210°", () => { expect(RAD210.cot().toString()).toBe(TAN60.toString()); });
-  test("cot 225°", () => { expect(RAD225.cot().toString()).toBe(TAN45.toString()); });
-  test("cot 240°", () => { expect(RAD240.cot().toString()).toBe(TAN30.toString()); });
-  test("cot 255°", () => { expect(RAD255.cot().toString()).toBe(TAN15.toString()); });
-  test("cot 270°", () => { expect(RAD270.cot().toString()).toBe(RAD000.toString()); });
-  test("cot 285°", () => { expect(RAD285.cot().toString()).toBe(TAN15.neg().toString()); });
-  test("cot 300°", () => { expect(RAD300.cot().toString()).toBe(TAN30.neg().toString()); });
-  test("cot 315°", () => { expect(RAD315.cot().toString()).toBe(TAN45.neg().toString()); });
-  test("cot 330°", () => { expect(RAD330.cot().toString()).toBe(TAN60.neg().toString()); });
-  test("cot 345°", () => { expect(RAD345.cot().toString()).toBe(TAN75.neg().toString()); });
-  test("cot 360° is large", () => { expect(() => RAD360.cot()).toThrow(); });
-
-  // test("asin 0°", () => { expect(RAD000.asin().toString()).toBe(RAD000.toString()); });
-  // test("asin 015°", () => { expect(SIN15.asin().toString()).toBe(RAD015.toString()); });
-  // test("asin 030°", () => { expect(SIN30.asin().toString()).toBe(RAD030.toString()); });
-  // test("asin 045°", () => { expect(SIN45.asin().toString()).toBe(RAD045.toString()); });
-  // test("asin 060°", () => { expect(SIN60.asin().toString()).toBe(RAD060.toString()); });
-  // test("asin 075°", () => { expect(SIN75.asin().toString()).toBe(RAD075.toString()); });
-  // test("asin 090°", () => { expect(TAN45.asin().toString()).toBe(RAD090.toString()); });
-  // test("asin 105°", () => { expect(SIN75.asin().toString()).toBe(RAD015.toString()); });
-  // test("asin 120°", () => { expect(SIN60.asin().toString()).toBe(RAD030.toString()); });
-  // test("asin 135°", () => { expect(SIN45.asin().toString()).toBe(RAD045.toString()); });
-  // test("asin 150°", () => { expect(SIN30.asin().toString()).toBe(RAD060.toString()); });
-  // test("asin 165°", () => { expect(SIN15.asin().toString()).toBe(RAD075.toString()); });
-  // test("asin 180°", () => { expect(RAD000.asin().toString()).toBe(RAD000.toString()); });
-  // test("asin 195°", () => { expect(SIN15.neg().asin().toString()).toBe(RAD015.neg().toString()); });
-  // test("asin 210°", () => { expect(SIN30.neg().asin().toString()).toBe(RAD030.neg().toString()); });
-  // test("asin 225°", () => { expect(SIN45.neg().asin().toString()).toBe(RAD045.neg().toString()); });
-  // test("asin 240°", () => { expect(SIN60.neg().asin().toString()).toBe(RAD060.neg().toString()); });
-  // test("asin 255°", () => { expect(SIN75.neg().asin().toString()).toBe(RAD075.neg().toString()); });
-  // test("asin 270°", () => { expect(TAN45.neg().asin().toString()).toBe(RAD090.neg().toString()); });
-  // test("asin 285°", () => { expect(SIN75.neg().asin().toString()).toBe(RAD075.neg().toString()); });
-  // test("asin 300°", () => { expect(SIN60.neg().asin().toString()).toBe(RAD060.neg().toString()); });
-  // test("asin 315°", () => { expect(SIN45.neg().asin().toString()).toBe(RAD045.neg().toString()); });
-  // test("asin 330°", () => { expect(SIN30.neg().asin().toString()).toBe(RAD030.neg().toString()); });
-  // test("asin 345°", () => { expect(SIN15.neg().asin().toString()).toBe(RAD015.neg().toString()); });
-  // test("asin 360°", () => { expect(RAD000.asin().toString()).toBe(RAD000.toString()); });
-
-  // test("acos 0°", () => { expect(TAN45.acos().toString()).toBe(RAD000.toString()); });
-  // test("acos 015°", () => { expect(SIN75.acos().toString()).toBe(RAD015.toString()); });
-  // test("acos 030°", () => { expect(SIN60.acos().toString()).toBe(RAD030.toString()); });
-  // test("acos 045°", () => { expect(SIN45.acos().toString()).toBe(RAD045.toString()); });
-  // test("acos 060°", () => { expect(SIN30.acos().toString()).toBe(RAD060.toString()); });
-  // test("acos 075°", () => { expect(SIN15.acos().toString()).toBe(RAD075.toString()); });
-  // test("acos 090°", () => { expect(RAD000.acos().toString()).toBe(RAD090.toString()); });
-  // test("acos 105°", () => { expect(SIN15.neg().acos().toString()).toBe(RAD105.toString()); });
-  // test("acos 120°", () => { expect(SIN30.neg().acos().toString()).toBe(RAD120.toString()); });
-  // test("acos 135°", () => { expect(SIN45.neg().acos().toString()).toBe(RAD135.toString()); });
-  // test("acos 150°", () => { expect(SIN60.neg().acos().toString()).toBe(RAD150.toString()); });
-  // test("acos 165°", () => { expect(SIN75.neg().acos().toString()).toBe(RAD165.toString()); });
-  // test("acos 180°", () => { expect(TAN45.neg().acos().toString()).toBe(RAD180.toString()); });
-  // test("acos 195°", () => { expect(SIN75.neg().acos().toString()).toBe(RAD165.toString()); });
-  // test("acos 210°", () => { expect(SIN60.neg().acos().toString()).toBe(RAD150.toString()); });
-  // test("acos 225°", () => { expect(SIN45.neg().acos().toString()).toBe(RAD135.toString()); });
-  // test("acos 240°", () => { expect(SIN30.neg().acos().toString()).toBe(RAD120.toString()); });
-  // test("acos 255°", () => { expect(SIN15.neg().acos().toString()).toBe(RAD105.toString()); });
-  // test("acos 270°", () => { expect(RAD000.acos().toString()).toBe(RAD090.toString()); });
-  // test("acos 285°", () => { expect(SIN15.acos().toString()).toBe(RAD075.toString()); });
-  // test("acos 300°", () => { expect(SIN30.acos().toString()).toBe(RAD060.toString()); });
-  // test("acos 315°", () => { expect(SIN45.acos().toString()).toBe(RAD045.toString()); });
-  // test("acos 330°", () => { expect(SIN60.acos().toString()).toBe(RAD030.toString()); });
-  // test("acos 345°", () => { expect(SIN75.acos().toString()).toBe(RAD015.toString()); });
-  // test("acos 360°", () => { expect(TAN45.acos().toString()).toBe(RAD000.toString()); });
-
-  // test("atan 0°",   () => { expect(RAD000.atan().toString()).toBe(RAD000.toString()); });
-  // test("atan 015°", () => { expect(TAN15.atan().toString()).toBe(RAD015.toString()); });
-  // test("atan 030°", () => { expect(TAN30.atan().toString()).toBe(RAD030.toString()); });
-  // test("atan 045°", () => { expect(TAN45.atan().toString()).toBe(RAD045.toString()); });
-  // test("atan 060°", () => { expect(TAN60.atan().toString()).toBe(RAD060.toString()); });
-  // test("atan 075°", () => { expect(TAN75.atan().toString()).toBe(RAD075.toString()); });
-  // test("atan 090°", () => { expect(RAD090.toString()).toBe(RAD090.toString()); });
-  // test("atan 105°", () => { expect(TAN75.neg().atan().toString()).toBe(RAD075.neg().toString()); });
-  // test("atan 120°", () => { expect(TAN60.neg().atan().toString()).toBe(RAD060.neg().toString()); }); 
-  // test("atan 135°", () => { expect(TAN45.neg().atan().toString()).toBe(RAD045.neg().toString()); });
-  // test("atan 150°", () => { expect(TAN30.neg().atan().toString()).toBe(RAD030.neg().toString()); });
-  // test("atan 165°", () => { expect(TAN15.neg().atan().toString()).toBe(RAD015.neg().toString()); });
-  // test("atan 180°", () => { expect(RAD000.atan().toString()).toBe(RAD000.toString()); });
-  // test("atan 195°", () => { expect(TAN15.atan().toString()).toBe(RAD015.toString()); });
-  // test("atan 210°", () => { expect(TAN30.atan().toString()).toBe(RAD030.toString()); });
-  // test("atan 225°", () => { expect(TAN45.atan().toString()).toBe(RAD045.toString()); });
-  // test("atan 240°", () => { expect(TAN60.atan().toString()).toBe(RAD060.toString()); });
-  // test("atan 255°", () => { expect(TAN75.atan().toString()).toBe(RAD075.toString()); });
-  // test("atan 270°", () => { expect(RAD090.toString()).toBe(RAD090.toString()); });
-  // test("atan 285°", () => { expect(TAN75.neg().atan().toString()).toBe(RAD075.neg().toString()); });
-  // test("atan 300°", () => { expect(TAN60.neg().atan().toString()).toBe(RAD060.neg().toString()); });
-  // test("atan 315°", () => { expect(TAN45.neg().atan().toString()).toBe(RAD045.neg().toString()); });
-  // test("atan 330°", () => { expect(TAN30.neg().atan().toString()).toBe(RAD030.neg().toString()); });
-  // test("atan 345°", () => { expect(TAN15.neg().atan().toString()).toBe(RAD015.neg().toString()); });
-  // test("atan 360°", () => { expect(RAD000.atan().toString()).toBe(RAD000.toString()); });
-
-  // test("asec 0°", () => { expect(TAN45.asec().toString()).toBe(RAD000.toString()); });
-  // test("asec 015°", () => { expect(SEC15.asec().toString()).toBe(RAD015.toString()); });
-  // test("asec 030°", () => { expect(SEC30.asec().toString()).toBe(RAD030.toString()); });
-  // test("asec 045°", () => { expect(SEC45.asec().toString()).toBe(RAD045.toString()); });
-  // test("asec 060°", () => { expect(SEC60.asec().toString()).toBe(RAD060.toString()); });
-  // test("asec 075°", () => { expect(SEC75.asec().toString()).toBe(RAD075.toString()); });
-  // test("asec 090° is large", () => { expect(() => RAD090.sec()).toThrow(); });
-  // test("asec 105°", () => { expect(SEC75.neg().asec().toString()).toBe(RAD105.toString()); });
-  // test("asec 120°", () => { expect(SEC60.neg().asec().toString()).toBe(RAD120.toString()); });
-  // test("asec 135°", () => { expect(SEC45.neg().asec().toString()).toBe(RAD135.toString()); });
-  // test("asec 150°", () => { expect(SEC30.neg().asec().toString()).toBe(RAD150.toString()); });
-  // test("asec 165°", () => { expect(SEC15.neg().asec().toString()).toBe(RAD165.toString()); });
-  // test("asec 180°", () => { expect(TAN45.neg().asec().toString()).toBe(RAD180.toString()); });
-  // test("asec 195°", () => { expect(SEC15.neg().asec().toString()).toBe(RAD165.toString()); });
-  // test("asec 210°", () => { expect(SEC30.neg().asec().toString()).toBe(RAD150.toString()); });
-  // test("asec 225°", () => { expect(SEC45.neg().asec().toString()).toBe(RAD135.toString()); });
-  // test("asec 240°", () => { expect(SEC60.neg().asec().toString()).toBe(RAD120.toString()); });
-  // test("asec 255°", () => { expect(SEC75.neg().asec().toString()).toBe(RAD105.toString()); });
-  // test("asec 270° is large", () => { expect((() => RAD270.sec())).toThrow(); });
-  // test("asec 285°", () => { expect(SEC75.asec().toString()).toBe(RAD075.toString()); });
-  // test("asec 300°", () => { expect(SEC60.asec().toString()).toBe(RAD060.toString()); });
-  // test("asec 315°", () => { expect(SEC45.asec().toString()).toBe(RAD045.toString()); });
-  // test("asec 330°", () => { expect(SEC30.asec().toString()).toBe(RAD030.toString()); });
-  // test("asec 345°", () => { expect(SEC15.asec().toString()).toBe(RAD015.toString()); });
-  // test("asec 360°", () => { expect(TAN45.asec().toString()).toBe(RAD000.toString()); });
-
-  // test("acsc 0° throws", () => { expect(() => RAD000.csc()).toThrow(); });
-  // test("acsc 015°", () => { expect(SEC75.acsc().toString()).toBe(RAD015.toString()); });
-  // test("acsc 030°", () => { expect(SEC60.acsc().toString()).toBe(RAD030.toString()); });
-  // test("acsc 045°", () => { expect(SEC45.acsc().toString()).toBe(RAD045.toString()); });
-  // test("acsc 060°", () => { expect(SEC30.acsc().toString()).toBe(RAD060.toString()); });
-  // test("acsc 075°", () => { expect(SEC15.acsc().toString()).toBe(RAD075.toString()); });
-  // test("acsc 090°", () => { expect(TAN45.acsc().toString()).toBe(RAD090.toString()); });
-  // test("acsc 105°", () => { expect(SEC15.acsc().toString()).toBe(RAD075.toString()); });
-  // test("acsc 120°", () => { expect(SEC30.acsc().toString()).toBe(RAD060.toString()); });
-  // test("acsc 135°", () => { expect(SEC45.acsc().toString()).toBe(RAD045.toString()); });
-  // test("acsc 150°", () => { expect(SEC60.acsc().toString()).toBe(RAD030.toString()); });
-  // test("acsc 165°", () => { expect(SEC75.acsc().toString()).toBe(RAD015.toString()); });
-  // test("acsc 180° is large", () => { expect(() => RAD180.csc()).toThrow(); });
-  // test("acsc 195°", () => { expect(SEC75.neg().acsc().toString()).toBe(RAD015.neg().toString()); });
-  // test("acsc 210°", () => { expect(SEC60.neg().acsc().toString()).toBe(RAD030.neg().toString()); });
-  // test("acsc 225°", () => { expect(SEC45.neg().acsc().toString()).toBe(RAD045.neg().toString()); });
-  // test("acsc 240°", () => { expect(SEC30.neg().acsc().toString()).toBe(RAD060.neg().toString()); });
-  // test("acsc 255°", () => { expect(SEC15.neg().acsc().toString()).toBe(RAD075.neg().toString()); });
-  // test("acsc 270°", () => { expect(TAN45.neg().acsc().toString()).toBe(RAD090.neg().toString()); });
-  // test("acsc 285°", () => { expect(SEC15.neg().acsc().toString()).toBe(RAD075.neg().toString()); });
-  // test("acsc 300°", () => { expect(SEC30.neg().acsc().toString()).toBe(RAD060.neg().toString()); });
-  // test("acsc 315°", () => { expect(SEC45.neg().acsc().toString()).toBe(RAD045.neg().toString()); });
-  // test("acsc 330°", () => { expect(SEC60.neg().acsc().toString()).toBe(RAD030.neg().toString()); });
-  // test("acsc 345°", () => { expect(SEC75.neg().acsc().toString()).toBe(RAD015.neg().toString()); });
-  // test("acsc 360° is large", () => { expect(() => RAD360.csc()).toThrow(); });
-
-  // test("acot 0° throws", () => { expect(() => RAD000.cot()).toThrow(); });
-  // test("acot 015°", () => { expect(TAN75.acot().toString()).toBe(RAD015.toString()); });
-  // test("acot 030°", () => { expect(TAN60.acot().toString()).toBe(RAD030.toString()); });
-  // test("acot 045°", () => { expect(TAN45.acot().toString()).toBe(RAD045.toString()); });
-  // test("acot 060°", () => { expect(TAN30.acot().toString()).toBe(RAD060.toString()); });
-  // test("acot 075°", () => { expect(TAN15.acot().toString()).toBe(RAD075.toString()); });
-  // test("acot 090°", () => { expect(RAD000.acot().toString()).toBe(RAD090.toString()); });
-  // test("acot 105°", () => { expect(TAN15.neg().acot().toString()).toBe(RAD075.neg().toString()); });
-  // test("acot 120°", () => { expect(TAN30.neg().acot().toString()).toBe(RAD060.neg().toString()); });
-  // test("acot 135°", () => { expect(TAN45.neg().acot().toString()).toBe(RAD045.neg().toString()); });
-  // test("acot 150°", () => { expect(TAN60.neg().acot().toString()).toBe(RAD030.neg().toString()); });
-  // test("acot 165°", () => { expect(TAN75.neg().acot().toString()).toBe(RAD015.neg().toString()); });
-  // test("acot 180° is large", () => { expect(() => RAD180.cot()).toThrow(); });
-  // test("acot 195°", () => { expect(TAN75.acot().toString()).toBe(RAD015.toString()); });
-  // test("acot 210°", () => { expect(TAN60.acot().toString()).toBe(RAD030.toString()); });
-  // test("acot 225°", () => { expect(TAN45.acot().toString()).toBe(RAD045.toString()); });
-  // test("acot 240°", () => { expect(TAN30.acot().toString()).toBe(RAD060.toString()); });
-  // test("acot 255°", () => { expect(TAN15.acot().toString()).toBe(RAD075.toString()); });
-  // test("acot 270°", () => { expect(RAD000.acot().toString()).toBe(RAD090.toString()); });
-  // test("acot 285°", () => { expect(TAN15.neg().acot().toString()).toBe(RAD075.neg().toString()); });
-  // test("acot 300°", () => { expect(TAN30.neg().acot().toString()).toBe(RAD060.neg().toString()); });
-  // test("acot 315°", () => { expect(TAN45.neg().acot().toString()).toBe(RAD045.neg().toString()); });
-  // test("acot 330°", () => { expect(TAN60.neg().acot().toString()).toBe(RAD030.neg().toString()); });
-  // test("acot 345°", () => { expect(TAN75.neg().acot().toString()).toBe(RAD015.neg().toString()); });
-  // test("acot 360° is large", () => { expect(() => RAD360.cot()).toThrow(); });
+  test("complementary: sin(x) = cos(90°-x)", () => {
+    for (const degrees of [15, 30, 45, 60, 75]) {
+      const sin = FP20(SIN_INPUTS[degrees]).sin();
+      const cos = FP20(SIN_INPUTS[90 - degrees]).cos();
+      const diff = units(sin.toString()) - units(cos.toString());
+      expect(diff <= 2n && -diff <= 2n).toBe(true);
+    }
+  });
 
   test("asin acos roundtrip", () => {
-    expect(FP20(SIN45.toString()).asin().sin().toString()).toBe(SIN45.toString());
-    expect(FP20(SIN45.toString()).acos().cos().toString()).toBe(SIN45.toString());
+    expect_close(FP20("0.7071067811865475244").asin().sin(), "0.7071067811865475244", 3);
+    expect_close(FP20("0.7071067811865475244").acos().cos(), "0.7071067811865475244", 3);
   });
 
   test("inverse domain validation", () => {
@@ -437,6 +178,8 @@ describe("Trigonometry", () => {
   test("static wrappers", () => {
     fixedconfig.configure({ places: 20, roundingMode: 4 });
     try {
+      const FP16 = FixedPrecision.create({ places: 16, roundingMode: 4 });
+      const FP8 = FixedPrecision.create({ places: 8, roundingMode: 4 });
       expect(FixedPrecision.sin(FP16("0.5")).toString()).toBe(FP16("0.5").sin().toString());
       expect(FixedPrecision.cos(FP8("0.5")).toString()).toBe(FP8("0.5").cos().toString());
       expect(FixedPrecision.tan(FP16("0.5")).toString()).toBe(FP16("0.5").tan().toString());
@@ -447,4 +190,3 @@ describe("Trigonometry", () => {
     }
   });
 });
-
