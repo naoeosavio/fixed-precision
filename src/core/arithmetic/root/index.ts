@@ -27,22 +27,41 @@ export function root_value(value: bigint, n: number, scale: bigint): bigint {
   const target = value * ipow(scale, n - 1);
 
   let current = root_initial_guess(target, n);
-  let next = (current * (index - 1n) + target / ipow(current, n - 1)) / index;
+  let p = ipow(current, n - 1);
+  let c = p * current;
+  let next = (current * (index - 1n) + target / p) / index;
 
   while (next < current) {
     current = next;
-    next = (current * (index - 1n) + target / ipow(current, n - 1)) / index;
+    p = ipow(current, n - 1);
+    c = p * current;
+    next = (current * (index - 1n) + target / p) / index;
   }
 
-  while (ipow(current, n) > target) {
-    current -= 1n;
-  }
-
-  while (true) {
-    const candidate = current + 1n;
-    if (ipow(candidate, n) > target) {
-      return current;
+  if (c > target) {
+    let steps = 0;
+    do {
+      current -= 1n;
+      c = ipow(current, n);
+      steps++;
+    } while (c > target && steps < 8);
+    if (c > target) {
+      let lo = 0n;
+      let hi = current;
+      while (hi - lo > 1n) {
+        const mid = (lo + hi) >> 1n;
+        if (ipow(mid, n) > target) {
+          hi = mid;
+        } else {
+          lo = mid;
+        }
+      }
+      current = lo;
     }
-    current = candidate;
   }
+
+  while (ipow(current + 1n, n) <= target) {
+    current += 1n;
+  }
+  return current;
 }

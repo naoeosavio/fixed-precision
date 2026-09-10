@@ -122,8 +122,12 @@ export default class FixedPrecision {
   }
 
   protected fromRaw(rawValue: bigint): FixedPrecision {
-    const instance = new FixedPrecision(0n, this.ctx);
-    instance.value = rawValue;
+    const instance = Object.create(
+      FixedPrecision.prototype,
+    ) as unknown as FixedPrecision;
+    const writable = instance as unknown as { ctx: FPContext; value: bigint };
+    writable.ctx = this.ctx;
+    writable.value = rawValue;
     return instance;
   }
 
@@ -131,8 +135,12 @@ export default class FixedPrecision {
     rawValue: bigint,
     ctx: FPContext,
   ): FixedPrecision {
-    const instance = new FixedPrecision(0n, ctx);
-    instance.value = rawValue;
+    const instance = Object.create(
+      FixedPrecision.prototype,
+    ) as unknown as FixedPrecision;
+    const writable = instance as unknown as { ctx: FPContext; value: bigint };
+    writable.ctx = ctx;
+    writable.value = rawValue;
     return instance;
   }
 
@@ -147,6 +155,19 @@ export default class FixedPrecision {
       return value;
     }
     return new FixedPrecision(value, this.ctx);
+  }
+
+  private coerceRaw(value: FixedPrecisionValue): bigint {
+    if (value instanceof FixedPrecision) {
+      if (
+        this.ctx.places !== value.ctx.places ||
+        this.ctx.roundingMode !== value.ctx.roundingMode
+      ) {
+        throw new Error("Cannot operate on different precisions");
+      }
+      return value.value;
+    }
+    return FixedPrecision.toScaled(value, this.ctx);
   }
 
   private static toScaled(value: FixedPrecisionValue, ctx: FPContext): bigint {
@@ -222,27 +243,27 @@ export default class FixedPrecision {
   }
 
   public cmp(other: FixedPrecisionValue): Comparison {
-    return compareValues(this.value, this.coerce(other).value);
+    return compareValues(this.value, this.coerceRaw(other));
   }
 
   public eq(other: FixedPrecisionValue): boolean {
-    return equalsValue(this.value, this.coerce(other).value);
+    return equalsValue(this.value, this.coerceRaw(other));
   }
 
   public gt(other: FixedPrecisionValue): boolean {
-    return greaterThanValue(this.value, this.coerce(other).value);
+    return greaterThanValue(this.value, this.coerceRaw(other));
   }
 
   public gte(other: FixedPrecisionValue): boolean {
-    return greaterThanOrEqualValue(this.value, this.coerce(other).value);
+    return greaterThanOrEqualValue(this.value, this.coerceRaw(other));
   }
 
   public lt(other: FixedPrecisionValue): boolean {
-    return lessThanValue(this.value, this.coerce(other).value);
+    return lessThanValue(this.value, this.coerceRaw(other));
   }
 
   public lte(other: FixedPrecisionValue): boolean {
-    return lessThanOrEqualValue(this.value, this.coerce(other).value);
+    return lessThanOrEqualValue(this.value, this.coerceRaw(other));
   }
 
   public cmpRaw(other: FixedPrecisionValue): Comparison {
@@ -286,15 +307,15 @@ export default class FixedPrecision {
   }
 
   public and(other: FixedPrecisionValue): boolean {
-    return logicalAndValues(this.value, this.coerce(other).value);
+    return logicalAndValues(this.value, this.coerceRaw(other));
   }
 
   public or(other: FixedPrecisionValue): boolean {
-    return logicalOrValues(this.value, this.coerce(other).value);
+    return logicalOrValues(this.value, this.coerceRaw(other));
   }
 
   public xor(other: FixedPrecisionValue): boolean {
-    return logicalXorValues(this.value, this.coerce(other).value);
+    return logicalXorValues(this.value, this.coerceRaw(other));
   }
 
   public isInteger(): boolean {
@@ -409,8 +430,8 @@ export default class FixedPrecision {
     min: FixedPrecisionValue,
     max: FixedPrecisionValue,
   ): FixedPrecision {
-    const minRaw = this.coerce(min).value;
-    const maxRaw = this.coerce(max).value;
+    const minRaw = this.coerceRaw(min);
+    const maxRaw = this.coerceRaw(max);
     if (minRaw > maxRaw) {
       throw new Error("min must be less than or equal to max");
     }
@@ -1364,7 +1385,7 @@ export default class FixedPrecision {
     let result = FixedPrecision.normalizeTo(first, ctx);
     for (const item of values.slice(1)) {
       const next = FixedPrecision.normalizeTo(item, ctx);
-      if (next.lt(result)) result = next;
+      if (next.value < result.value) result = next;
     }
     return result;
   }
@@ -1382,7 +1403,7 @@ export default class FixedPrecision {
     let result = FixedPrecision.normalizeTo(first, ctx);
     for (const item of values.slice(1)) {
       const next = FixedPrecision.normalizeTo(item, ctx);
-      if (next.gt(result)) result = next;
+      if (next.value > result.value) result = next;
     }
     return result;
   }
