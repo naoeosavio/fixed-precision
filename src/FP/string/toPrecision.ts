@@ -4,7 +4,7 @@ import {
   type FixedPrecisionOperand,
   fromRawWithContext,
   type RequiredSdOptions,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 import { stringify } from "./stringify";
@@ -14,7 +14,7 @@ export function toPrecision(
   value: FixedPrecisionOperand,
   options: RequiredSdOptions,
 ): string {
-  const ctx = resolveContext([value]);
+  const ctx = resolveContextSingle(value);
   const { sd, roundingMode: mode } = options;
   const rawValue = toScaled(value, ctx);
   if (rawValue === 0n) {
@@ -44,7 +44,9 @@ export function toPrecision(
     return formatted;
   }
 
-  return stringify(fromRawWithContext(raw, ctx))
-    .replace(/(\.\d*?)0+$/, "$1")
-    .replace(/\.$/, "");
+  const str = stringify(fromRawWithContext(raw, ctx));
+  if (!str.includes(".")) {
+    return str;
+  }
+  return str.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
 }

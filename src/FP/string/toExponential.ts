@@ -3,7 +3,7 @@ import { shiftedBy } from "../arithmetic/shiftedBy";
 import {
   type FixedPrecisionOperand,
   type PlacesOptions,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 import { toFixed } from "./toFixed";
@@ -12,7 +12,7 @@ export function toExponential(
   value: FixedPrecisionOperand,
   options?: PlacesOptions,
 ): string {
-  const ctx = resolveContext([value]);
+  const ctx = resolveContextSingle(value);
   const effDp = options?.places ?? ctx.places;
   const rm = options?.roundingMode ?? ctx.roundingMode;
   const raw = toScaled(value, ctx);

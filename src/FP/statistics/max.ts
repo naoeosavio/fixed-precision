@@ -4,7 +4,6 @@ import {
   normalizeTo,
   resolveContext,
 } from "../construction";
-import { greaterThan } from "../relational/greaterThan";
 
 export function max(
   value: FixedPrecisionOperand | FixedPrecisionOperand[],
@@ -21,7 +20,7 @@ export function max(
   let result = normalizeTo(first, ctx);
   for (const item of items.slice(1)) {
     const next = normalizeTo(item, ctx);
-    if (greaterThan(next, result)) result = next;
+    if (next.value > result.value) result = next;
   }
   return result;
 }

@@ -4,7 +4,6 @@ import {
   normalizeTo,
   resolveContext,
 } from "../construction";
-import { lessThan } from "../relational/lessThan";
 
 export function min(
   value: FixedPrecisionOperand | FixedPrecisionOperand[],
@@ -21,7 +20,7 @@ export function min(
   let result = normalizeTo(first, ctx);
   for (const item of items.slice(1)) {
     const next = normalizeTo(item, ctx);
-    if (lessThan(next, result)) result = next;
+    if (next.value < result.value) result = next;
   }
   return result;
 }

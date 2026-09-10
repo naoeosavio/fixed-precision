@@ -3,7 +3,7 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromRawWithContext,
-  resolveContext,
+  resolveContextArrays,
   toScaled,
 } from "../construction";
 
@@ -11,7 +11,7 @@ export function dot(
   a: FixedPrecisionOperand[],
   b: FixedPrecisionOperand[],
 ): FixedPrecisionData {
-  const ctx = resolveContext([...a, ...b]);
+  const ctx = resolveContextArrays(a, b);
   const rawA = a.map((v) => toScaled(v, ctx));
   const rawB = b.map((v) => toScaled(v, ctx));
   return fromRawWithContext(dot_product(rawA, rawB, ctx.SCALE), ctx);

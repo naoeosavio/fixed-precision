@@ -2,7 +2,7 @@ import { to_number_with_ctx } from "../../core/numeric/toNumber";
 import { scale } from "../arithmetic/scale";
 import {
   type FixedPrecisionOperand,
-  resolveContext,
+  resolveContextSingle,
   toScaled,
 } from "../construction";
 
@@ -11,7 +11,7 @@ export function toNumber(
   options?: { places?: number },
 ): number {
   if (options?.places === undefined) {
-    const ctx = resolveContext([value]);
+    const ctx = resolveContextSingle(value);
     return to_number_with_ctx(toScaled(value, ctx), ctx);
   }
 
