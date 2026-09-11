@@ -41,9 +41,6 @@ function from_short_integer_string_with_ctx(
 ): bigint {
   const SCALE_NUM = ctx.SCALENUMBER;
   const num = Number(str);
-  if (!Number.isFinite(num)) {
-    return BigInt(str) * ctx.SCALE;
-  }
   if (Math.abs(num) <= Number.MAX_SAFE_INTEGER / SCALE_NUM) {
     return BigInt(num * SCALE_NUM);
   }

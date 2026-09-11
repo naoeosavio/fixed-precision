@@ -14,7 +14,7 @@ export function format_base_quotient(
   const fractional_part = abs_quotient - integer_part * scale;
 
   if (fractional_part === 0n) {
-    return `${sign}${integer_part.toString(radix)}`;
+    return `${sign}${integer_part.toString(radix)}.${"0".repeat(fractional_places)}`;
   }
 
   const { n: stripped_frac, c: trimmed_frac } = cleanTrailingZeros(

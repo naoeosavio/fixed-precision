@@ -1,6 +1,7 @@
 import type { FPContext, RoundingMode } from "../../../FixedPrecision";
 import { round_to_scale_value } from "../../arithmetic";
-import { assert_significant_digits } from "./assert_significant_digits";
+import { assert_significant_digits } from "../../arithmetic/internal/assert_significant_digits";
+import { zero_with_precision } from "../../utils";
 import { base_exponent } from "./base_exponent";
 import { base_power } from "./base_power";
 import { format_base_quotient } from "./format_base_quotient";
@@ -15,7 +16,7 @@ export function to_base_with_significant_digits(
   assert_significant_digits(sd);
 
   if (value === 0n) {
-    return "0";
+    return zero_with_precision(sd);
   }
 
   const exponent = base_exponent(value, ctx.SCALE, radix);

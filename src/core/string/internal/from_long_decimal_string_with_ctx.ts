@@ -11,7 +11,7 @@ export function from_long_decimal_string_with_ctx(
   const int_str = str.slice(0, dot_index);
   const fac_str = str.slice(dot_index + 1, dot_index + 1 + P);
   const faclen = fac_str.length;
-  const new_len = P >= faclen ? P - faclen : P;
+  const new_len = P - faclen;
 
   if (dot_index < 16) {
     return from_long_decimal_with_number_integer(

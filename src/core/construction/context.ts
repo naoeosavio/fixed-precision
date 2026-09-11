@@ -1,6 +1,9 @@
 import { powerOfTen } from "../utils";
 import type { FixedPrecisionConfig, FPContext, RoundingMode } from "./types";
 
+export const MAX_PLACES = 20;
+export const DEFAULT_ROUNDING_MODE: RoundingMode = 4;
+
 export function makeContext(
   places: number,
   roundingMode: RoundingMode,
@@ -14,18 +17,34 @@ export function makeContext(
   };
 }
 
-function assertPlaces(places: number): void {
-  if (!Number.isInteger(places) || places < 0 || places > 20) {
+export function assertPlaces(places: number): void {
+  if (!Number.isInteger(places) || places < 0 || places > MAX_PLACES) {
     throw new Error("Decimal places must be an integer between 0 and 20");
   }
 }
 
-function assertRoundingMode(value: number): asserts value is RoundingMode {
+export function assertRoundingMode(
+  value: number,
+): asserts value is RoundingMode {
   if (!Number.isInteger(value) || value < 0 || value > 8) {
     throw new Error(
       "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8",
     );
   }
+}
+
+export function preferContext(
+  best: FPContext | null,
+  candidate: FPContext,
+): FPContext {
+  if (!best) return candidate;
+  if (candidate.places !== best.places) {
+    return candidate.places > best.places ? candidate : best;
+  }
+  if (candidate.roundingMode !== best.roundingMode) {
+    return candidate.roundingMode < best.roundingMode ? candidate : best;
+  }
+  return best;
 }
 
 export function configureContext(
@@ -54,7 +73,7 @@ export function FactoryContext(config: FixedPrecisionConfig): FPContext {
 
   assertPlaces(config.places);
 
-  const roundingMode = config.roundingMode ?? 4;
+  const roundingMode = config.roundingMode ?? DEFAULT_ROUNDING_MODE;
   assertRoundingMode(roundingMode);
 
   return makeContext(config.places, roundingMode);
