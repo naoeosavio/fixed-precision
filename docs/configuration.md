@@ -57,7 +57,31 @@ FixedPrecision.configure({ places: 8 });
 > The **functional API** (`fixed-precision/add`, `fixed-precision/round`, ...)
 > goes further: it has no global configuration at all. Its default context is a
 > frozen constant, and precision is controlled through factories and operands.
-> See [Functional API Design](functional-design.md).
+> In particular, `FixedPrecision.configure()` does **not** affect functional
+> wrappers — the default functional context stays at 8 places / HALF_UP
+> regardless of global configuration. See [Functional API Design](functional-design.md).
+
+## Mixed-Precision Operations
+
+Instance methods (`add`, `eq`, `cmp`, `mul`, `div`, ...) compare only `places`
+when coercing operands. The `roundingMode` is a property of the *operation*,
+not of the value — so two values with the same `places` but different
+`roundingMode` combine normally (like decimal.js):
+
+```ts
+const A = FixedPrecision.create({ places: 8, roundingMode: 0 });
+const B = FixedPrecision.create({ places: 8, roundingMode: 8 });
+
+A("1.5").eq(B("1.5")); // true — no throw
+A("2").add(B("3"));    // "5"
+```
+
+Operands with different `places` still throw
+`"Cannot operate on different precisions"`.
+
+Static aggregations (`min`, `max`, `sum`, ...) resolve mixed contexts
+deterministically: the context with more `places` wins; on a tie in `places`,
+the smaller `roundingMode` wins (`MAX_PLACES` = 20 short-circuits the search).
 
 ## Factory Configuration
 

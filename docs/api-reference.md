@@ -1018,7 +1018,8 @@ Each FixedPrecision instance has a context with:
 ## Functional Composition
 
 `fixed-precision/pipe` exports exactly three functions: `pipe`, `compose`
-and `partial`.
+and `partial`. They are also re-exported from the functional barrel, so
+`import { pipe } from "fixed-precision"` works too.
 Pipelines consume the standalone functions (`fixed-precision/add`,
 `fixed-precision/round`, ...) directly and return plain `FixedPrecisionData`
 or whatever the terminal stage produces — no class instances, no wrappers.
@@ -1068,5 +1069,7 @@ Notes:
   their `places`.
 - `pipe(...stages)(value)` applies left-to-right; `compose(...stages)(value)`
   applies right-to-left (`compose(stringify, partial(add, "2"), sqrt)("4") ===
-  "4"`). Precise typings cover up to ten pure-unary stages; pipelines
-  containing bound stages fall back to a loose overload by design.
+  "4"`). Typings are recursive and tail-call optimized, so chains up to
+  TypeScript's tail-recursion limit (~1000 stages) stay fully typed —
+  including bound stages from `partial` (mismatched stages resolve to `never`,
+  failing compilation instead of silently falling back to `any`).

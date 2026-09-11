@@ -72,6 +72,13 @@ value.toPrecision(6); // "123.457"
 value.toPrecision(2); // "1.2e2"
 ```
 
+Zero is padded to `sd` significant digits, like `Number.prototype.toPrecision`:
+
+```ts
+new FixedPrecision("0").toPrecision(3); // "0.00"
+new FixedPrecision("0").toPrecision(1); // "0"
+```
+
 ### `toJSON()`
 
 Returns the string representation of the value. Used automatically by `JSON.stringify()`.
@@ -183,6 +190,20 @@ const value = new FixedPrecision("255.50000000");
 value.toHex(0);  // "ff" (255 in hex)
 value.toHex(2);  // "ff.8"
 ```
+
+**Significant-digits padding:** when `sd` is given, the output always carries
+`sd` significant digits — whole results are padded with fractional zeros and
+zero renders as `0.00…`:
+
+```ts
+new FixedPrecision("1").toHex(3); // "1.00"
+new FixedPrecision("0").toHex(3); // "0.00"
+```
+
+**Output limit:** `sd` must be an integer in `[1, 1e6)` (`"Invalid precision"`
+otherwise), so a single `toBase` call produces at most ~1e6 digits — e.g.
+`toBase(0.001, 16, { sd: 999999 })` emits roughly 1MB of text. Keep `sd` small
+unless you really need that many digits.
 
 ## Constructor — Creating from Different Types
 

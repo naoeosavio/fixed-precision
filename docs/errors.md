@@ -246,7 +246,7 @@ new FixedPrecision("10.00").shiftedBy(-1);
 
 ```ts
 new FixedPrecision("10.00").prec(0);
-// Error: Precision must be a positive integer
+// Error: Invalid precision
 
 new FixedPrecision("10.00").toPrecision(0);
 // Error: Invalid precision

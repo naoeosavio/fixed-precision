@@ -186,9 +186,21 @@ Raw lambdas are equally valid stages, so any shape is reachable without extra
 API surface:
 
 ```ts
-pipe(
+const A = pipe(
+  partial(add, "2"),
+  partial(multiply, "3"),
+  partial(stringify),
+)("1"); // "9"
+
+const B = pipe(
   (x: string) => add("2", x),
-  (data: FixedPrecisionData) => multiply("3", data),
+  (data) => multiply("3", data),
+  stringify,
+)("1"); // "9"
+
+const C = pipe(
+  partial(add, "2"),
+  (data) => multiply("3", data),
   stringify,
 )("1"); // "9"
 ```
