@@ -7,6 +7,7 @@ export * from "./fractions";
 export * from "./logical";
 export * from "./matrix";
 export * from "./numeric";
+export * from "./pipe";
 export * from "./probability";
 export * from "./relational";
 export * from "./statistics";
