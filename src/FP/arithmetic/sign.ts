@@ -8,7 +8,7 @@ import {
 
 function signNumber(value: number): number {
   if (Number.isNaN(value)) {
-    return NaN;
+    throw new Error("sign requires a numeric value, got NaN");
   }
 
   return value === 0 ? value : value < 0 ? -1 : 1;
@@ -17,7 +17,7 @@ function signNumber(value: number): number {
 function signString(value: string): number {
   const numericValue = Number(value);
   if (Number.isNaN(numericValue)) {
-    return NaN;
+    throw new Error(`sign requires a numeric value, got "${value}"`);
   }
 
   if (numericValue === 0) {

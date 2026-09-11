@@ -1,3 +1,8 @@
+import {
+  assertPlaces,
+  assertRoundingMode,
+  DEFAULT_ROUNDING_MODE,
+} from "../../core/construction/context";
 import type { FixedPrecisionConfig, FPContext, RoundingMode } from "./types";
 
 const CONTEXT_CACHE = new Map<number, FPContext>();
@@ -21,20 +26,6 @@ export function makeContext(
   return cached;
 }
 
-function assertPlaces(places: number): void {
-  if (!Number.isInteger(places) || places < 0 || places > 20) {
-    throw new Error("Decimal places must be an integer between 0 and 20");
-  }
-}
-
-function assertRoundingMode(value: number): asserts value is RoundingMode {
-  if (!Number.isInteger(value) || value < 0 || value > 8) {
-    throw new Error(
-      "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8",
-    );
-  }
-}
-
 export function FactoryContext(config: FixedPrecisionConfig): FPContext {
   if (config.places === undefined) {
     throw new Error("Decimal places must be specified in factory config");
@@ -42,7 +33,7 @@ export function FactoryContext(config: FixedPrecisionConfig): FPContext {
 
   assertPlaces(config.places);
 
-  const roundingMode = config.roundingMode ?? 4;
+  const roundingMode = config.roundingMode ?? DEFAULT_ROUNDING_MODE;
   assertRoundingMode(roundingMode);
 
   return makeContext(config.places, roundingMode);

@@ -1,4 +1,5 @@
 import { scale_value } from "../../core/arithmetic/scale";
+import { MAX_PLACES, preferContext } from "../../core/construction/context";
 import { from_number_with_ctx } from "../../core/numeric/fromNumber";
 import { from_string_with_ctx } from "../../core/string/fromString";
 import { makeContext } from "./context";
@@ -88,10 +89,8 @@ export function resolveContext(values: FixedPrecisionOperand[]): FPContext {
   let best: FPContext | null = null;
   for (const v of values) {
     if (isFixedPrecisionData(v)) {
-      if (!best || v.places > best.places) {
-        best = v;
-        if (best.places === 20) return best;
-      }
+      best = preferContext(best, v);
+      if (best.places === MAX_PLACES) return best;
     }
   }
   return best ?? DEFAULT_CONTEXT;
@@ -107,7 +106,7 @@ export function resolveContextPair(
 ): FPContext {
   if (isFixedPrecisionData(a)) {
     if (isFixedPrecisionData(b)) {
-      return a.places >= b.places ? a : b;
+      return preferContext(a, b);
     }
     return a;
   }
@@ -120,9 +119,9 @@ function bestOfList(
 ): FPContext | null {
   for (let i = 0; i < list.length; i++) {
     const v = list[i];
-    if (isFixedPrecisionData(v) && (!best || v.places > best.places)) {
-      best = v;
-      if (best.places === 20) return best;
+    if (isFixedPrecisionData(v)) {
+      best = preferContext(best, v);
+      if (best.places === MAX_PLACES) return best;
     }
   }
   return best;
