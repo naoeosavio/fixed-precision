@@ -24,7 +24,9 @@ import {
   FactoryContext,
   type FixedPrecisionConfig,
   type FPContext,
+  MAX_PLACES,
   makeContext,
+  preferContext,
   type RoundingMode,
 } from "./core/construction";
 import { fraction_value } from "./core/fractions/fraction";
@@ -81,6 +83,7 @@ import {
   tan_value,
   tanh_value,
 } from "./core/trigonometry";
+import { zero_with_precision } from "./core/utils";
 import { toExponential as toExponential_string } from "./FP/string/toExponential";
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
@@ -146,10 +149,7 @@ export default class FixedPrecision {
 
   private coerce(value: FixedPrecisionValue): FixedPrecision {
     if (value instanceof FixedPrecision) {
-      if (
-        this.ctx.places !== value.ctx.places ||
-        this.ctx.roundingMode !== value.ctx.roundingMode
-      ) {
+      if (this.ctx.places !== value.ctx.places) {
         throw new Error("Cannot operate on different precisions");
       }
       return value;
@@ -159,10 +159,7 @@ export default class FixedPrecision {
 
   private coerceRaw(value: FixedPrecisionValue): bigint {
     if (value instanceof FixedPrecision) {
-      if (
-        this.ctx.places !== value.ctx.places ||
-        this.ctx.roundingMode !== value.ctx.roundingMode
-      ) {
+      if (this.ctx.places !== value.ctx.places) {
         throw new Error("Cannot operate on different precisions");
       }
       return value.value;
@@ -194,10 +191,8 @@ export default class FixedPrecision {
     let best: FPContext | null = null;
     for (const v of values) {
       if (v instanceof FixedPrecision) {
-        if (!best || v.ctx.places > best.places) {
-          best = v.ctx;
-          if (best.places === 20) return best;
-        }
+        best = preferContext(best, v.ctx);
+        if (best.places === MAX_PLACES) return best;
       }
     }
     return best ?? FixedPrecision.defaultContext;
@@ -729,7 +724,7 @@ export default class FixedPrecision {
 
   public toPrecision(sd: number, rm?: RoundingMode): string {
     if (this.value === 0n) {
-      return "0";
+      return zero_with_precision(sd);
     }
     const raw = precision_value(
       this.value,
@@ -737,7 +732,7 @@ export default class FixedPrecision {
       rm ?? this.ctx.roundingMode,
       this.ctx,
     );
-    if (raw === 0n) return "0";
+    if (raw === 0n) return zero_with_precision(sd);
 
     const absRaw = raw < 0n ? -raw : raw;
     const digitLength = absRaw.toString().length;
@@ -817,13 +812,17 @@ export default class FixedPrecision {
   }
 
   private static signOfNumber(value: number): number {
-    if (Number.isNaN(value)) return NaN;
+    if (Number.isNaN(value)) {
+      throw new Error("sign requires a numeric value, got NaN");
+    }
     return value === 0 ? value : value < 0 ? -1 : 1;
   }
 
   private static signOfString(value: string): number {
     const numericValue = Number(value);
-    if (Number.isNaN(numericValue)) return NaN;
+    if (Number.isNaN(numericValue)) {
+      throw new Error(`sign requires a numeric value, got "${value}"`);
+    }
     if (numericValue === 0) {
       return value.trim().startsWith("-") ? -0 : 0;
     }

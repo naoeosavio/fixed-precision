@@ -6,15 +6,20 @@ import {
   sqrt_value,
 } from "./core/arithmetic";
 import {
+  assertPlaces,
+  assertRoundingMode,
   type Comparison,
+  DEFAULT_ROUNDING_MODE,
   type FixedPrecisionConfig,
   type FPContext,
+  MAX_PLACES,
   makeContext,
+  preferContext,
   type RoundingMode,
 } from "./core/construction";
 import { from_number_with_ctx, to_number_with_ctx } from "./core/numeric";
 import { from_string_with_ctx, to_string_with_ctx } from "./core/string";
-import { precisionPowerOfTen } from "./core/utils";
+import { precisionPowerOfTen, zero_with_precision } from "./core/utils";
 import { toExponential as toExponential_string } from "./FP/string/toExponential";
 
 export type {
@@ -26,20 +31,6 @@ export type {
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
 
-function assertPlaces(places: number, message: string): void {
-  if (!Number.isInteger(places) || places < 0 || places > 20) {
-    throw new Error(message);
-  }
-}
-
-function assertRoundingMode(rm: number): asserts rm is RoundingMode {
-  if (!Number.isInteger(rm) || rm < 0 || rm > 8) {
-    throw new Error(
-      "Invalid rounding mode. Must be 0, 1, 2, 3, 4, 5, 6, 7 or 8",
-    );
-  }
-}
-
 export default class FixedPrecision {
   private value: bigint;
   private readonly ctx: FPContext;
@@ -50,7 +41,7 @@ export default class FixedPrecision {
     const roundingMode =
       config.roundingMode ?? FixedPrecision.defaultContext.roundingMode;
 
-    assertPlaces(places, "Decimal places must be an integer between 0 and 20");
+    assertPlaces(places);
     assertRoundingMode(roundingMode);
     FixedPrecision.defaultContext = makeContext(places, roundingMode);
   }
@@ -58,11 +49,8 @@ export default class FixedPrecision {
   public static create(
     config: FixedPrecisionConfig,
   ): (val: FixedPrecisionValue) => FixedPrecision {
-    assertPlaces(
-      config.places,
-      "Decimal places must be an integer between 0 and 20",
-    );
-    const roundingMode = config.roundingMode ?? 4;
+    assertPlaces(config.places);
+    const roundingMode = config.roundingMode ?? DEFAULT_ROUNDING_MODE;
     assertRoundingMode(roundingMode);
     const ctx = makeContext(config.places, roundingMode);
     return (value: FixedPrecisionValue) => new FixedPrecision(value, ctx);
@@ -128,10 +116,8 @@ export default class FixedPrecision {
     let best: FPContext | null = null;
     for (const v of values) {
       if (v instanceof FixedPrecision) {
-        if (!best || v.ctx.places > best.places) {
-          best = v.ctx;
-          if (best.places === 20) return best;
-        }
+        best = preferContext(best, v.ctx);
+        if (best.places === MAX_PLACES) return best;
       }
     }
     return best ?? FixedPrecision.defaultContext;
@@ -283,7 +269,7 @@ export default class FixedPrecision {
     );
   }
 
-  public tiems(other: FixedPrecisionValue): FixedPrecision {
+  public times(other: FixedPrecisionValue): FixedPrecision {
     return this.fromRaw(this.value * this.toScaledValue(other));
   }
 
@@ -379,7 +365,7 @@ export default class FixedPrecision {
     rm: RoundingMode = this.ctx.roundingMode,
   ): FixedPrecision {
     const nextValue = scale_value(this.value, newScale, rm, this.ctx);
-    const nextCtx = makeContext(newScale, this.ctx.roundingMode);
+    const nextCtx = makeContext(newScale, rm);
     const instance = new FixedPrecision(0n, nextCtx);
     instance.value = nextValue;
     return instance;
@@ -438,7 +424,7 @@ export default class FixedPrecision {
 
   public toPrecision(sd: number, rm?: RoundingMode): string {
     if (sd >= 1e6) throw new Error("Invalid precision");
-    if (this.value === 0n) return "0";
+    if (this.value === 0n) return zero_with_precision(sd);
 
     const raw = precision_value(
       this.value,
@@ -446,7 +432,7 @@ export default class FixedPrecision {
       rm ?? this.ctx.roundingMode,
       this.ctx,
     );
-    if (raw === 0n) return "0";
+    if (raw === 0n) return zero_with_precision(sd);
 
     const absRaw = raw < 0n ? -raw : raw;
     const digitLength = absRaw.toString().length;
