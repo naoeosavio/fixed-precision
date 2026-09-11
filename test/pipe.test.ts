@@ -92,6 +92,57 @@ describe("compose", () => {
     );
     expect(calc("1")).toBe("5");
   });
+
+  test("typed chains beyond 10 stages keep full type safety (4.7)", () => {
+    const by1 = partial(add, "1");
+    const by2 = partial(multiply, "2");
+    const piped = pipe(
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+      stringify,
+    );
+    expect(piped("0")).toBe("63");
+    const composed = compose(
+      stringify,
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+      by2,
+      by1,
+    );
+    expect(composed("0")).toBe("63");
+  });
+
+  test("tail-recursive typings survive 999 stages (5)", () => {
+    type Repeat<Stage, Count extends number, Acc extends Stage[] = []> =
+      Acc["length"] extends Count
+        ? Acc
+        : Repeat<Stage, Count, [...Acc, Stage]>;
+
+    const by1 = partial(add, "1");
+    const many_by_1 = Array.from(
+      { length: 999 },
+      () => by1,
+    ) as unknown as Repeat<typeof by1, 999>;
+
+    expect(stringify(pipe(...many_by_1)("0"))).toBe("999");
+    expect(stringify(compose(...many_by_1)("0"))).toBe("999");
+  });
 });
 
 type Fn = (...args: any[]) => any;

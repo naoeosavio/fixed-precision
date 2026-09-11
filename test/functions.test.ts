@@ -531,7 +531,7 @@ describe("functions: options object", () => {
   });
 
   test("toBase keeps base positional and sd/roundingMode in options", () => {
-    expect(toBase("255", 16, { sd: 8 })).toBe(new FixedPrecision("255").toHex());
+    expect(toBase("255", 16, { sd: 8 })).toBe("ff.000000");
     expect(toBase("255", 16, {})).toBe(toBase("255", 16));
   });
 

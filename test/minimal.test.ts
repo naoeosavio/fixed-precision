@@ -33,3 +33,35 @@ describe("Minimal mod", () => {
     expect(M8("12.34").mod("5.67").toString()).toBe("1.72");
   });
 });
+
+describe("Minimal scale carries the requested roundingMode (4.5)", () => {
+  const M8 = Minimal.create({ places: 8, roundingMode: 4 });
+
+  test("scale keeps values exact regardless of rm", () => {
+    const p2 = M8("1.115").scale(2, 1);
+    expect(p2.toString()).toBe("1.11");
+    expect(p2.toFixed(2, 1)).toBe("1.11");
+  });
+
+  test("operations after scale respect the rm passed to scale", () => {
+    const p2 = M8("2.345").scale(2, 1);
+    expect(p2.toString()).toBe("2.34");
+    expect(p2.plus(p2).toString()).toBe("4.68");
+    expect(Minimal.max(p2, M8("1.11")).toString()).toBe("2.34");
+    expect(Minimal.min(p2, M8("1.11")).toString()).toBe("1.11");
+    expect(Minimal.sum(p2, M8("1.11")).toString()).toBe("3.45");
+  });
+
+  test("scale without rm keeps the source roundingMode", () => {
+    const p2 = M8("2.345").scale(2);
+    expect(p2.toFixed(2, 4)).toBe("2.35");
+    expect(p2.plus(p2).toString()).toBe("4.7");
+  });
+
+  test("scale with a different rm does not contaminate the default context", () => {
+    const defaultScaled = M8("1.005").scale(2, 1);
+    expect(defaultScaled.toString()).toBe("1");
+    const fresh = M8("1.5").scale(2);
+    expect(fresh.plus(fresh).toString()).toBe("3");
+  });
+});

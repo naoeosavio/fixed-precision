@@ -107,9 +107,7 @@ describe("String", () => {
   });
 
   test("prec validation", () => {
-    expect(() => FP8("9876.54321").prec(0)).toThrow(
-      "Precision must be a positive integer",
-    );
+    expect(() => FP8("9876.54321").prec(0)).toThrow("Invalid precision");
     expect(() => FP8("9876.54321").prec(2, 9 as RoundingMode)).toThrow(
       "Rounding mode 9 is not supported.",
     );
@@ -146,6 +144,22 @@ describe("String", () => {
     expect(() => FP8("10.625").toBinary(0)).toThrow("Invalid precision");
     expect(() => FP8("10.625").toOctal(1.5)).toThrow("Invalid precision");
     expect(() => FP8("10.625").toHex(1e6)).toThrow("Invalid precision");
+  });
+
+  test("base conversion with sd pads fractional digits (4.6)", () => {
+    expect(FP8("1").toHex(3)).toBe("1.00");
+    expect(FP8("1").toBinary(3)).toBe("1.00");
+    expect(FP8("1").toOctal(3)).toBe("1.00");
+    expect(FP8("0").toHex(3)).toBe("0.00");
+    expect(FP8("-1").toHex(3)).toBe("-1.00");
+    expect(FP8("255").toHex(8)).toBe("ff.000000");
+  });
+
+  test("toPrecision zero pads like Number.prototype.toPrecision (4.6)", () => {
+    expect(FP8("0").toPrecision(3)).toBe("0.00");
+    expect(FP8("0").toPrecision(1)).toBe("0");
+    expect(FP8("0.000000001").toPrecision(3)).toBe("0.00");
+    expect(FP8("0.000000004").toPrecision(1)).toBe("0");
   });
 
   test("toString default strips trailing zeros", () => {
