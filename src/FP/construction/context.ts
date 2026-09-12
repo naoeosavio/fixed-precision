@@ -3,6 +3,7 @@ import {
   assertRoundingMode,
   DEFAULT_ROUNDING_MODE,
 } from "../../core/construction/context";
+import { powerOfTen } from "../../core/utils";
 import type { FixedPrecisionConfig, FPContext, RoundingMode } from "./types";
 
 const CONTEXT_CACHE = new Map<number, FPContext>();
@@ -18,7 +19,7 @@ export function makeContext(
     cached = {
       places,
       roundingMode,
-      SCALE: 10n ** BigInt(places),
+      SCALE: powerOfTen(places),
       SCALENUMBER: 10 ** places,
     };
     CONTEXT_CACHE.set(key, cached);

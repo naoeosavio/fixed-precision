@@ -107,10 +107,12 @@ export function resolveContextPair(
   if (isFixedPrecisionData(a)) {
     if (isFixedPrecisionData(b)) {
       return preferContext(a, b);
+    } else {
+      return a;
     }
-    return a;
+  } else {
+    return isFixedPrecisionData(b) ? b : DEFAULT_CONTEXT;
   }
-  return isFixedPrecisionData(b) ? b : DEFAULT_CONTEXT;
 }
 
 function bestOfList(

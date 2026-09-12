@@ -1,6 +1,6 @@
 import type FixedPrecision from "../../FixedPrecision";
 import type { FixedPrecisionData, FixedPrecisionOperand } from "./types";
-import { resolveContext, toScaled } from "./value";
+import { resolveContextSingle, toScaled } from "./value";
 
 export function dataOf(
   value: FixedPrecisionOperand | FixedPrecision,
@@ -14,13 +14,14 @@ export function dataOf(
       SCALENUMBER: ctx.SCALENUMBER,
       value: value.raw(),
     };
+  } else {
+    const ctx = resolveContextSingle(value);
+    return {
+      places: ctx.places,
+      roundingMode: ctx.roundingMode,
+      SCALE: ctx.SCALE,
+      SCALENUMBER: ctx.SCALENUMBER,
+      value: toScaled(value, ctx),
+    };
   }
-  const ctx = resolveContext([value]);
-  return {
-    places: ctx.places,
-    roundingMode: ctx.roundingMode,
-    SCALE: ctx.SCALE,
-    SCALENUMBER: ctx.SCALENUMBER,
-    value: toScaled(value, ctx),
-  };
 }
