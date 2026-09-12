@@ -1,17 +1,19 @@
 import type { PipeResult, UnknownFn } from "./types";
 
-type Reverse<T extends readonly unknown[]> = T extends readonly [
-  ...infer Init,
-  infer Last,
-]
-  ? [Last, ...Reverse<Init>]
-  : [];
+type Reverse<
+  Stages extends readonly unknown[],
+  Reversed extends readonly unknown[] = [],
+> = Stages extends readonly [infer First, ...infer Rest]
+  ? Reverse<Rest, [First, ...Reversed]>
+  : Reversed;
 
-type ComposeResult<Fs extends readonly UnknownFn[]> = PipeResult<Reverse<Fs>>;
+type ComposeResult<Stages extends readonly UnknownFn[]> = PipeResult<
+  Reverse<Stages>
+>;
 
-function composeFn<const Fs extends readonly UnknownFn[]>(
-  ...stages: Fs
-): ComposeResult<Fs>;
+function composeFn<const Stages extends readonly UnknownFn[]>(
+  ...stages: Stages
+): ComposeResult<Stages>;
 function composeFn(...stages: UnknownFn[]): UnknownFn {
   return (source: unknown) =>
     stages.reduceRight((accumulator, stage) => stage(accumulator), source);

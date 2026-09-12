@@ -1,29 +1,25 @@
 import { describe, expect, test } from "vitest";
+import FixedPrecision from "../src/FixedPrecision";
+import * as arithmetic from "../src/FP/arithmetic";
 import { add } from "../src/FP/arithmetic/add";
 import { multiply } from "../src/FP/arithmetic/multiply";
 import { sqrt } from "../src/FP/arithmetic/sqrt";
-import { stringify } from "../src/FP/string/stringify";
-import * as arithmetic from "../src/FP/arithmetic";
 import * as bitwise from "../src/FP/bitwise";
 import * as combinatorics from "../src/FP/combinatorics";
 import * as constants from "../src/FP/constants";
-import * as fractions from "../src/FP/fractions";
 import type { FixedPrecisionData } from "../src/FP/construction";
 import { createFactory } from "../src/FP/construction/createFactory";
 import { dataOf } from "../src/FP/construction/dataOf";
+import * as fractions from "../src/FP/fractions";
 import * as logical from "../src/FP/logical";
 import * as matrix from "../src/FP/matrix";
 import * as numeric from "../src/FP/numeric";
-import FixedPrecision from "../src/FixedPrecision";
 import * as pipeModule from "../src/FP/pipe";
-import {
-  partial,
-  compose,
-  pipe,
-} from "../src/FP/pipe";
+import { compose, partial, pipe } from "../src/FP/pipe";
 import * as relational from "../src/FP/relational";
 import * as statistics from "../src/FP/statistics";
 import * as strings from "../src/FP/string";
+import { stringify } from "../src/FP/string/stringify";
 import * as trigonometry from "../src/FP/trigonometry";
 
 describe("pipe + partial", () => {
@@ -71,9 +67,9 @@ describe("pipe + partial", () => {
     const out = pipe(partial(add, "1"))(dataOf(FP2("1.5")));
     expect(out.places).toBe(2);
     expect(stringify(out)).toBe("2.5");
-    expect(stringify(pipe(partial(multiply, "3"), stringify)(Money("10")))).toBe(
-      "30",
-    );
+    expect(
+      stringify(pipe(partial(multiply, "3"), stringify)(Money("10"))),
+    ).toBe("30");
   });
 });
 
@@ -129,10 +125,13 @@ describe("compose", () => {
   });
 
   test("tail-recursive typings survive 999 stages (5)", () => {
-    type Repeat<Stage, Count extends number, Acc extends Stage[] = []> =
-      Acc["length"] extends Count
-        ? Acc
-        : Repeat<Stage, Count, [...Acc, Stage]>;
+    type Repeat<
+      Stage,
+      Count extends number,
+      Acc extends Stage[] = [],
+    > = Acc["length"] extends Count
+      ? Acc
+      : Repeat<Stage, Count, [...Acc, Stage]>;
 
     const by1 = partial(add, "1");
     const many_by_1 = Array.from(
@@ -142,6 +141,36 @@ describe("compose", () => {
 
     expect(stringify(pipe(...many_by_1)("0"))).toBe("999");
     expect(stringify(compose(...many_by_1)("0"))).toBe("999");
+  });
+});
+
+describe("typings", () => {
+  test("mismatched stages fail to compile", () => {
+    const mismatched_pipe = pipe(
+      (value: string) => value,
+      (value: number) => value,
+    );
+    // @ts-expect-error incompatible stages resolve to never
+    mismatched_pipe("x");
+
+    const mismatched_compose = compose(
+      (value: number) => value,
+      (value: string) => value,
+    );
+    // @ts-expect-error incompatible stages resolve to never
+    mismatched_compose("x");
+  });
+
+  test("partial requires its trailing arguments", () => {
+    // @ts-expect-error add requires its second argument to be bound
+    partial(add);
+    // @ts-expect-error places is a number
+    partial(arithmetic.round, { places: "2" });
+  });
+
+  test("empty pipelines are the identity", () => {
+    expect(pipe()("value")).toBe("value");
+    expect(compose()(42)).toBe(42);
   });
 });
 
@@ -223,12 +252,14 @@ const registry: Entry[] = [
   ["toPrecision", strings.toPrecision, [{ sd: 3 }], "1.23456"],
   ...Object.entries(trigonometry)
     .filter(([name]) => name !== "atan2")
-    .map(([name, fn]): Entry => [
-      name,
-      fn as Fn,
-      [],
-      name === "acoth" ? "2" : name === "atanh" ? "0.5" : "1",
-    ]),
+    .map(
+      ([name, fn]): Entry => [
+        name,
+        fn as Fn,
+        [],
+        name === "acoth" ? "2" : name === "atanh" ? "0.5" : "1",
+      ],
+    ),
   ["atan2", trigonometry.atan2, ["1"], "1"],
 ];
 
@@ -243,15 +274,21 @@ function runCompose([fn, extras]: [Fn, any[]], input: any) {
 }
 
 describe("standalone surface through pipe and compose", () => {
-  test.each(registry)("%s matches its direct call via pipe", (_n, fn, extras, input) => {
-    const direct = fn(input, ...extras);
-    expect(runPipe([fn, extras], input)).toEqual(direct);
-  });
+  test.each(registry)(
+    "%s matches its direct call via pipe",
+    (_n, fn, extras, input) => {
+      const direct = fn(input, ...extras);
+      expect(runPipe([fn, extras], input)).toEqual(direct);
+    },
+  );
 
-  test.each(registry)("%s matches its direct call via compose", (_n, fn, extras, input) => {
-    const direct = fn(input, ...extras);
-    expect(runCompose([fn, extras], input)).toEqual(direct);
-  });
+  test.each(registry)(
+    "%s matches its direct call via compose",
+    (_n, fn, extras, input) => {
+      const direct = fn(input, ...extras);
+      expect(runCompose([fn, extras], input)).toEqual(direct);
+    },
+  );
 
   test("registry covers every standalone export except excluded ones", () => {
     const categories = [

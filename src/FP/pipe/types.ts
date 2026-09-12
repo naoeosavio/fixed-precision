@@ -1,14 +1,24 @@
 export type UnknownFn = (input: any) => any;
 
-export type PipeResult<Fs extends readonly UnknownFn[]> = Fs extends readonly [
+type PipeStages<
+  Stages extends readonly UnknownFn[],
+  Source,
+  Out,
+> = Stages extends readonly [
   infer First extends UnknownFn,
   ...infer Rest extends readonly UnknownFn[],
 ]
-  ? Rest extends readonly []
-    ? (source: Parameters<First>[0]) => ReturnType<First>
-    : PipeResult<Rest> extends (source: infer In) => infer Out
-      ? [ReturnType<First>] extends [In]
-        ? (source: Parameters<First>[0]) => Out
-        : never
-      : never
-  : never;
+  ? [Out] extends [Parameters<First>[0]]
+    ? PipeStages<Rest, Source, ReturnType<First>>
+    : never
+  : (source: Source) => Out;
+
+export type PipeResult<Stages extends readonly UnknownFn[]> =
+  Stages extends readonly []
+    ? <T>(source: T) => T
+    : Stages extends readonly [
+          infer First extends UnknownFn,
+          ...infer Rest extends readonly UnknownFn[],
+        ]
+      ? PipeStages<Rest, Parameters<First>[0], ReturnType<First>>
+      : never;

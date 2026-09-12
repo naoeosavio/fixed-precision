@@ -1,10 +1,14 @@
-type RestParams<Fn> = Fn extends (first: any, ...rest: infer Rest) => any
-  ? Rest
-  : never;
-
-export function partial<Fn extends (first: any, ...rest: any[]) => any>(
-  fn: Fn,
-  ...bound: RestParams<Fn>
-): (first: Parameters<Fn>[0]) => ReturnType<Fn> {
+/**
+ * Binds the trailing arguments of a standalone function, leaving the value to
+ * flow as the first argument.
+ *
+ * @param fn - Standalone function whose trailing arguments are bound.
+ * @param bound - Trailing arguments passed after the value on every call.
+ * @returns Unary transform `(value) => fn(value, ...bound)`.
+ */
+export function partial<First, Rest extends unknown[], Out>(
+  fn: (first: First, ...rest: Rest) => Out,
+  ...bound: Rest
+): (first: First) => Out {
   return (first) => fn(first, ...bound);
 }
