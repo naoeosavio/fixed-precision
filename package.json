@@ -1105,7 +1105,7 @@
   "license": "MIT",
   "scripts": {
     "build": "NODE_OPTIONS=--max-old-space-size=8192 node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\" && tsup",
-    "lint": "tsc",
+    "lint": "tsc -p tsconfig.json",
     "format": "biome check --write src",
     "check:format": "biome check src",
     "check:exports": "attw --pack . --profile node16",

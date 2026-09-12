@@ -21,5 +21,6 @@
     /* If transpiling with TypeScript: */
     "module": "ES2020"
   },
+  "include":["src", "test"],
   "exclude": ["out", "dist", "bench"]
 }
