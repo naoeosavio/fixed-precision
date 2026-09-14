@@ -100,6 +100,49 @@ export function toScaled(value: FixedPrecisionOperand, ctx: FPContext): bigint {
   throw new Error(`Invalid value type: ${typeof value}`);
 }
 
+/**
+ * Resolves the pair context and scales both operands with a single
+ * validation per operand.
+ *
+ * Equivalent to combining resolveContextPair with one toScaled call per
+ * operand, without validating either operand twice.
+ *
+ * @param a - Left operand, data or primitive.
+ * @param b - Right operand, data or primitive.
+ * @returns Resolved context with both raw scaled values.
+ */
+export function toScaledPair(
+  a: FixedPrecisionOperand,
+  b: FixedPrecisionOperand,
+): { ctx: FPContext; left: bigint; right: bigint } {
+  if (isFixedPrecisionData(a)) {
+    if (isFixedPrecisionData(b)) {
+      const ctx = preferContext(a.ctx, b.ctx);
+      return { ctx, left: toScaledData(a, ctx), right: toScaledData(b, ctx) };
+    } else {
+      return {
+        ctx: a.ctx,
+        left: a.value,
+        right: toScaled(b, a.ctx),
+      };
+    }
+  } else {
+    if (isFixedPrecisionData(b)) {
+      return {
+        ctx: b.ctx,
+        left: toScaled(a, b.ctx),
+        right: b.value,
+      };
+    } else {
+      return {
+        ctx: DEFAULT_CONTEXT,
+        left: toScaled(a, DEFAULT_CONTEXT),
+        right: toScaled(b, DEFAULT_CONTEXT),
+      };
+    }
+  }
+}
+
 export function resolveContext(values: FixedPrecisionOperand[]): FPContext {
   let best: FPContext | null = null;
   for (const v of values) {

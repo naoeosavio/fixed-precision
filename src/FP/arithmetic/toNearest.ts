@@ -4,8 +4,7 @@ import {
   type FixedPrecisionOperand,
   fromRawWithContext,
   type RoundingMode,
-  resolveContextPair,
-  toScaled,
+  toScaledPair,
 } from "../construction";
 
 export function toNearest(
@@ -13,19 +12,18 @@ export function toNearest(
   increment: FixedPrecisionOperand,
   options?: { roundingMode?: RoundingMode },
 ): FixedPrecisionData {
-  const ctx = resolveContextPair(value, increment);
-  const stepRaw = toScaled(increment, ctx);
-  const step = stepRaw < 0n ? -stepRaw : stepRaw;
+  const scaled = toScaledPair(value, increment);
+  const step = scaled.right < 0n ? -scaled.right : scaled.right;
   if (step === 0n) {
     throw new Error("Increment must be non-zero");
   }
 
   return fromRawWithContext(
     round_to_scale_value(
-      toScaled(value, ctx),
+      scaled.left,
       step,
-      options?.roundingMode ?? ctx.roundingMode,
+      options?.roundingMode ?? scaled.ctx.roundingMode,
     ) * step,
-    ctx,
+    scaled.ctx,
   );
 }

@@ -3,17 +3,16 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromRawWithContext,
-  resolveContextPair,
-  toScaled,
+  toScaledPair,
 } from "../construction";
 
 export function atan2(
   y: FixedPrecisionOperand,
   x: FixedPrecisionOperand,
 ): FixedPrecisionData {
-  const ctx = resolveContextPair(y, x);
+  const scaled = toScaledPair(y, x);
   return fromRawWithContext(
-    atan2_value(toScaled(y, ctx), toScaled(x, ctx), ctx),
-    ctx,
+    atan2_value(scaled.left, scaled.right, scaled.ctx),
+    scaled.ctx,
   );
 }
