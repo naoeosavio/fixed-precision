@@ -14,10 +14,7 @@ export type FixedPrecisionConfig = {
 };
 
 export type FixedPrecisionData = {
-  places: number;
-  roundingMode: RoundingMode;
-  SCALE: bigint;
-  SCALENUMBER: number;
+  ctx: FPContext;
   value: bigint;
 };
 

@@ -65,7 +65,7 @@ describe("pipe + partial", () => {
     const FP2 = FixedPrecision.create({ places: 2 });
     const Money = createFactory({ places: 2 });
     const out = pipe(partial(add, "1"))(dataOf(FP2("1.5")));
-    expect(out.places).toBe(2);
+    expect(out.ctx.places).toBe(2);
     expect(stringify(out)).toBe("2.5");
     expect(
       stringify(pipe(partial(multiply, "3"), stringify)(Money("10"))),

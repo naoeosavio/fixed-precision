@@ -150,9 +150,9 @@ describe("functions: factories", () => {
   test("createFactory fixes the places of every produced value", () => {
     const FP20 = createFactory({ places: 20 });
 
-    expect(FP20("1.1").places).toBe(20);
+    expect(FP20("1.1").ctx.places).toBe(20);
     expect(stringify(add(FP20("1.1"), FP20("2.2")))).toBe("3.3");
-    expect(add(FP20("1.1"), FP20("2.2")).places).toBe(20);
+    expect(add(FP20("1.1"), FP20("2.2")).ctx.places).toBe(20);
   });
 
   test("createFactory applies the configured rounding mode", () => {
@@ -170,7 +170,7 @@ describe("functions: factories", () => {
     const FP20 = createFactory({ places: 20 });
     const FP4 = createFactory({ places: 4 });
 
-    expect(add(FP20("1.23456789"), FP4("2.5")).places).toBe(20);
+    expect(add(FP20("1.23456789"), FP4("2.5")).ctx.places).toBe(20);
     expect(stringify(add(FP20("1.23456789"), FP4("2.5")))).toBe("3.73456789");
   });
 
@@ -437,7 +437,7 @@ describe("functions: constants and random", () => {
 
   test("random returns a value within the requested scale", () => {
     const value = random({ places: 5 });
-    expect(value.places).toBe(5);
+    expect(value.ctx.places).toBe(5);
     expect(greaterThanOrEqual(value, "0")).toBe(true);
     expect(lessThan(value, "1")).toBe(true);
   });
@@ -445,35 +445,38 @@ describe("functions: constants and random", () => {
 
 describe("functions: dataOf", () => {
   test("primitive uses the default context", () => {
-    expect(dataOf("1.5")).toEqual({
+    expect(dataOf("1.5")).toEqual({ ctx: {
       places: 8,
       roundingMode: 4,
       SCALE: 100000000n,
       SCALENUMBER: 100000000,
-      value: 150000000n,
-    });
+    },
+    value: 150000000n,
+  });
   });
 
   test("instance converts through the class → functional bridge", () => {
     const FP4 = FixedPrecision.create({ places: 4 });
     const instance = FP4("1.5");
-    expect(dataOf(instance)).toEqual({
+    expect(dataOf(instance)).toEqual({ ctx: {
       places: 4,
       roundingMode: 4,
       SCALE: 10000n,
       SCALENUMBER: 10000,
-      value: 15000n,
-    });
+    },
+    value: 15000n,
+  });
   });
 
   test("number uses the default context", () => {
-    expect(dataOf(1.5)).toEqual({
+    expect(dataOf(1.5)).toEqual({ ctx: {
       places: 8,
       roundingMode: 4,
       SCALE: 100000000n,
       SCALENUMBER: 100000000,
-      value: 150000000n,
-    });
+    },
+    value: 150000000n,
+  });
   });
 
   test("data passes through unchanged", () => {
@@ -492,7 +495,7 @@ describe("functions: options object", () => {
   });
 
   test("scale requires places and accepts roundingMode", () => {
-    expect(scale("1.23456789", { places: 2 }).places).toBe(2);
+    expect(scale("1.23456789", { places: 2 }).ctx.places).toBe(2);
     expect(scale("9.99", { places: 0, roundingMode: 4 }).value).toBe(10n);
   });
 
@@ -548,9 +551,9 @@ describe("functions: options object", () => {
   });
 
   test("random takes places via options", () => {
-    expect(random({ places: 3 }).places).toBe(3);
-    expect(random().places).toBe(getDefaultContext().places);
-    expect(random({}).places).toBe(getDefaultContext().places);
+    expect(random({ places: 3 }).ctx.places).toBe(3);
+    expect(random().ctx.places).toBe(getDefaultContext().places);
+    expect(random({}).ctx.places).toBe(getDefaultContext().places);
   });
 
   test("default context is frozen and stable", () => {

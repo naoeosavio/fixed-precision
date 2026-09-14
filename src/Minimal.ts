@@ -401,7 +401,7 @@ export default class FixedPrecision {
 
   public toExponential(dp = this.ctx.places, rm?: RoundingMode): string {
     return toExponential_string(
-      { ...this.ctx, value: this.value },
+      { ctx: this.ctx, value: this.value },
       {
         places: dp,
         roundingMode: rm ?? this.ctx.roundingMode,

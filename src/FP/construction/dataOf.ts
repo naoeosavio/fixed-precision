@@ -8,19 +8,23 @@ export function dataOf(
   if (typeof value === "object" && value !== null && "context" in value) {
     const ctx = value.context();
     return {
-      places: ctx.places,
-      roundingMode: ctx.roundingMode,
-      SCALE: ctx.SCALE,
-      SCALENUMBER: ctx.SCALENUMBER,
+      ctx: {
+        places: ctx.places,
+        roundingMode: ctx.roundingMode,
+        SCALE: ctx.SCALE,
+        SCALENUMBER: ctx.SCALENUMBER,
+      },
       value: value.raw(),
     };
   } else {
     const ctx = resolveContextSingle(value);
     return {
-      places: ctx.places,
-      roundingMode: ctx.roundingMode,
-      SCALE: ctx.SCALE,
-      SCALENUMBER: ctx.SCALENUMBER,
+      ctx: {
+        places: ctx.places,
+        roundingMode: ctx.roundingMode,
+        SCALE: ctx.SCALE,
+        SCALENUMBER: ctx.SCALENUMBER,
+      },
       value: toScaled(value, ctx),
     };
   }

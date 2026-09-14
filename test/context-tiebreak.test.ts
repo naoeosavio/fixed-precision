@@ -25,7 +25,7 @@ describe("context constants", () => {
 
   test("functional factory without roundingMode uses DEFAULT_ROUNDING_MODE", () => {
     const factory = createFactory({ places: 4 });
-    expect(dataOf(factory("1")).roundingMode).toBe(DEFAULT_ROUNDING_MODE);
+    expect(dataOf(factory("1")).ctx.roundingMode).toBe(DEFAULT_ROUNDING_MODE);
   });
 
   test("Minimal create without roundingMode uses DEFAULT_ROUNDING_MODE", () => {
@@ -53,8 +53,8 @@ describe("resolveContext tie-break: greater places wins", () => {
   test("functional max/min pick the context with more places", () => {
     const fp6 = dataOf(FP6("2"));
     const fp4 = dataOf(FP4("1"));
-    expect(dataOf(fpMax(fp4, fp6)).places).toBe(6);
-    expect(dataOf(fpMin(fp6, fp4)).places).toBe(6);
+    expect(dataOf(fpMax(fp4, fp6)).ctx.places).toBe(6);
+    expect(dataOf(fpMin(fp6, fp4)).ctx.places).toBe(6);
   });
 });
 
@@ -82,7 +82,7 @@ describe("resolveContext tie-break: equal places picks smaller roundingMode", ()
   test("functional sum picks the smaller roundingMode", () => {
     const a = dataOf(FP4rm8("1"));
     const b = dataOf(FP4rm0("2"));
-    expect(dataOf(fpSum(a, b)).roundingMode).toBe(0);
+    expect(dataOf(fpSum(a, b)).ctx.roundingMode).toBe(0);
   });
 });
 

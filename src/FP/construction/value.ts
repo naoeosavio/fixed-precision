@@ -21,7 +21,10 @@ export function isFixedPrecisionData(
   if (typeof value !== "object" || value === null) return false;
   const data = value as Partial<FixedPrecisionData>;
   if (typeof data.value !== "bigint") return false;
-  const places = data.places;
+  // Single ctx load: the previous version reloaded data.ctx on every check.
+  const ctx = data.ctx;
+  if (ctx === undefined || ctx === null) return false;
+  const places = ctx.places;
   if (
     typeof places !== "number" ||
     !Number.isInteger(places) ||
@@ -30,7 +33,7 @@ export function isFixedPrecisionData(
   ) {
     return false;
   }
-  const roundingMode = data.roundingMode;
+  const roundingMode = ctx.roundingMode;
   if (
     typeof roundingMode !== "number" ||
     !Number.isInteger(roundingMode) ||
@@ -39,7 +42,7 @@ export function isFixedPrecisionData(
   ) {
     return false;
   }
-  return typeof data.SCALE === "bigint" && typeof data.SCALENUMBER === "number";
+  return typeof ctx.SCALE === "bigint" && typeof ctx.SCALENUMBER === "number";
 }
 
 export function fromRawWithContext(
@@ -47,10 +50,7 @@ export function fromRawWithContext(
   ctx: FPContext,
 ): FixedPrecisionData {
   return {
-    places: ctx.places,
-    roundingMode: ctx.roundingMode,
-    SCALE: ctx.SCALE,
-    SCALENUMBER: ctx.SCALENUMBER,
+    ctx,
     value: rawValue,
   };
 }
@@ -68,17 +68,32 @@ export function fromContextValue(
   operation: (value: bigint, ctx: FPContext) => bigint,
 ): FixedPrecisionData {
   if (isFixedPrecisionData(value)) {
-    return fromRawWithContext(operation(value.value, value), value);
+    return fromRawWithContext(operation(value.value, value.ctx), value.ctx);
   }
   const ctx = getDefaultContext();
   return fromRawWithContext(operation(toScaled(value, ctx), ctx), ctx);
 }
 
+/**
+ * Scales already-validated fixed-precision data into a target context.
+ *
+ * Skips validation: callers must have confirmed the shape with
+ * isFixedPrecisionData first.
+ *
+ * @param value - Validated fixed-precision data.
+ * @param ctx - Target context.
+ * @returns Raw scaled value.
+ */
+export function toScaledData(
+  value: FixedPrecisionData,
+  ctx: FPContext,
+): bigint {
+  if (value.ctx.places === ctx.places) return value.value;
+  return scale_value(value.value, ctx.places, ctx.roundingMode, value.ctx);
+}
+
 export function toScaled(value: FixedPrecisionOperand, ctx: FPContext): bigint {
-  if (isFixedPrecisionData(value)) {
-    if (value.places === ctx.places) return value.value;
-    return scale_value(value.value, ctx.places, ctx.roundingMode, value);
-  }
+  if (isFixedPrecisionData(value)) return toScaledData(value, ctx);
   if (typeof value === "bigint") return value;
   if (typeof value === "number") return from_number_with_ctx(value, ctx);
   if (typeof value === "string") return from_string_with_ctx(value, ctx);
@@ -89,7 +104,7 @@ export function resolveContext(values: FixedPrecisionOperand[]): FPContext {
   let best: FPContext | null = null;
   for (const v of values) {
     if (isFixedPrecisionData(v)) {
-      best = preferContext(best, v);
+      best = preferContext(best, v.ctx);
       if (best.places === MAX_PLACES) return best;
     }
   }
@@ -97,7 +112,7 @@ export function resolveContext(values: FixedPrecisionOperand[]): FPContext {
 }
 
 export function resolveContextSingle(value: FixedPrecisionOperand): FPContext {
-  return isFixedPrecisionData(value) ? value : DEFAULT_CONTEXT;
+  return isFixedPrecisionData(value) ? value.ctx : DEFAULT_CONTEXT;
 }
 
 export function resolveContextPair(
@@ -106,12 +121,12 @@ export function resolveContextPair(
 ): FPContext {
   if (isFixedPrecisionData(a)) {
     if (isFixedPrecisionData(b)) {
-      return preferContext(a, b);
+      return preferContext(a.ctx, b.ctx);
     } else {
-      return a;
+      return a.ctx;
     }
   } else {
-    return isFixedPrecisionData(b) ? b : DEFAULT_CONTEXT;
+    return isFixedPrecisionData(b) ? b.ctx : DEFAULT_CONTEXT;
   }
 }
 
@@ -122,7 +137,7 @@ function bestOfList(
   for (let i = 0; i < list.length; i++) {
     const v = list[i];
     if (isFixedPrecisionData(v)) {
-      best = preferContext(best, v);
+      best = preferContext(best, v.ctx);
       if (best.places === MAX_PLACES) return best;
     }
   }
@@ -148,11 +163,14 @@ export function normalizeTo(
   ctx: FPContext,
 ): FixedPrecisionData {
   if (isFixedPrecisionData(v)) {
-    if (v.places === ctx.places && v.roundingMode === ctx.roundingMode) {
+    if (
+      v.ctx.places === ctx.places &&
+      v.ctx.roundingMode === ctx.roundingMode
+    ) {
       return v;
     }
     return fromRawWithContext(
-      scale_value(v.value, ctx.places, ctx.roundingMode, v),
+      scale_value(v.value, ctx.places, ctx.roundingMode, v.ctx),
       ctx,
     );
   }

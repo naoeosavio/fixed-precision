@@ -10,7 +10,7 @@ describe("tree-shaking / functional-first", () => {
     const result = add("1.5", "2.25");
     expect(result instanceof FixedPrecision).toBe(false);
     expect(result.value).toBe(375000000n);
-    expect(result.places).toBe(8);
+    expect(result.ctx.places).toBe(8);
     expect(stringify(result)).toBe("3.75");
   });
 
@@ -23,7 +23,7 @@ describe("tree-shaking / functional-first", () => {
   test("dataOf is the bridge from instance to the functional world", () => {
     const FP4 = FixedPrecision.create({ places: 4 });
     const bridged = add(dataOf(FP4("1.5")), "0");
-    expect(bridged.places).toBe(4);
+    expect(bridged.ctx.places).toBe(4);
     expect(stringify(bridged)).toBe("1.5");
   });
 
