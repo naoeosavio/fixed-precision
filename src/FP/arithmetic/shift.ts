@@ -7,7 +7,7 @@ import {
   toScaled,
 } from "../construction";
 
-export function shiftedBy(
+export function shift(
   value: FixedPrecisionOperand,
   n: number,
 ): FixedPrecisionData {

@@ -143,6 +143,53 @@ export function toScaledPair(
   }
 }
 
+/**
+ * Raw pair scaling, left-biased.
+ *
+ * Trusts the context of the leftmost fixed-precision operand instead of
+ * resolving the pair: data pairs are combined as-is with no compatibility
+ * check and no rescaling, so callers must pass compatible contexts. Only
+ * primitive sides are scaled. Falls back to the default context when both
+ * operands are primitives.
+ *
+ * @param a - Left operand, data or primitive.
+ * @param b - Right operand, data or primitive.
+ * @returns Left context with both raw values.
+ */
+export function toScaledPairRaw(
+  a: FixedPrecisionOperand,
+  b: FixedPrecisionOperand,
+): { ctx: FPContext; left: bigint; right: bigint } {
+  if (isFixedPrecisionData(a)) {
+    if (isFixedPrecisionData(b)) {
+      // Compatible contexts by contract, combine raw values directly.
+      return { ctx: a.ctx, left: a.value, right: b.value };
+    } else {
+      // Only the primitive side needs scaling into the left context.
+      if (typeof b === "bigint") {
+        return { ctx: a.ctx, left: a.value, right: b };
+      } else {
+        return { ctx: a.ctx, left: a.value, right: toScaled(b, a.ctx) };
+      }
+    }
+  } else {
+    if (isFixedPrecisionData(b)) {
+      // Only the primitive side needs scaling into the right context.
+      if (typeof a === "bigint") {
+        return { ctx: b.ctx, left: a, right: b.value };
+      } else {
+        return { ctx: b.ctx, left: toScaled(a, b.ctx), right: b.value };
+      }
+    } else {
+      return {
+        ctx: DEFAULT_CONTEXT,
+        left: toScaled(a, DEFAULT_CONTEXT),
+        right: toScaled(b, DEFAULT_CONTEXT),
+      };
+    }
+  }
+}
+
 export function resolveContext(values: FixedPrecisionOperand[]): FPContext {
   let best: FPContext | null = null;
   for (const v of values) {
