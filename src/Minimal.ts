@@ -19,8 +19,8 @@ import {
 } from "./core/construction";
 import { from_number_with_ctx, to_number_with_ctx } from "./core/numeric";
 import { from_string_with_ctx, to_string_with_ctx } from "./core/string";
+import { to_exponential_with_ctx } from "./core/string/toExponential";
 import { precisionPowerOfTen, zero_with_precision } from "./core/utils";
-import { toExponential as toExponential_string } from "./FP/string/toExponential";
 
 export type {
   Comparison,
@@ -400,13 +400,7 @@ export default class FixedPrecision {
   }
 
   public toExponential(dp = this.ctx.places, rm?: RoundingMode): string {
-    return toExponential_string(
-      { ctx: this.ctx, value: this.value },
-      {
-        places: dp,
-        roundingMode: rm ?? this.ctx.roundingMode,
-      },
-    );
+    return to_exponential_with_ctx(this.value, this.ctx, dp, rm);
   }
 
   public toPrecision(sd: number, rm?: RoundingMode): string {

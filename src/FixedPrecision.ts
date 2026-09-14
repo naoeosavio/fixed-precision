@@ -55,6 +55,7 @@ import {
 } from "./core/relational";
 import { from_string_with_ctx } from "./core/string/fromString";
 import { to_base_with_ctx } from "./core/string/toBase";
+import { to_exponential_with_ctx } from "./core/string/toExponential";
 import { to_string_with_ctx } from "./core/string/toString";
 import {
   acos_value,
@@ -84,7 +85,6 @@ import {
   tanh_value,
 } from "./core/trigonometry";
 import { zero_with_precision } from "./core/utils";
-import { toExponential as toExponential_string } from "./FP/string/toExponential";
 
 export type FixedPrecisionValue = string | number | bigint | FixedPrecision;
 
@@ -681,13 +681,7 @@ export default class FixedPrecision {
   }
 
   public toExponential(dp?: number, rm?: RoundingMode): string {
-    return toExponential_string(
-      { ctx: this.ctx, value: this.value },
-      {
-        places: dp ?? this.ctx.places,
-        roundingMode: rm ?? this.ctx.roundingMode,
-      },
-    );
+    return to_exponential_with_ctx(this.value, this.ctx, dp, rm);
   }
 
   public toPrecision(sd: number, rm?: RoundingMode): string {

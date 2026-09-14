@@ -216,7 +216,7 @@ const registry: Entry[] = [
   ["bitOr", bitwise.bitOr, ["2"], "5"],
   ["bitXor", bitwise.bitXor, ["3"], "5"],
   ["leftShift", bitwise.leftShift, [2], "5"],
-  ["rightArithShift", bitwise.rightArithShift, [1], "-5"],
+  ["rightShift", bitwise.rightShift, [1], "-5"],
   ["combinations", combinatorics.combinations, [2], 5],
   ["factorial", combinatorics.factorial, [], 5],
   ["permutations", combinatorics.permutations, [2], 5],
