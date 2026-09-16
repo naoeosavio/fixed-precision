@@ -177,6 +177,10 @@ them. It exports exactly three functions:
 - **`partial(fn, ...args)`** — binds the trailing arguments of a standalone into
   `(value) => fn(value, ...args)`; doubles as a reusable transform.
 
+Every standalone with a trailing parameter also has a `*By` variant
+(`addBy`, `toFixedBy`, ...) that does the same binding — see
+[The `*By` functions and `partial`](#the-by-functions-and-partial) below.
+
 ```ts
 const withTax = pipe(partial(add, "2"), partial(multiply, "3"), stringify);
 withTax("1"); // "9"
@@ -207,6 +211,60 @@ const C = pipe(
 
 Unary functions plug in directly (`pipe(sqrt, stringify)`), operand contexts
 flow through unchanged, and every stage speaks plain `FixedPrecisionData`.
+
+## The `*By` functions and `partial`
+
+Every standalone function with a trailing parameter also ships a `*By`
+variant that binds that parameter and returns a unary transform:
+
+```ts
+add(value, amount)            // binary
+addBy(amount)                 // => (value) => add(value, amount)
+
+toFixed(value, options?)      // binary (options optional)
+toFixedBy(options?)           // => (value) => toFixed(value, options)
+```
+
+There are ~40 of these across arithmetic, bitwise, relational, logical,
+combinatorics, string and numeric modules (`addBy`, `minusBy`, `timesBy`,
+`divideBy`, `bitAndBy`, `equalsBy`, `logicalAndBy`, `toFixedBy`, ...).
+
+### Why both exist
+
+`addBy(amount)` is exactly `partial(add, amount)`. They are not duplicated
+logic — `*By` is a thin wrapper over the standalone. Keeping both is a
+deliberate API choice, not an oversight:
+
+1. **Discoverability.** The `*By` name is the convention of the functional
+   layer. A user looking for "add a fixed amount" finds `addBy` directly
+   without learning `partial`.
+2. **Self-documenting call sites.** `toFixedBy({ places: 2 })` reads as a
+   named transform; `partial(toFixed, { places: 2 })` requires inferring
+   intent at the call site.
+3. **Precise types.** Each `*By` declares a concrete return type
+   `(value: FixedPrecisionOperand) => FixedPrecisionData`, while `partial`
+   is generic.
+4. **No-arg default-parameter forms.** `stringifyBy()`, `toNumberBy()`,
+   `toExponentialBy()` and `fractionBy()` accept zero arguments to produce a
+   default-parameter transform — a small ergonomic win `partial` replicates
+   awkwardly (`partial(stringify)` reads like a mistake).
+5. **Tested parity.** `test/by.test.ts` asserts that every `*By` is
+   equivalent to the base function with bound arguments, so this is enforced
+   API surface, not leftover code.
+
+### When to use which
+
+| Situation | Use |
+|---|---|
+| Binary function with a positional operand (`add`, `multiply`, ...) | `partial(fn, operand)` or `fnBy(operand)` — equivalent |
+| Function whose only extra arg is an optional options object (`toFixed`, `stringify`, ...) | Either; `fnBy(options)` is the lowest-value `*By` form, `partial` reads equally well |
+| Binding multiple trailing args, or middle/leading args | `partial` only — `*By` cannot express these |
+| Reusable named transform (`const tax = multiplyBy("1.08")`) | `*By` reads better as a definition |
+
+`partial` is the general mechanism; `*By` is the semantic convenience layer.
+They coexist by design. Removing existing `*By` functions is a breaking
+change with no benefit, and the parity convention means new binary functions
+should ship a `*By` counterpart too.
 
 ## Next Steps
 

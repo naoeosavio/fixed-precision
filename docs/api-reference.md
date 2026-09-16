@@ -1065,6 +1065,10 @@ Notes:
 - `partial(fn)` with no extra arguments is a pass-through stage.
 - `partial(fn, ...args)` returns `(value) => fn(value, ...args)`; it doubles as a
   reusable transform: `const tax = partial(multiply, "1.1")`.
+- Every standalone with a trailing parameter also has a `*By` variant
+  (`addBy`, `toFixedBy`, ...) that binds the same argument. `*By` and
+  `partial` produce identical transforms — see
+  [The `*By` functions and `partial`](functional-design.md#the-by-functions-and-partial).
 - Operand contexts flow through stages unchanged; factory-built values keep
   their `places`.
 - `pipe(...stages)(value)` applies left-to-right; `compose(...stages)(value)`

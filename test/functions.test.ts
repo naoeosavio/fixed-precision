@@ -26,9 +26,8 @@ import { precision } from "../src/FP/arithmetic/precision";
 import { round } from "../src/FP/arithmetic/round";
 import { root } from "../src/FP/arithmetic/root";
 import { scale } from "../src/FP/arithmetic/scale";
-import { shiftedBy } from "../src/FP/arithmetic/shiftedBy";
+import { shift } from "../src/FP/arithmetic/shift";
 import { sign } from "../src/FP/arithmetic/sign";
-import { significantDigits } from "../src/FP/arithmetic/significantDigits";
 import { sqrt } from "../src/FP/arithmetic/sqrt";
 import { square } from "../src/FP/arithmetic/square";
 import { subtract } from "../src/FP/arithmetic/subtract";
@@ -237,7 +236,7 @@ describe("functions: arithmetic — rounding and scaling", () => {
   });
 
   test("shiftedBy, neg, abs and sign", () => {
-    expect(stringify(shiftedBy("1.5", 2))).toBe("150");
+    expect(stringify(shift("1.5", 2))).toBe("150");
     expect(stringify(neg("-5"))).toBe("5");
     expect(stringify(abs("-5"))).toBe("5");
     expect(sign("-5")).toBe(-1);
@@ -245,10 +244,9 @@ describe("functions: arithmetic — rounding and scaling", () => {
     expect(sign("3.14")).toBe(1);
   });
 
-  test("precision and significantDigits", () => {
+  test("precision", () => {
     expect(precision("123")).toBe(3);
     expect(precision("12.34")).toBe(4);
-    expect(significantDigits("12.34")).toBe(4);
   });
 });
 

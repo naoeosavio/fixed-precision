@@ -133,6 +133,8 @@ average(items); // "5.00"
   (`fixed-precision/add`).
 - **Pipelines and reusable transforms** → `pipe` (or right-to-left
   `compose`) + `partial`; lambdas for the odd shape.
+- **Reusable named transform** → the `*By` variant (`const tax = multiplyBy("1.08")`), which is exactly `partial(multiply, "1.08")` — see
+  [The `*By` functions and `partial`](../functional-design.md#the-by-functions-and-partial).
 
 Both interoperate freely: every stage speaks the same plain
 `FixedPrecisionData`, and contexts keep flowing through operands regardless of
