@@ -20,3 +20,10 @@ export function divmod(
     ),
   };
 }
+
+export function divmodBy(other: FixedPrecisionOperand) {
+  return (
+    value: FixedPrecisionOperand,
+  ): { quotient: FixedPrecisionData; remainder: FixedPrecisionData } =>
+    divmod(value, other);
+}

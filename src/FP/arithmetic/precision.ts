@@ -12,3 +12,8 @@ export function precision(
   const ctx = resolveContextSingle(value);
   return significant_digits_value(toScaled(value, ctx), ctx, includeZeros);
 }
+
+export function precisionBy(includeZeros = false) {
+  return (value: FixedPrecisionOperand): number =>
+    precision(value, includeZeros);
+}

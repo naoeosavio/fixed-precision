@@ -13,3 +13,8 @@ export function leftShift(
   }
   return fromContextValue(value, (raw) => raw << BigInt(n));
 }
+
+export function leftShiftBy(n: number) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    leftShift(value, n);
+}

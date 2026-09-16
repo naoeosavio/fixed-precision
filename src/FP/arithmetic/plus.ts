@@ -27,3 +27,15 @@ export function plus(
   return { ctx: scaled.ctx, value: scaled.left + scaled.right };
 }
 
+/**
+ * Creates a function that adds a fixed amount to any operand.
+ *
+ * @param amount - Right operand captured for later calls.
+ * @returns Function applying raw addition with the captured amount.
+ */
+export function plusBy(
+  amount: FixedPrecisionOperand,
+): (value: FixedPrecisionOperand) => FixedPrecisionData {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    plus(value, amount);
+}

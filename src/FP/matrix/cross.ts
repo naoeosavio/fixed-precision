@@ -18,3 +18,7 @@ export function cross(
     fromRawWithContext(v, ctx),
   );
 }
+
+export function crossBy(b: FixedPrecisionOperand[]) {
+  return (a: FixedPrecisionOperand[]): FixedPrecisionData[] => cross(a, b);
+}

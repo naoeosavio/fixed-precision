@@ -23,3 +23,11 @@ export function clamp(
     ctx,
   );
 }
+
+export function clampBy(
+  min: FixedPrecisionOperand,
+  max: FixedPrecisionOperand,
+) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    clamp(value, min, max);
+}

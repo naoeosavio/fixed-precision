@@ -8,3 +8,7 @@ export function lessThan(
   const scaled = toScaledPair(left, right);
   return lessThanValue(scaled.left, scaled.right);
 }
+
+export function lessThanBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): boolean => lessThan(left, right);
+}

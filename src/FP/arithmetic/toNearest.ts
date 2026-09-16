@@ -27,3 +27,11 @@ export function toNearest(
     scaled.ctx,
   );
 }
+
+export function toNearestBy(
+  increment: FixedPrecisionOperand,
+  options?: { roundingMode?: RoundingMode },
+) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    toNearest(value, increment, options);
+}

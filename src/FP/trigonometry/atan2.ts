@@ -16,3 +16,7 @@ export function atan2(
     scaled.ctx,
   );
 }
+
+export function atan2By(x: FixedPrecisionOperand) {
+  return (y: FixedPrecisionOperand): FixedPrecisionData => atan2(y, x);
+}

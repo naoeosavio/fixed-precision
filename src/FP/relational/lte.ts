@@ -23,3 +23,14 @@ export function lte(
   return lessThanOrEqualValue(scaled.left, scaled.right);
 }
 
+/**
+ * Creates a function that raw-tests any operand against a fixed upper bound.
+ *
+ * @param right - Right operand captured for later calls.
+ * @returns Function applying raw less-than-or-equal with the captured operand.
+ */
+export function lteBy(
+  right: FixedPrecisionOperand,
+): (left: FixedPrecisionOperand) => boolean {
+  return (left: FixedPrecisionOperand): boolean => lte(left, right);
+}

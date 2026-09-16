@@ -23,3 +23,14 @@ export function gte(
   return greaterThanOrEqualValue(scaled.left, scaled.right);
 }
 
+/**
+ * Creates a function that raw-tests any operand against a fixed lower bound.
+ *
+ * @param right - Right operand captured for later calls.
+ * @returns Function applying raw greater-than-or-equal with the captured operand.
+ */
+export function gteBy(
+  right: FixedPrecisionOperand,
+): (left: FixedPrecisionOperand) => boolean {
+  return (left: FixedPrecisionOperand): boolean => gte(left, right);
+}

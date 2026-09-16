@@ -12,3 +12,7 @@ export function stringify(
   const ctx = resolveContextSingle(value);
   return to_string_with_ctx(toScaled(value, ctx), ctx, trimZeros);
 }
+
+export function stringifyBy(trimZeros = true) {
+  return (value: FixedPrecisionOperand): string => stringify(value, trimZeros);
+}

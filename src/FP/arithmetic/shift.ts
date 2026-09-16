@@ -14,3 +14,7 @@ export function shift(
   const ctx = resolveContextSingle(value);
   return fromRawWithContext(shifted_by_value(toScaled(value, ctx), n), ctx);
 }
+
+export function shiftBy(n: number) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData => shift(value, n);
+}

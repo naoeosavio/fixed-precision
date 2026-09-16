@@ -15,3 +15,8 @@ export function permutations(
   const valK = asSafeIndex(k, "permutations");
   return fromRawWithContext(permutations_value(valN, valK) * ctx.SCALE, ctx);
 }
+
+export function permutationsBy(k: number | FixedPrecisionData) {
+  return (n: number | FixedPrecisionData): FixedPrecisionData =>
+    permutations(n, k);
+}

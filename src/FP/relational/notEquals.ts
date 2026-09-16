@@ -7,3 +7,7 @@ export function notEquals(
 ): boolean {
   return !equals(left, right);
 }
+
+export function notEqualsBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): boolean => notEquals(left, right);
+}

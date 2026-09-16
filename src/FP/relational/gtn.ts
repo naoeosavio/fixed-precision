@@ -22,3 +22,15 @@ export function gtn(
   // No data side, scale both operands into the default context.
   return greaterThanValue(scaled.left, scaled.right);
 }
+
+/**
+ * Creates a function that raw-tests any operand as greater than a fixed one.
+ *
+ * @param right - Right operand captured for later calls.
+ * @returns Function applying raw greater-than with the captured operand.
+ */
+export function gtnBy(
+  right: FixedPrecisionOperand,
+): (left: FixedPrecisionOperand) => boolean {
+  return (left: FixedPrecisionOperand): boolean => gtn(left, right);
+}

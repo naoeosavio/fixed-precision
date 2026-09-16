@@ -26,3 +26,8 @@ export function scale(
     makeContext(options.places, effectiveRm),
   );
 }
+
+export function scaleBy(options: ScaleOptions) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    scale(value, options);
+}

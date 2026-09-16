@@ -8,3 +8,7 @@ export function logicalAnd(
   const scaled = toScaledPair(left, right);
   return logicalAndValues(scaled.left, scaled.right);
 }
+
+export function logicalAndBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): boolean => logicalAnd(left, right);
+}

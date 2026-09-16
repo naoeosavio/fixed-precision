@@ -50,3 +50,7 @@ export function toPrecision(
   }
   return str.replace(/(\.\d*?)0+$/, "$1").replace(/\.$/, "");
 }
+
+export function toPrecisionBy(options: RequiredSdOptions) {
+  return (value: FixedPrecisionOperand): string => toPrecision(value, options);
+}

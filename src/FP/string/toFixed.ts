@@ -17,3 +17,7 @@ export function toFixed(
     false,
   );
 }
+
+export function toFixedBy(options?: PlacesOptions) {
+  return (value: FixedPrecisionOperand): string => toFixed(value, options);
+}

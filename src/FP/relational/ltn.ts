@@ -22,3 +22,15 @@ export function ltn(
   // No data side, scale both operands into the default context.
   return lessThanValue(scaled.left, scaled.right);
 }
+
+/**
+ * Creates a function that raw-tests any operand as less than a fixed one.
+ *
+ * @param right - Right operand captured for later calls.
+ * @returns Function applying raw less-than with the captured operand.
+ */
+export function ltnBy(
+  right: FixedPrecisionOperand,
+): (left: FixedPrecisionOperand) => boolean {
+  return (left: FixedPrecisionOperand): boolean => ltn(left, right);
+}

@@ -20,3 +20,7 @@ export function toBase(
     options?.roundingMode,
   );
 }
+
+export function toBaseBy(base: 2 | 8 | 16, options?: SdOptions) {
+  return (value: FixedPrecisionOperand): string => toBase(value, base, options);
+}

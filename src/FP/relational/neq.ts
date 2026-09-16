@@ -17,3 +17,15 @@ export function neq(
 ): boolean {
   return !eql(left, right);
 }
+
+/**
+ * Creates a function that tests any operand for raw inequality.
+ *
+ * @param right - Right operand captured for later calls.
+ * @returns Function applying raw inequality with the captured operand.
+ */
+export function neqBy(
+  right: FixedPrecisionOperand,
+): (left: FixedPrecisionOperand) => boolean {
+  return (left: FixedPrecisionOperand): boolean => neq(left, right);
+}

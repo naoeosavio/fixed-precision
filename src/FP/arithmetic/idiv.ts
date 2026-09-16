@@ -15,3 +15,8 @@ export function idiv(
     scaled.ctx,
   );
 }
+
+export function idivBy(other: FixedPrecisionOperand) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    idiv(value, other);
+}

@@ -19,3 +19,8 @@ export function round(
     ),
   );
 }
+
+export function roundBy(options?: PlacesOptions) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    round(value, options);
+}

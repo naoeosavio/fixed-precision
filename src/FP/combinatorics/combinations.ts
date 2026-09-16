@@ -15,3 +15,8 @@ export function combinations(
   const valK = asSafeIndex(k, "combinations");
   return fromRawWithContext(combinations_value(valN, valK) * ctx.SCALE, ctx);
 }
+
+export function combinationsBy(k: number | FixedPrecisionData) {
+  return (n: number | FixedPrecisionData): FixedPrecisionData =>
+    combinations(n, k);
+}

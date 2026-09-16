@@ -11,3 +11,7 @@ export function pow(
 ): FixedPrecisionData {
   return fromContextValue(value, (raw, ctx) => power(raw, exp, ctx.SCALE));
 }
+
+export function powBy(exp: number) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData => pow(value, exp);
+}

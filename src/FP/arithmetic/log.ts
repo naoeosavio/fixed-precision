@@ -24,3 +24,8 @@ export function log(
     scaled.ctx,
   );
 }
+
+export function logBy(options: BaseOptions) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    log(value, options);
+}

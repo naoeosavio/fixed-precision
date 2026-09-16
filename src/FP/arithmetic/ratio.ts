@@ -28,3 +28,15 @@ export function ratio(
   return { ctx: scaled.ctx, value: scaled.left / scaled.right };
 }
 
+/**
+ * Creates a function that divides any operand by a fixed amount.
+ *
+ * @param amount - Right operand captured for later calls.
+ * @returns Function applying raw division with the captured amount.
+ */
+export function ratioBy(
+  amount: FixedPrecisionOperand,
+): (value: FixedPrecisionOperand) => FixedPrecisionData {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    ratio(value, amount);
+}

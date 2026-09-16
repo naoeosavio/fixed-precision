@@ -8,3 +8,8 @@ export function greaterThanOrEqual(
   const scaled = toScaledPair(left, right);
   return greaterThanOrEqualValue(scaled.left, scaled.right);
 }
+
+export function greaterThanOrEqualBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): boolean =>
+    greaterThanOrEqual(left, right);
+}

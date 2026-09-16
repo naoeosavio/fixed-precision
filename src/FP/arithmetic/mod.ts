@@ -2,7 +2,6 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromRawWithContext,
-  isFixedPrecisionData,
   toScaledPair,
 } from "../construction";
 
@@ -15,4 +14,9 @@ export function mod(
     (scaled.left * scaled.ctx.SCALE) % scaled.right,
     scaled.ctx,
   );
+}
+
+export function modBy(amount: FixedPrecisionOperand) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    mod(value, amount);
 }

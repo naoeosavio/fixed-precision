@@ -27,3 +27,16 @@ export function rem(
   // No rescaling between operands; the trusted context is shared.
   return { ctx: scaled.ctx, value: scaled.left % scaled.right };
 }
+
+/**
+ * Creates a function that takes the remainder of any operand by a fixed amount.
+ *
+ * @param amount - Right operand captured for later calls.
+ * @returns Function applying raw remainder with the captured amount.
+ */
+export function remBy(
+  amount: FixedPrecisionOperand,
+): (value: FixedPrecisionOperand) => FixedPrecisionData {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    rem(value, amount);
+}

@@ -8,3 +8,7 @@ export function logicalXor(
   const scaled = toScaledPair(left, right);
   return logicalXorValues(scaled.left, scaled.right);
 }
+
+export function logicalXorBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): boolean => logicalXor(left, right);
+}

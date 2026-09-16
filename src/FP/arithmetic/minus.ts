@@ -27,3 +27,15 @@ export function minus(
   return { ctx: scaled.ctx, value: scaled.left - scaled.right };
 }
 
+/**
+ * Creates a function that subtracts a fixed amount from any operand.
+ *
+ * @param amount - Right operand captured for later calls.
+ * @returns Function applying raw subtraction with the captured amount.
+ */
+export function minusBy(
+  amount: FixedPrecisionOperand,
+): (value: FixedPrecisionOperand) => FixedPrecisionData {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    minus(value, amount);
+}

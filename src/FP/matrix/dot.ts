@@ -16,3 +16,8 @@ export function dot(
   const rawB = b.map((v) => toScaled(v, ctx));
   return fromRawWithContext(dot_product(rawA, rawB, ctx.SCALE), ctx);
 }
+
+export function dotBy(b: FixedPrecisionOperand[]) {
+  return (a: FixedPrecisionOperand[]): FixedPrecisionData => dot(a, b);
+}
+

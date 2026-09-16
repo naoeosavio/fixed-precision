@@ -2,7 +2,6 @@ import {
   type FixedPrecisionData,
   type FixedPrecisionOperand,
   fromRawWithContext,
-  isFixedPrecisionData,
   toScaledPair,
 } from "../construction";
 
@@ -15,4 +14,9 @@ export function multiply(
     (scaled.left * scaled.right) / scaled.ctx.SCALE,
     scaled.ctx,
   );
+}
+
+export function multiplyBy(amount: FixedPrecisionOperand) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData =>
+    multiply(value, amount);
 }

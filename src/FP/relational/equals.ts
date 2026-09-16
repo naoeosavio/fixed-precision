@@ -8,3 +8,7 @@ export function equals(
   const scaled = toScaledPair(left, right);
   return equalsValue(scaled.left, scaled.right);
 }
+
+export function equalsBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): boolean => equals(left, right);
+}

@@ -22,3 +22,15 @@ export function eql(
   // No data side, scale both operands into the default context.
   return equalsValue(scaled.left, scaled.right);
 }
+
+/**
+ * Creates a function that tests any operand for raw equality.
+ *
+ * @param right - Right operand captured for later calls.
+ * @returns Function applying raw equality with the captured operand.
+ */
+export function eqlBy(
+  right: FixedPrecisionOperand,
+): (left: FixedPrecisionOperand) => boolean {
+  return (left: FixedPrecisionOperand): boolean => eql(left, right);
+}

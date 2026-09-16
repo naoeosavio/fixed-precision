@@ -26,3 +26,15 @@ export function cmp(
   // No data side, scale both operands into the default context.
   return compareValues(scaled.left, scaled.right);
 }
+
+/**
+ * Creates a function that raw-compares any operand against a fixed one.
+ *
+ * @param other - Right operand captured for later calls.
+ * @returns Function applying raw comparison with the captured operand.
+ */
+export function cmpBy(
+  other: FixedPrecisionOperand,
+): (value: FixedPrecisionOperand) => Comparison {
+  return (value: FixedPrecisionOperand): Comparison => cmp(value, other);
+}

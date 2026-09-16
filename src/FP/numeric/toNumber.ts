@@ -17,3 +17,7 @@ export function toNumber(
 
   return toNumber(scale(value, { places: options.places }));
 }
+
+export function toNumberBy(options?: { places?: number }) {
+  return (value: FixedPrecisionOperand): number => toNumber(value, options);
+}

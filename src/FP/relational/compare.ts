@@ -12,3 +12,7 @@ export function compare(
   const scaled = toScaledPair(value, other);
   return compareValues(scaled.left, scaled.right);
 }
+
+export function compareBy(other: FixedPrecisionOperand) {
+  return (value: FixedPrecisionOperand): Comparison => compare(value, other);
+}

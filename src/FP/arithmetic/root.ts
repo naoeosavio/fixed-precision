@@ -11,3 +11,7 @@ export function root(
 ): FixedPrecisionData {
   return fromContextValue(value, (raw, ctx) => root_value(raw, n, ctx.SCALE));
 }
+
+export function rootBy(n: number) {
+  return (value: FixedPrecisionOperand): FixedPrecisionData => root(value, n);
+}

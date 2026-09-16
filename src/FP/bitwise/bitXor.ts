@@ -12,3 +12,8 @@ export function bitXor(
   const scaled = toScaledPair(left, right);
   return fromRawWithContext(scaled.left ^ scaled.right, scaled.ctx);
 }
+
+export function bitXorBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): FixedPrecisionData =>
+    bitXor(left, right);
+}

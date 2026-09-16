@@ -20,3 +20,10 @@ export function idivmod(
     ),
   };
 }
+
+export function idivmodBy(other: FixedPrecisionOperand) {
+  return (
+    value: FixedPrecisionOperand,
+  ): { quotient: FixedPrecisionData; remainder: FixedPrecisionData } =>
+    idivmod(value, other);
+}

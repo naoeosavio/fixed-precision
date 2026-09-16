@@ -30,3 +30,9 @@ export function fraction(
     fromRawWithContext(result.denominator * ctx.SCALE, ctx),
   ];
 }
+
+export function fractionBy(options?: MaxDenOptions) {
+  return (
+    value: FixedPrecisionOperand,
+  ): [FixedPrecisionData, FixedPrecisionData] => fraction(value, options);
+}
