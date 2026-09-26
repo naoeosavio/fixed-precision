@@ -10,4 +10,5 @@ export * from "./lessThan";
 export * from "./lessThanOrEqual";
 export * from "./lte";
 export * from "./ltn";
+export * from "./neq";
 export * from "./notEquals";

@@ -20,4 +20,3 @@ export function dot(
 export function dotBy(b: FixedPrecisionOperand[]) {
   return (a: FixedPrecisionOperand[]): FixedPrecisionData => dot(a, b);
 }
-

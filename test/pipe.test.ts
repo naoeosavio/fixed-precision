@@ -317,6 +317,7 @@ const registry: Entry[] = [
   ["gte", relational.gte, ["3"], "5"],
   ["ltn", relational.ltn, ["3"], "5"],
   ["lte", relational.lte, ["3"], "5"],
+  ["neq", relational.neq, ["3"], "5"],
   ["plusBy", arithmetic.plusBy("2"), [], "6"],
   ["minusBy", arithmetic.minusBy("2"), [], "6"],
   ["timesBy", arithmetic.timesBy("3"), [], "6"],
@@ -328,6 +329,7 @@ const registry: Entry[] = [
   ["gteBy", relational.gteBy("3"), [], "5"],
   ["ltnBy", relational.ltnBy("3"), [], "5"],
   ["lteBy", relational.lteBy("3"), [], "5"],
+  ["neqBy", relational.neqBy("3"), [], "5"],
 ];
 
 function runPipe([fn, extras]: [Fn, any[]], input: any) {
