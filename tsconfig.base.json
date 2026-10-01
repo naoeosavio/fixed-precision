@@ -1,0 +1,30 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "moduleResolution": "Bundler",
+    "module": "ES2020",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "moduleDetection": "force",
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "forceConsistentCasingInFileNames": true,
+
+    /* Strictness */
+    "strict": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": true,
+    "noEmit": true,
+
+    /* Resolve the core to its sources so type-checking runs without a build
+       step in between. `fixed-precision-fp` reaches the value-level modules by
+       relative path and builds them into its own entries. */
+    "baseUrl": ".",
+    "paths": {
+      "fixed-precision": ["./packages/core/src/FixedPrecision.ts"],
+      "fixed-precision/minimal": ["./packages/core/src/Minimal.ts"]
+    }
+  }
+}

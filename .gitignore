@@ -140,12 +140,14 @@ dist
 .yarn/install-state.gz
 .pnp.*
 /.changeset
-tsup.config.ts
+# tsup declaration cache (the config itself is versioned)
+.tsup/
 .prettier*
 .npm*
 .biome*
 .vscode
 biome.*
+*-lock*
 
 # C implementation build files
 C/obj/
