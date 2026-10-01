@@ -1,0 +1,65 @@
+{
+  "name": "fixed-precision",
+  "version": "2.0.0",
+  "description": "A fixed-precision decimal arithmetic library for JavaScript/TypeScript",
+  "main": "dist/FixedPrecision.js",
+  "type": "module",
+  "module": "dist/FixedPrecision.js",
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "src",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE",
+    "MIGRATION.md"
+  ],
+  "exports": {
+    "./package.json": "./package.json",
+    ".": {
+      "import": {
+        "types": "./dist/FixedPrecision.d.ts",
+        "default": "./dist/FixedPrecision.js"
+      },
+      "require": {
+        "types": "./dist/FixedPrecision.d.cts",
+        "default": "./dist/FixedPrecision.cjs"
+      }
+    },
+    "./minimal": {
+      "import": {
+        "types": "./dist/Minimal.d.ts",
+        "default": "./dist/Minimal.js"
+      },
+      "require": {
+        "types": "./dist/Minimal.d.cts",
+        "default": "./dist/Minimal.cjs"
+      }
+    }
+  },
+  "bugs": {
+    "url": "https://github.com/naoeosavio/fixed-precision/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/naoeosavio/fixed-precision.git",
+    "directory": "packages/core"
+  },
+  "keywords": [
+    "fixed",
+    "decimal",
+    "arithmetic",
+    "fixed-point",
+    "precision",
+    "financial",
+    "bigint"
+  ],
+  "author": "it is not savio",
+  "license": "MIT",
+  "scripts": {
+    "build": "npm run clean && tsup",
+    "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "check:exports": "attw --pack . --profile node16"
+  }
+}
