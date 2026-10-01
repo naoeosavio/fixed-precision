@@ -1,72 +1,28 @@
 {
-  "name": "fixed-precision",
-  "version": "1.7.3",
-  "description": "A fixed-precision decimal arithmetic library for JavaScript/TypeScript",
-  "main": "dist/FixedPrecision.js",
+  "name": "fixed-precision-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Monorepo for fixed-precision (class API) and fixed-precision-fp (functional API)",
   "type": "module",
-  "module": "dist/FixedPrecision.js",
-  "files": [
-    "dist",
-    "minimal.js",
-    "minimal.d.ts",
-    "README.md",
-    "LICENSE"
+  "workspaces": [
+    "packages/*"
   ],
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/FixedPrecision.d.ts",
-        "default": "./dist/FixedPrecision.js"
-      },
-      "require": {
-        "types": "./dist/FixedPrecision.d.cts",
-        "default": "./dist/FixedPrecision.cjs"
-      }
-    },
-    "./minimal": {
-      "import": {
-        "types": "./dist/Minimal.d.ts",
-        "default": "./dist/Minimal.js"
-      },
-      "require": {
-        "types": "./dist/Minimal.d.cts",
-        "default": "./dist/Minimal.cjs"
-      }
-    },
-    "./package.json": "./package.json"
-  },
-  "bugs": {
-    "url": "https://github.com/naoeosavio/fixed-precision/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/naoeosavio/fixed-precision.git"
-  },
-  "keywords": [
-    "fixed",
-    "decimal",
-    "arithmetic",
-    "fixed-point",
-    "precision",
-    "financial",
-    "bigint"
-  ],
-  "author": "it is not savio",
-  "license": "MIT",
   "scripts": {
-    "build": "tsup",
-    "lint": "tsc",
-    "format": "biome check --write src",
-    "check:format": "biome check src",
-    "check:exports": "attw --pack .",
+    "build": "npm run build --workspace fixed-precision && npm run build --workspace fixed-precision-fp",
+    "lint": "tsc -p packages/core/tsconfig.json && tsc -p packages/fp/tsconfig.json",
+    "format": "biome check --write packages/core/src packages/fp/src scripts",
+    "check:format": "biome check packages/core/src packages/fp/src scripts",
     "test": "vitest run",
     "dev": "vitest",
+    "exports:gen": "node scripts/gen_exports.mjs",
+    "check:exports": "npm run exports:gen -- --check && attw --pack packages/core --profile node16 && attw --pack packages/fp --profile node16",
     "ci": "npm run lint && npm run check:format && npm run test && npm run build && npm run check:exports",
     "prepublish": "npm run ci"
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.17.4",
     "@biomejs/biome": "2.2.6",
+    "@types/node": "26.1.2",
     "tsup": "^8.5.0",
     "typescript": "^5.5.4",
     "vitest": "^3.0.8"
