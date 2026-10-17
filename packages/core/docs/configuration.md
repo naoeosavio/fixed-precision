@@ -54,7 +54,7 @@ FixedPrecision.configure({ places: 8 });
 // Module A's code now breaks — it expects 2 places
 ```
 
-> The **functional API** ([`fixed-precision-fp`](../../fp/README.md)) goes
+> The **functional API** ([`fixed-precision-fns`](../../fp/README.md)) goes
 > further: it has no global configuration at all. Its default context is a
 > frozen constant, and precision is controlled through factories and operands.
 > In particular, `FixedPrecision.configure()` does **not** affect functional

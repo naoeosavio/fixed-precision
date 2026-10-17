@@ -1017,12 +1017,12 @@ Each FixedPrecision instance has a context with:
 ## Functional Composition
 
 Composition (`pipe`, `compose`, `partial`) moved to
-[`fixed-precision-fp`](https://www.npmjs.com/package/fixed-precision-fp), together
+[`fixed-precision-fns`](https://www.npmjs.com/package/fixed-precision-fns), together
 with every standalone operation it is meant to compose:
 
 ```ts
-import { add } from "fixed-precision-fp/add";
-import { multiply, partial, pipe, stringify } from "fixed-precision-fp/pipe";
+import { add } from "fixed-precision-fns/add";
+import { multiply, partial, pipe, stringify } from "fixed-precision-fns/pipe";
 ```
 
 The functional API has no class instances and no global configuration: pipelines

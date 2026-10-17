@@ -20,7 +20,7 @@ FixedPrecision is a library for handling fixed‑precision decimal numbers in Ja
 - **Vector / matrix** — `dot`, `cross`.
 - **Fractions** — `num`, `den`, `fraction`.
 - **Bitwise operations** — `bitAnd`, `bitOr`, `bitXor`, `bitNot`, `leftShift`, `rightArithShift`.
-- **Functional composition** — see [`fixed-precision-fp`](../fp/README.md): tree-shakeable standalone functions composed via `pipe`, `compose` and `partial`.
+- **Functional composition** — see [`fixed-precision-fns`](../fp/README.md): tree-shakeable standalone functions composed via `pipe`, `compose` and `partial`.
 - **TypeScript** — full type definitions included (`FixedPrecisionValue`, `FixedPrecisionConfig`, `RoundingMode`, `Comparison`).
 
 ## Installation
@@ -126,11 +126,11 @@ FixedPrecision.create(config: FixedPrecisionConfig): (val: FixedPrecisionValue) 
 ## Functional Composition
 
 The class API above is one of two packages. Standalone functions, `pipe`,
-`compose` and `partial` live in [`fixed-precision-fp`](../fp/README.md):
+`compose` and `partial` live in [`fixed-precision-fns`](../fp/README.md):
 
 ```ts
-import { add } from "fixed-precision-fp/add";
-import { multiply, partial, pipe, stringify } from "fixed-precision-fp/pipe";
+import { add } from "fixed-precision-fns/add";
+import { multiply, partial, pipe, stringify } from "fixed-precision-fns/pipe";
 
 pipe(partial(add, "2"), partial(multiply, "3"), partial(stringify))("1"); // "9"
 ```
@@ -146,7 +146,7 @@ For more detailed guides and examples, see the [docs/](docs/) directory:
 |----------|--------|
 | **Getting Started** | [Quick Start](docs/quick-start.md), [Installation](docs/installation.md), [Basic Concepts](docs/concepts.md) |
 | **Core Features** | [Arithmetic](docs/arithmetic.md), [Raw Operations](docs/raw-operations.md), [Rounding & Scaling](docs/rounding-scaling.md), [Conversion](docs/conversion.md), [Minimal Build](docs/minimal.md) |
-| **Functional** | [Functional Design](../fp/docs/functional-design.md), [Composition Examples](../fp/docs/examples/composition.md) — all in [`fixed-precision-fp`](../fp/README.md) |
+| **Functional** | [Functional Design](../fp/docs/functional-design.md), [Composition Examples](../fp/docs/examples/composition.md) — all in [`fixed-precision-fns`](../fp/README.md) |
 | **Configuration** | [Global Configuration](docs/configuration.md), [Precision Factories](docs/factories.md) |
 | **Advanced** | [Performance](docs/performance.md), [Error Handling](docs/errors.md), [BigInt Warning](docs/bigint-warning.md) |
 | **API** | [Full API Reference](docs/api-reference.md), [Type Definitions](docs/types.md) |

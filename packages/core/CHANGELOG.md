@@ -7,7 +7,7 @@ All notable changes to the fixed-precision library will be documented in this fi
 ### Breaking Changes
 
 - The 118 functional subpaths (`fixed-precision/add`, `fixed-precision/pipe`, ...)
-  moved to the new package [`fixed-precision-fp`](https://www.npmjs.com/package/fixed-precision-fp).
+  moved to the new package [`fixed-precision-fns`](https://www.npmjs.com/package/fixed-precision-fns).
   The class API (`.`) and `fixed-precision/minimal` are unchanged — see
   [MIGRATION.md](./MIGRATION.md) for the 1:1 table.
 - `exports` is down to 3 entries (`.`, `./minimal`, `./package.json`); the 118
