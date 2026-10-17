@@ -48,7 +48,7 @@ describe("tree-shaking / functional-first", () => {
     // Markers that only exist in packages/fp/src.
     expect(bundle).not.toContain("isFixedPrecisionData");
     expect(bundle).not.toContain("compose");
-    expect(bundle).not.toContain("fixed-precision-fp");
+    expect(bundle).not.toContain("fixed-precision-fns");
   });
 
   test("the value-level core is built in, not imported at runtime (after build)", () => {

@@ -6,9 +6,9 @@ implementation.
 | Package | npm | What it is |
 |---------|-----|------------|
 | [`packages/core`](packages/core) | [`fixed-precision`](https://www.npmjs.com/package/fixed-precision) | The class API — `new FixedPrecision(...)` and the `Minimal` variant |
-| [`packages/fp`](packages/fp) | [`fixed-precision-fp`](https://www.npmjs.com/package/fixed-precision-fp) | The functional API — one tree-shakeable subpath per operation, plus `pipe`/`compose`/`partial` |
+| [`packages/fp`](packages/fp) | [`fixed-precision-fns`](https://www.npmjs.com/package/fixed-precision-fns) | The functional API — one tree-shakeable subpath per operation, plus `pipe`/`compose`/`partial` |
 
-`fixed-precision-fp` builds the value-level operations of `fixed-precision` into its
+`fixed-precision-fns` builds the value-level operations of `fixed-precision` into its
 own entries and declares the core as a dev dependency, so nothing is resolved at
 runtime. The core knows nothing about the functional layer: installing
 `fixed-precision` alone pulls none of it.
@@ -17,7 +17,7 @@ runtime. The core knows nothing about the functional layer: installing
 
 ```
 packages/core   fixed-precision        src/core/** (value-level operations), FixedPrecision.ts, Minimal.ts
-packages/fp     fixed-precision-fp     src/** (one module per operation, core built in)
+packages/fp     fixed-precision-fns     src/** (one module per operation, core built in)
 scripts         gen_exports.mjs        writes the `exports` map of both packages
 tasks           execution plans, one file per group
 ```

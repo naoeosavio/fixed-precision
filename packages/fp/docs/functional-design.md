@@ -1,7 +1,7 @@
 # Functional API Design
 
 The functional layer of FixedPrecision (the per-function entry points like
-`fixed-precision-fp/add`, `fixed-precision-fp/round`, ...) follows two deliberate
+`fixed-precision-fns/add`, `fixed-precision-fns/round`, ...) follows two deliberate
 design decisions:
 
 1. **No mutable global context** — the default context is a frozen constant.
@@ -23,7 +23,7 @@ const DEFAULT_CONTEXT = Object.freeze(makeContext(8, 4)); // 8 places, HALF_UP
 Functions never read or write shared module state at call time:
 
 ```ts
-import { add } from "fixed-precision-fp/add";
+import { add } from "fixed-precision-fns/add";
 
 add("10.50", "2.25"); // uses the frozen default only when no operand carries a context
 ```
@@ -36,7 +36,7 @@ add("10.50", "2.25"); // uses the frozen default only when no operand carries a 
   [Configuration](configuration.md)). With a frozen default this failure mode
   cannot happen.
 - **Tree-shakeable by construction.** Each function must be self-contained so
-  that importing `fixed-precision-fp/round` alone stays small and side-effect free.
+  that importing `fixed-precision-fns/round` alone stays small and side-effect free.
   A writable global would force every entry point to share and guard the same
   mutable slot.
 - **Isolation for tests and concurrency.** SSR requests, web workers and
@@ -62,7 +62,7 @@ global, you attach the context to the values themselves.
 with a fixed context:
 
 ```ts
-import { createFactory } from "fixed-precision-fp/createFactory";
+import { createFactory } from "fixed-precision-fns/createFactory";
 
 const Price = createFactory({ places: 2 });
 const Rate = createFactory({ places: 6 });
@@ -77,8 +77,8 @@ Results are plain data that keep their context, and subsequent calls resolve
 it automatically (the highest `places` among operands wins):
 
 ```ts
-import { multiply } from "fixed-precision-fp/multiply";
-import { stringify } from "fixed-precision-fp/stringify";
+import { multiply } from "fixed-precision-fns/multiply";
+import { stringify } from "fixed-precision-fns/stringify";
 
 const result = multiply(total, rate); // resolved at places: 6
 stringify(result);                    // "21.697785"
@@ -93,8 +93,8 @@ Where a function supports tuning, pass it in the options object (see next
 section):
 
 ```ts
-import { round } from "fixed-precision-fp/round";
-import { scale } from "fixed-precision-fp/scale";
+import { round } from "fixed-precision-fns/round";
+import { scale } from "fixed-precision-fns/scale";
 
 round(total, { roundingMode: 1 });      // ROUND_DOWN, keeps places
 scale(total, { places: 4 });            // convert to another precision
@@ -167,7 +167,7 @@ options.
 
 ## Composition: `pipe` and `partial`
 
-The standalone functions are the foundation; `fixed-precision-fp/pipe` builds
+The standalone functions are the foundation; `fixed-precision-fns/pipe` builds
 composition on top of them without changing their semantics or duplicating
 them. It exports exactly three functions:
 

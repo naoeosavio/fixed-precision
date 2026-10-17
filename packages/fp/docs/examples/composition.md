@@ -1,13 +1,13 @@
 # Composition Examples: standalone vs `pipe` + `partial`
 
 Every functional pipeline can be written with plain standalone calls or
-composed through `fixed-precision-fp/pipe`. Both produce **identical values** —
+composed through `fixed-precision-fns/pipe`. Both produce **identical values** —
 they differ only in ergonomics.
 
 | Style | Import | Best for |
 |-------|--------|----------|
-| Standalone functions | `fixed-precision-fp/<fn>` | Single operations, smallest bundles |
-| `pipe` / `compose` + `partial` | `fixed-precision-fp/pipe` | Pipelines and reusable transforms |
+| Standalone functions | `fixed-precision-fns/<fn>` | Single operations, smallest bundles |
+| `pipe` / `compose` + `partial` | `fixed-precision-fns/pipe` | Pipelines and reusable transforms |
 
 ## Checkout Total
 
@@ -16,9 +16,9 @@ Price × quantity − 10% discount + 8% tax, rounded to cents.
 ### Standalone
 
 ```typescript
-import { createFactory } from "fixed-precision-fp/createFactory";
-import { multiply, round } from "fixed-precision-fp/multiply";
-import { toFixed } from "fixed-precision-fp/toFixed";
+import { createFactory } from "fixed-precision-fns/createFactory";
+import { multiply, round } from "fixed-precision-fns/multiply";
+import { toFixed } from "fixed-precision-fns/toFixed";
 
 const Money = createFactory({ places: 2 });
 const price = Money("19.99");
@@ -33,10 +33,10 @@ console.log(toFixed(total, { places: 2 })); // "58.28"
 ### `pipe` + `partial`
 
 ```typescript
-import { createFactory } from "fixed-precision-fp/createFactory";
-import { multiply, round } from "fixed-precision-fp/multiply";
-import { toFixed } from "fixed-precision-fp/toFixed";
-import { partial, compose, pipe } from "fixed-precision-fp/pipe";
+import { createFactory } from "fixed-precision-fns/createFactory";
+import { multiply, round } from "fixed-precision-fns/multiply";
+import { toFixed } from "fixed-precision-fns/toFixed";
+import { partial, compose, pipe } from "fixed-precision-fns/pipe";
 
 const Money = createFactory({ places: 2 });
 
@@ -54,8 +54,8 @@ console.log(partial(toFixed, { places: 2 })(checkout(Money("19.99"))));
 ### Lambdas where they read better
 
 ```typescript
-import { pipe } from "fixed-precision-fp/pipe";
-import type { FixedPrecisionData } from "fixed-precision-fp/pipe/types";
+import { pipe } from "fixed-precision-fns/pipe";
+import type { FixedPrecisionData } from "fixed-precision-fns/pipe/types";
 
 checkout = pipe(
   (v: FixedPrecisionData) => round(multiply(v, "0.90"), { places: 2 }),
@@ -73,8 +73,8 @@ checkout = pipe(
 `partial(fn)` returns a standalone transform — define pricing policies once:
 
 ```typescript
-import { multiply } from "fixed-precision-fp/multiply";
-import { partial, compose, pipe } from "fixed-precision-fp/pipe";
+import { multiply } from "fixed-precision-fns/multiply";
+import { partial, compose, pipe } from "fixed-precision-fns/pipe";
 
 const applyDiscount = partial(multiply, "0.90");
 const withTax = partial(multiply, "1.08");
@@ -94,9 +94,9 @@ double(Money("5")); // "10.00"
 Celsius → Fahrenheit: `× 1.8 + 32` (default context, no factory needed).
 
 ```typescript
-import { add } from "fixed-precision-fp/add";
-import { multiply } from "fixed-precision-fp/multiply";
-import { partial, pipe, stringify } from "fixed-precision-fp/pipe";
+import { add } from "fixed-precision-fns/add";
+import { multiply } from "fixed-precision-fns/multiply";
+import { partial, pipe, stringify } from "fixed-precision-fns/pipe";
 
 stringify(add(multiply("36.6", "1.8"), "32")); // standalone: "97.88"
 
@@ -112,10 +112,10 @@ pipe(
 Average cart value from an array of money values.
 
 ```typescript
-import { divide } from "fixed-precision-fp/divide";
-import { sum } from "fixed-precision-fp/sum";
-import { partial, compose, pipe } from "fixed-precision-fp/pipe";
-import { toFixed } from "fixed-precision-fp/toFixed";
+import { divide } from "fixed-precision-fns/divide";
+import { sum } from "fixed-precision-fns/sum";
+import { partial, compose, pipe } from "fixed-precision-fns/pipe";
+import { toFixed } from "fixed-precision-fns/toFixed";
 
 const items = ["10.00", "5.50", "3.25", "1.25"].map(Money);
 
@@ -130,7 +130,7 @@ average(items); // "5.00"
 ## Which One Should I Use?
 
 - **One operation, hot path, tiny bundle** → standalone function
-  (`fixed-precision-fp/add`).
+  (`fixed-precision-fns/add`).
 - **Pipelines and reusable transforms** → `pipe` (or right-to-left
   `compose`) + `partial`; lambdas for the odd shape.
 - **Reusable named transform** → the `*By` variant (`const tax = multiplyBy("1.08")`), which is exactly `partial(multiply, "1.08")` — see

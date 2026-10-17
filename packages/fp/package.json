@@ -1,5 +1,5 @@
 {
-  "name": "fixed-precision-fp",
+  "name": "fixed-precision-fns",
   "version": "1.0.0",
   "description": "Tree-shakeable functional API for fixed-precision \u2014 one subpath per operation, pipe/compose/partial included",
   "type": "module",

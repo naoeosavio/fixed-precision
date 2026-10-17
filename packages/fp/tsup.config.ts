@@ -4,7 +4,7 @@ import { defineConfig } from "tsup";
 
 /**
  * Every `<category>/<name>.ts` file becomes one subpath entry
- * (`fixed-precision-fp/<name>`), which is what makes the API tree-shakeable at
+ * (`fixed-precision-fns/<name>`), which is what makes the API tree-shakeable at
  * function granularity. The names are kept in sync with `exports` by
  * `scripts/gen_exports.mjs`, which reads this same directory layout.
  */

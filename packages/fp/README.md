@@ -1,10 +1,10 @@
-# fixed-precision-fp
+# fixed-precision-fns
 
 The functional API of [fixed-precision](https://www.npmjs.com/package/fixed-precision):
 one subpath per operation, no class instances, no global configuration.
 
 ```bash
-npm install fixed-precision-fp
+npm install fixed-precision-fns
 ```
 
 ## Why a separate package
@@ -24,8 +24,8 @@ runtime one.
 ## Quick start
 
 ```ts
-import { add } from "fixed-precision-fp/add";
-import { multiply, partial, pipe, stringify } from "fixed-precision-fp/pipe";
+import { add } from "fixed-precision-fns/add";
+import { multiply, partial, pipe, stringify } from "fixed-precision-fns/pipe";
 
 pipe(partial(add, "2"), partial(multiply, "3"), partial(stringify))("1"); // "9"
 ```
@@ -33,8 +33,8 @@ pipe(partial(add, "2"), partial(multiply, "3"), partial(stringify))("1"); // "9"
 Every function returns plain data — `{ ctx, value }` — never a class instance:
 
 ```ts
-import { add } from "fixed-precision-fp/add";
-import { stringify } from "fixed-precision-fp/stringify";
+import { add } from "fixed-precision-fns/add";
+import { stringify } from "fixed-precision-fns/stringify";
 
 const sum = add("1.5", "2.25");
 sum.value;              // 375000000n
@@ -48,7 +48,7 @@ There is no `configure()` here. The default context is a frozen constant
 (8 places, ROUND_HALF_UP); precision comes from the operands or from a factory:
 
 ```ts
-import { createFactory } from "fixed-precision-fp/createFactory";
+import { createFactory } from "fixed-precision-fns/createFactory";
 
 const Money = createFactory({ places: 2, roundingMode: 4 });
 Money("19.99"); // ctx.places === 2
@@ -61,9 +61,9 @@ See [Functional API Design](docs/functional-design.md) for the full rationale.
 
 ```ts
 import FixedPrecision, { fixedconfig } from "fixed-precision";
-import { dataOf } from "fixed-precision-fp/dataOf";
-import { multiply } from "fixed-precision-fp/multiply";
-import { stringify } from "fixed-precision-fp/stringify";
+import { dataOf } from "fixed-precision-fns/dataOf";
+import { multiply } from "fixed-precision-fns/multiply";
+import { stringify } from "fixed-precision-fns/stringify";
 
 fixedconfig.configure({ places: 4 });
 
@@ -72,7 +72,7 @@ stringify(multiply(dataOf(new FixedPrecision("1.5")), "2")); // "3.0000"
 
 ## Composition
 
-`fixed-precision-fp/pipe` exports exactly three functions: `pipe`, `compose` and
+`fixed-precision-fns/pipe` exports exactly three functions: `pipe`, `compose` and
 `partial`. Pipelines are typed end to end (mismatched stages resolve to `never`
 instead of falling back to `any`).
 
@@ -103,7 +103,7 @@ More in [Composition Examples](docs/examples/composition.md) and
 | Composition | `pipe` `compose` `partial` |
 | Construction | `createFactory` `dataOf` |
 
-The barrel entry (`import { add } from "fixed-precision-fp"`) also works and
+The barrel entry (`import { add } from "fixed-precision-fns"`) also works and
 re-exports everything, but importing from the subpath is what keeps the bundle
 small.
 

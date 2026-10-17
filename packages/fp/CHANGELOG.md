@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the `fixed-precision-fp` package will be documented in
+All notable changes to the `fixed-precision-fns` package will be documented in
 this file. For the class API, see
 [`fixed-precision`](../core/CHANGELOG.md).
 
@@ -16,7 +16,7 @@ own package with the same 118 subpaths.
   [`fixed-precision`'s MIGRATION.md](../core/MIGRATION.md).
 - `fixed-precision` is a runtime dependency and is never bundled here, so an app
   that uses both packages has exactly one copy of every operation.
-- The barrel entry (`import { add } from "fixed-precision-fp"`) re-exports
+- The barrel entry (`import { add } from "fixed-precision-fns"`) re-exports
   everything; importing from a subpath is what keeps the bundle small.
 - `context`, `safeIndex`, `types` and `value` are internal building blocks. They
   are reachable through the barrel but have no subpath, exactly as in v1.7.3.
