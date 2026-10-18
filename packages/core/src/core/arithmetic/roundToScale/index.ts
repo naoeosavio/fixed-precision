@@ -1,8 +1,13 @@
 import type { RoundingMode } from "../../construction/types";
-import { round_half } from "../internal/round_half";
-import { round_half_even } from "../internal/round_half_even";
-import { round_half_floor } from "../internal/round_half_floor";
 
+/**
+ * Divides a scaled value by a rounding factor with the rounding mode.
+ *
+ * @param value - Raw scaled value to divide.
+ * @param rounding_factor - Positive divisor to remove.
+ * @param rm - Rounding mode to apply to the remainder.
+ * @returns Rounded quotient.
+ */
 export function round_to_scale_value(
   value: bigint,
   rounding_factor: bigint,
@@ -26,15 +31,43 @@ export function round_to_scale_value(
     case 2:
       return is_positive ? q + 1n : q;
     case 3:
-      return !is_positive ? q - 1n : q;
+      return is_positive ? q : q - 1n;
+  }
+
+  const twice_abs_rem = (rem < 0n ? -rem : rem) << 1n;
+
+  switch (rm) {
     case 4:
+      return twice_abs_rem >= rounding_factor
+        ? is_positive
+          ? q + 1n
+          : q - 1n
+        : q;
     case 5:
-    case 7:
-      return round_half(q, rem, rounding_factor, is_positive, rm);
+      return twice_abs_rem > rounding_factor
+        ? is_positive
+          ? q + 1n
+          : q - 1n
+        : q;
     case 6:
-      return round_half_even(q, rem, rounding_factor, is_positive);
+      if (twice_abs_rem === rounding_factor) {
+        return q % 2n === 0n ? q : is_positive ? q + 1n : q - 1n;
+      }
+      return twice_abs_rem > rounding_factor
+        ? is_positive
+          ? q + 1n
+          : q - 1n
+        : q;
+    case 7:
+      if (is_positive) {
+        return twice_abs_rem >= rounding_factor ? q + 1n : q;
+      }
+      return twice_abs_rem > rounding_factor ? q - 1n : q;
     case 8:
-      return round_half_floor(q, rem, rounding_factor, is_positive);
+      if (is_positive) {
+        return twice_abs_rem > rounding_factor ? q + 1n : q;
+      }
+      return twice_abs_rem >= rounding_factor ? q - 1n : q;
     default:
       throw new Error(`Rounding mode ${rm} is not supported.`);
   }

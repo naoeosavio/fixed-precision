@@ -11,9 +11,9 @@ export function from_number_with_ctx(value: number, ctx: FPContext): bigint {
     }
 
     const num = Math.trunc(value);
-    const n_num = Math.abs(num - value);
-    const n_scaled = BigInt(Math.trunc(n_num * ctx.SCALENUMBER));
-    return BigInt(num) * ctx.SCALE + n_scaled;
+    const frac = value - num;
+    const frac_scaled = BigInt(Math.trunc(frac * ctx.SCALENUMBER));
+    return BigInt(num) * ctx.SCALE + frac_scaled;
   }
   return BigInt(Math.trunc(scaled));
 }

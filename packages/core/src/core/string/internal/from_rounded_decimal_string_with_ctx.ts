@@ -1,6 +1,6 @@
 import type { FPContext } from "../../../FixedPrecision";
 import { round_to_scale_value } from "../../arithmetic/roundToScale";
-import { precisionPowerOfTen } from "../../utils/precisionPowerOfTen";
+import { powerOfTen } from "../../utils/powerOfTen";
 
 export function from_rounded_decimal_string_with_ctx(
   str: string,
@@ -13,6 +13,7 @@ export function from_rounded_decimal_string_with_ctx(
   const int_str = unsigned.slice(0, u_dot) || "0";
   const frac_str = unsigned.slice(u_dot + 1);
   const N = BigInt(int_str + frac_str);
-  const factor = precisionPowerOfTen(frac_str.length - P);
+  const excess = frac_str.length - P;
+  const factor = excess <= 20 ? powerOfTen(excess) : 10n ** BigInt(excess);
   return round_to_scale_value(negative ? -N : N, factor, ctx.roundingMode);
 }

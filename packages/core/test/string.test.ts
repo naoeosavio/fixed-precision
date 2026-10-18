@@ -232,6 +232,15 @@ describe("Parse exactness (regression)", () => {
       FP18("-0.000000001").sinh().neg().toString(),
     );
   });
+
+  test("short decimal path parses exact values without float error", () => {
+    const FP5 = FixedPrecision.create({ places: 5, roundingMode: 4 });
+    expect(FP5("2228627.30").raw()).toBe(222862730000n);
+    expect(FP5("2228627.30").toString()).toBe("2228627.3");
+    expect(FP5("2228627.30").toString(false)).toBe("2228627.30000");
+    expect(FP8("1234567.89").raw()).toBe(123456789000000n);
+    expect(FP8("1234567.89").toString()).toBe("1234567.89");
+  });
 });
 
 describe("Parse string validation", () => {

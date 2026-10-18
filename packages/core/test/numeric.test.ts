@@ -154,4 +154,10 @@ describe("Numeric", () => {
       -1234567890.123456789,
     );
   });
+
+  test("large negative number keeps the fraction sign", () => {
+    const FP12 = FixedPrecision.create({ places: 12, roundingMode: 4 });
+    expect(FP12(-591979.9206741061).raw()).toBe(-591979920674106106n);
+    expect(FP12(-591979.9206741061).toString()).toBe("-591979.920674106106");
+  });
 });
