@@ -8,10 +8,11 @@ implementation.
 | [`packages/core`](packages/core) | [`fixed-precision`](https://www.npmjs.com/package/fixed-precision) | The class API — `new FixedPrecision(...)` and the `Minimal` variant |
 | [`packages/fp`](packages/fp) | [`fixed-precision-fns`](https://www.npmjs.com/package/fixed-precision-fns) | The functional API — one tree-shakeable subpath per operation, plus `pipe`/`compose`/`partial` |
 
-`fixed-precision-fns` builds the value-level operations of `fixed-precision` into its
-own entries and declares the core as a dev dependency, so nothing is resolved at
-runtime. The core knows nothing about the functional layer: installing
-`fixed-precision` alone pulls none of it.
+`fixed-precision-fns` builds the value-level operations of `fixed-precision` into
+its own entries. The core sources are bundled at build time, so nothing is
+resolved at runtime and the package ships with no dependencies. The core knows
+nothing about the functional layer: installing `fixed-precision` alone pulls
+none of it.
 
 ## Repository layout
 

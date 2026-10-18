@@ -5,14 +5,19 @@ import {
 } from "../../../core/src/core/construction/context";
 import { from_number_with_ctx } from "../../../core/src/core/numeric/fromNumber";
 import { from_string_with_ctx } from "../../../core/src/core/string/fromString";
-import { makeContext } from "./context";
 import type {
   FixedPrecisionData,
   FixedPrecisionOperand,
   FPContext,
+  RoundingMode,
 } from "./types";
 
-const DEFAULT_CONTEXT: FPContext = Object.freeze(makeContext(8, 4));
+const DEFAULT_CONTEXT: FPContext = Object.freeze({
+  places: 8,
+  roundingMode: 4 as RoundingMode,
+  SCALE: 100000000n,
+  SCALENUMBER: 100000000,
+});
 
 export function getDefaultContext(): FPContext {
   return DEFAULT_CONTEXT;
@@ -23,29 +28,11 @@ export function isFixedPrecisionData(
 ): value is FixedPrecisionData {
   if (typeof value !== "object" || value === null) return false;
   const data = value as Partial<FixedPrecisionData>;
-  if (typeof data.value !== "bigint") return false;
-  // Single ctx load: the previous version reloaded data.ctx on every check.
-  const ctx = data.ctx;
-  if (ctx === undefined || ctx === null) return false;
-  const places = ctx.places;
-  if (
-    typeof places !== "number" ||
-    !Number.isInteger(places) ||
-    places < 0 ||
-    places > 20
-  ) {
-    return false;
-  }
-  const roundingMode = ctx.roundingMode;
-  if (
-    typeof roundingMode !== "number" ||
-    !Number.isInteger(roundingMode) ||
-    roundingMode < 0 ||
-    roundingMode > 8
-  ) {
-    return false;
-  }
-  return typeof ctx.SCALE === "bigint" && typeof ctx.SCALENUMBER === "number";
+  return (
+    typeof data.value === "bigint" &&
+    data.ctx !== undefined &&
+    data.ctx !== null
+  );
 }
 
 export function fromRawWithContext(

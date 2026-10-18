@@ -1227,9 +1227,5 @@
     "build": "npm run clean && tsup",
     "clean": "node -e \"require('fs').rmSync('dist',{recursive:true,force:true})\"",
     "lint": "tsc -p tsconfig.json --noEmit"
-  },
-  "dependencies": {},
-  "devDependencies": {
-    "fixed-precision": "^2.0.0"
   }
 }

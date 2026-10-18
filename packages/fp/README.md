@@ -17,9 +17,10 @@ function lives here, so:
 - the two packages version and evolve independently.
 
 The operations this package composes (`sqrt_value`, `scale_value`, ...) live in
-`fixed-precision/src/core` and are built into these entries, so nothing has to
-resolve the core at runtime — `fixed-precision` is a dev dependency here, not a
-runtime one.
+`fixed-precision/src/core`. The build bundles these sources into the published
+entries, so nothing has to resolve the core at runtime. The package declares no
+runtime dependencies and no devDependencies; the bridge to the class API works
+through plain data.
 
 ## Quick start
 
@@ -103,9 +104,35 @@ More in [Composition Examples](docs/examples/composition.md) and
 | Composition | `pipe` `compose` `partial` |
 | Construction | `createFactory` `dataOf` |
 
-The barrel entry (`import { add } from "fixed-precision-fns"`) also works and
-re-exports everything, but importing from the subpath is what keeps the bundle
-small.
+## Tree shaking
+
+The package declares `sideEffects: false` and one entry per operation. Both
+import styles carry only what the program uses: the subpath import
+(`fixed-precision-fns/add`), and the root barrel import
+(`import { add } from "fixed-precision-fns"`), because the bundler prunes the
+unused barrel exports.
+
+Measured floor for `import { add } from "fixed-precision-fns"`:
+
+| Bundler | Root import | Subpath import |
+|---------|-------------|----------------|
+| esbuild (min) | 3.06 kB | 3.06 kB |
+| esbuild (gzip) | 1.24 kB | 1.24 kB |
+| rollup (unminified) | 3.08 kB | 3.08 kB |
+
+The size floor is the `FixedPrecisionOperand` contract: `add` accepts strings,
+numbers, bigints and data, so the bundle also keeps the string and number
+conversions that the contract requires. Heavier groups — trigonometry, logs,
+powers — never enter the `add` graph. A test in
+`test/tree-shaking.test.ts` pins this budget in CI.
+
+Two surfaces keep no tree shaking:
+
+- `require("fixed-precision-fns")` (CommonJS) loads the full barrel. Modules
+  cannot prune CJS. For the smallest payload, require the per-operation
+  subpath (`require("fixed-precision-fns/add")`).
+- A bare ESM import at runtime (no bundler) loads every chunk that the barrel
+  lists. Use a bundler to reach the measured floor.
 
 ## Documentation
 

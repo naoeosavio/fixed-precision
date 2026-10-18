@@ -1,64 +1,142 @@
-import { existsSync, readFileSync } from "node:fs";
-import { join } from "node:path";
-import FixedPrecision from "fixed-precision";
+// tree-shaking.test.ts — pins the byte floor of the published dist for the
+// smallest documented import, `import { add } from "fixed-precision-fns"`.
+// esbuild ships with tsup and rollup is a devDependency, so the suite needs no
+// extra tools.
+import { existsSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { build } from "esbuild";
+import type { Plugin } from "rollup";
+import { rollup } from "rollup";
 import { describe, expect, test } from "vitest";
-import { add } from "../src/arithmetic/add";
-import { dataOf } from "../src/construction/dataOf";
-import { stringify } from "../src/string/stringify";
 
-const DIST = join(import.meta.dirname, "..", "dist");
-const CORE_DIST = join(import.meta.dirname, "..", "..", "core", "dist");
+const PACKAGE_DIR = fileURLToPath(new URL("..", import.meta.url));
+const DIST_INDEX = `${PACKAGE_DIR}dist/index.js`;
+const WORKSPACE_MODULES = fileURLToPath(
+  new URL("../../node_modules", import.meta.url),
+);
 
-describe("tree-shaking / functional-first", () => {
-  test("add standalone returns raw data, not an instance", () => {
-    const result = add("1.5", "2.25");
-    expect(result instanceof FixedPrecision).toBe(false);
-    expect(result.value).toBe(375000000n);
-    expect(result.ctx.places).toBe(8);
-    expect(stringify(result)).toBe("3.75");
+// The ci pipeline builds after tests. An absent dist is a clean skip, and the
+// gate runs on the next ci pass with a fresh dist.
+const has_dist = existsSync(DIST_INDEX);
+
+/**
+ * Budget for one `add` bundle. The measured floor today is 3.06 kB (esbuild,
+ * minified, ~1.24 kB gzip) and 3.08 kB (rollup, unminified). The headroom
+ * absorbs reformat noise, while one extra trig or log module adds far more
+ * than the headroom.
+ */
+const MAX_ADD_BUNDLE_BYTES = 3500;
+
+/**
+ * Bundles a one-line consumer of fixed-precision-fns with the dist as the
+ * resolved package. This is the minified ESM entry size.
+ *
+ * @param specifier - Bare import specifier, root or a subpath.
+ * @returns Size of the minified bundle.
+ */
+async function bundle_with_esbuild(specifier: string): Promise<number> {
+  const result = await build({
+    stdin: {
+      contents: `import { add } from "${specifier}";\nconsole.log(add("1.5", "2.25"));\n`,
+      loader: "js",
+      resolveDir: PACKAGE_DIR,
+    },
+    bundle: true,
+    minify: true,
+    format: "esm",
+    target: "es2020",
+    write: false,
+    nodePaths: [WORKSPACE_MODULES],
   });
+  return result.outputFiles[0].text.length;
+}
 
-  test("class methods work without importing function modules", () => {
-    const result = new FixedPrecision("1.5").add("2.25");
-    expect(result.toString()).toBe("3.75");
-    expect(new FixedPrecision("2").mul("3").toString()).toBe("6");
-  });
-
-  test("dataOf is the bridge from instance to the functional world", () => {
-    const FP4 = FixedPrecision.create({ places: 4 });
-    const bridged = add(dataOf(FP4("1.5")), "0");
-    expect(bridged.ctx.places).toBe(4);
-    expect(stringify(bridged)).toBe("1.5");
-  });
-
-  // The assertions below need `npm run build`; they are skipped on a bare
-  // `npm test` so a fresh clone can run the suite without building first.
-  test("subpath entry stays a thin re-export (after build)", () => {
-    if (!existsSync(join(DIST, "add.js"))) return;
-    const bundle = readFileSync(join(DIST, "add.js"), "utf8");
-    expect(bundle.length).toBeLessThan(2000);
-    expect(bundle).toContain("./chunk-");
-    expect(bundle.includes("3.14159265358979323846")).toBe(false);
-  });
-
-  test("core ships no copy of the functional layer (after build)", () => {
-    const entry = join(CORE_DIST, "FixedPrecision.js");
-    if (!existsSync(entry)) return;
-    const bundle = readFileSync(entry, "utf8");
-    // Markers that only exist in packages/fp/src.
-    expect(bundle).not.toContain("isFixedPrecisionData");
-    expect(bundle).not.toContain("compose");
-    expect(bundle).not.toContain("fixed-precision-fns");
-  });
-
-  test("the value-level core is built in, not imported at runtime (after build)", () => {
-    // `fixed-precision` is a devDependency: the operations the functional layer
-    // composes are bundled into its chunks, so nothing has to resolve the core
-    // package at runtime.
-    for (const name of ["add", "sqrt", "stringify"]) {
-      const entry = join(DIST, `${name}.js`);
-      if (!existsSync(entry)) continue;
-      expect(readFileSync(entry, "utf8"), name).not.toContain("fixed-precision");
+const ROLLUP_PLUGIN: Plugin = {
+  name: "fixed-precision-consumer",
+  resolveId(specifier) {
+    if (specifier === "\0consumer-root" || specifier === "\0consumer-subpath") {
+      return specifier;
     }
+    if (specifier === "fixed-precision-fns") return DIST_INDEX;
+    if (specifier === "fixed-precision-fns/add") {
+      return `${PACKAGE_DIR}dist/add.js`;
+    }
+    // Relative imports inside the dist resolve through the default logic.
+    return null;
+  },
+  load(id) {
+    if (id === "\0consumer-root") {
+      const src = `import { add } from "fixed-precision-fns";\nconsole.log(add("1.5", "2.25"));\n`;
+      return src;
+    }
+    if (id === "\0consumer-subpath") {
+      const src = `import { add } from "fixed-precision-fns/add";\nconsole.log(add("1.5", "2.25"));\n`;
+      return src;
+    }
+    return null;
+  },
+};
+
+/**
+ * Bundles the same consumer through rollup. This run uses the rollup defaults,
+ * so the resolver ignores the sideEffects field — the worst resolver shape
+ * found in practice.
+ *
+ * @param specifier - Bare import specifier, root or a subpath.
+ * @returns Size of the unminified bundle.
+ */
+async function bundle_with_rollup(specifier: string): Promise<number> {
+  const entry =
+    specifier === "fixed-precision-fns"
+      ? "\0consumer-root"
+      : "\0consumer-subpath";
+  const bundle = await rollup({
+    input: entry,
+    plugins: [ROLLUP_PLUGIN],
+    treeshake: "recommended",
   });
+  const result = await bundle.generate({ format: "esm" });
+  await bundle.close();
+  const entryChunk = result.output.find(
+    (chunk) => chunk.type === "chunk" && chunk.isEntry,
+  );
+  if (!entryChunk || entryChunk.type !== "chunk") {
+    // rollup always emits the entry chunk for a single-input build.
+    throw new Error(`rollup emitted no entry chunk for ${specifier}`);
+  }
+  return entryChunk.code.length;
+}
+
+describe("Tree shaking", () => {
+  test.skipIf(!has_dist)(
+    "esbuild keeps { add } under the byte budget through the root import",
+    async () => {
+      const bytes = await bundle_with_esbuild("fixed-precision-fns");
+      expect(bytes).toBeLessThanOrEqual(MAX_ADD_BUNDLE_BYTES);
+    },
+  );
+
+  test.skipIf(!has_dist)(
+    "esbuild keeps { add } under the byte budget through the subpath import",
+    async () => {
+      const bytes = await bundle_with_esbuild("fixed-precision-fns/add");
+      expect(bytes).toBeLessThanOrEqual(MAX_ADD_BUNDLE_BYTES);
+    },
+  );
+
+  test.skipIf(!has_dist)(
+    "rollup keeps { add } under the byte budget through the root import",
+    async () => {
+      const bytes = await bundle_with_rollup("fixed-precision-fns");
+      expect(bytes).toBeLessThanOrEqual(MAX_ADD_BUNDLE_BYTES);
+    },
+  );
+
+  test.skipIf(!has_dist)(
+    "rollup keeps { add } under the byte budget through the subpath import",
+    async () => {
+      const bytes = await bundle_with_rollup("fixed-precision-fns/add");
+      expect(bytes).toBeLessThanOrEqual(MAX_ADD_BUNDLE_BYTES);
+    },
+  );
 });

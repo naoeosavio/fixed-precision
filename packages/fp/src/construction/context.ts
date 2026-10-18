@@ -6,25 +6,17 @@ import {
 import { powerOfTen } from "../../../core/src/core/utils/powerOfTen";
 import type { FixedPrecisionConfig, FPContext, RoundingMode } from "./types";
 
-const CONTEXT_CACHE = new Map<number, FPContext>();
-
 export function makeContext(
   places: number,
   roundingMode: RoundingMode,
 ): FPContext {
   assertPlaces(places);
-  const key = places * 16 + roundingMode;
-  let cached = CONTEXT_CACHE.get(key);
-  if (cached === undefined) {
-    cached = {
-      places,
-      roundingMode,
-      SCALE: powerOfTen(places),
-      SCALENUMBER: 10 ** places,
-    };
-    CONTEXT_CACHE.set(key, cached);
-  }
-  return cached;
+  return {
+    places,
+    roundingMode,
+    SCALE: powerOfTen(places),
+    SCALENUMBER: 10 ** places,
+  };
 }
 
 export function FactoryContext(config: FixedPrecisionConfig): FPContext {
