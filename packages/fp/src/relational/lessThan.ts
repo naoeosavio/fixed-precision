@@ -1,0 +1,14 @@
+import { lessThanValue } from "../../../core/src/core/relational/lessThan";
+import { type FixedPrecisionOperand, toScaledPair } from "../construction";
+
+export function lessThan(
+  left: FixedPrecisionOperand,
+  right: FixedPrecisionOperand,
+): boolean {
+  const scaled = toScaledPair(left, right);
+  return lessThanValue(scaled.left, scaled.right);
+}
+
+export function lessThanBy(right: FixedPrecisionOperand) {
+  return (left: FixedPrecisionOperand): boolean => lessThan(left, right);
+}
