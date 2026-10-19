@@ -1,6 +1,6 @@
 {
   "name": "fixed-precision",
-  "version": "2.0.0",
+  "version": "1.8.0",
   "description": "A fixed-precision decimal arithmetic library for JavaScript/TypeScript",
   "main": "dist/FixedPrecision.js",
   "type": "module",
