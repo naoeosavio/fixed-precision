@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>fixed-precision — conta exata, sem float</title>
+<meta name="description" content="Decimal de ponto fixo com bigint: 0 a 20 casas, nove modos de arredondamento e contexto imutável. Duas APIs, zero dependências de runtime.">
+<meta name="theme-color" content="#0B0A08">
+<meta name="color-scheme" content="dark">
+<meta property="og:title" content="fixed-precision — conta exata, sem float">
+<meta property="og:description" content="Decimal de ponto fixo com bigint. Duas APIs, zero dependências.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230B0A08'/%3E%3Ctext x='16' y='21' font-family='monospace' font-size='11' font-weight='bold' fill='%23FFB454' text-anchor='middle'%3E.3%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Instrument+Serif:ital@1&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/styles.css">
+<link rel="stylesheet" href="./assets/sections.css">
+<link rel="stylesheet" href="./assets/panels.css">
+<link rel="stylesheet" href="./assets/responsive.css">
+<script>document.documentElement.classList.add("js");</script>
+</head>
+<body>
+
+<a class="skip" href="#main" data-i18n="skip">pular para o conteúdo</a>
+
+<header class="top">
+  <div class="top-in">
+    <a class="logo" href="#main">fixed<em>-precision</em><i class="cur" aria-hidden="true"></i></a>
+    <nav aria-label="navegação principal" data-i18n-aria="nav.aria">
+      <a href="#porque" data-i18n="nav.why">por quê</a>
+      <a href="#lab" data-i18n="nav.lab">arredondar</a>
+      <a href="#recursos" data-i18n="nav.features">recursos</a>
+      <a href="#fns" data-i18n="nav.fns">funcional</a>
+      <a href="#nucleo" data-i18n="nav.core">núcleo</a>
+      <a href="#instalar" data-i18n="nav.install">instalar</a>
+      <div class="lng" role="group" aria-label="language / idioma">
+        <button type="button" data-lang="pt" aria-pressed="true">pt</button>
+        <button type="button" data-lang="en" aria-pressed="false">en</button>
+      </div>
+      <a class="ghbtn" href="https://github.com/naoeosavio/fixed-precision"
+        target="_blank" rel="noopener">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+        GitHub
+      </a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- hero -->
+  <section class="hero" id="topo">
+    <div class="wrap hero-in">
+      <div>
+        <p class="eyebrow" data-i18n="hero.eyebrow"><b>//</b> decimal de ponto fixo · bigint · duas APIs</p>
+        <h1 class="hero-h">
+          <span class="l"><span data-i18n="hero.h1a">CONTA EXATA,</span></span>
+          <span class="l"><span data-i18n="hero.h1b">sem <em class="serif">float</em>.</span></span>
+        </h1>
+        <p class="hero-sub" data-i18n="hero.sub">Cada decimal é um <b>bigint escalado</b>: de 0 a 20 casas, nove modos de arredondamento e contexto imutável. Sem <code>0.30000000000000004</code> no meio do caminho — e sem dependência de runtime.</p>
+        <div class="cmd">
+          <span class="ps1">$</span>
+          <code>npm install fixed-precision</code>
+          <button class="copy" type="button" data-copy="npm install fixed-precision" data-i18n-aria="ui.copycmd" aria-label="copiar comando">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>
+            <span data-i18n="ui.copy">copiar</span>
+          </button>
+        </div>
+        <div class="hero-links">
+          <a href="https://github.com/naoeosavio/fixed-precision" target="_blank" rel="noopener" data-i18n="hero.l1">ver o código ↗</a>
+          <a href="#lab" data-i18n="hero.l2">testar o arredondamento ↓</a>
+          <a href="#fns" data-i18n="hero.l3">API funcional ↘</a>
+          <a href="#instalar" data-i18n="hero.l4">instalar ↘</a>
+        </div>
+        <div class="hero-meta">
+          <span><span class="dot"></span>MIT</span>
+          <span data-i18n="hero.m2">zero dependências</span>
+          <span data-i18n="hero.m3">8 casas padrão</span>
+          <span data-i18n="hero.m4">9 modos</span>
+          <span>ESM + CJS</span>
+          <span data-i18n="hero.m6">119 subcaminhos</span>
+        </div>
+      </div>
+
+      <div class="term hero-term">
+        <div class="term-bar">
+          <span class="ti" data-i18n="term.title">node — fixed-precision</span>
+          <button type="button" id="replay" data-i18n="term.replay">↻ replay</button>
+        </div>
+        <div class="term-body" id="hero-term" role="img" aria-label="sessão de exemplo" data-i18n-aria="term.aria">
+          <noscript><p class="noscript" data-i18n="noscript.term">Ative o JavaScript para ver a sessão animada e o laboratório. O resto da página funciona sem ele.</p></noscript>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="mq" aria-hidden="true">
+    <div class="mq-track" id="mq-track"></div>
+  </div>
+
+  <!-- 01 why -->
+  <section class="sec" id="porque">
+    <div class="wrap">
+      <div class="shead rv">
+        <p class="slabel" data-i18n="why.label"><b>§ 01</b> — por quê</p>
+        <h2 data-i18n="why.h2">O float mente em <em class="serif">silêncio.</em></h2>
+      </div>
+      <div class="why">
+        <div class="diff rv">
+          <div class="diff-bar"><span data-i18n="diff.bar">fluxo — antes / depois</span><span>unified</span></div>
+          <div class="diff-body">
+<div class="dl hdr"><span class="ln"></span>--- a/float.js</div>
+<div class="dl hdr"><span class="ln"></span>+++ b/fixed.js</div>
+<div class="dl del"><span class="ln">1</span>- 0.1 + 0.2</div>
+<div class="dl del"><span class="ln">2</span>- 0.30000000000000004</div>
+<div class="dl del"><span class="ln">3</span>- (2.675).toFixed(2)</div>
+<div class="dl del"><span class="ln">4</span>- "2.67"</div>
+<div class="dl add"><span class="ln">1</span>+ new FixedPrecision("0.1").add("0.2").toString()</div>
+<div class="dl add"><span class="ln">2</span>+ "0.3"</div>
+<div class="dl add"><span class="ln">3</span>+ new FixedPrecision("2.675").scale(2, 4).toFixed(2)</div>
+<div class="dl add"><span class="ln">4</span>+ "2.68"</div>
+          </div>
+        </div>
+        <div class="why-side rv" style="transition-delay:.1s">
+          <div class="why-i">
+            <h3 data-i18n="why.i1.h3">0.1 + 0.2 = <em>0.3</em></h3>
+            <p data-i18n="why.i1.p">Em binário, 0.1 e 0.2 não têm representação finita. O fixed-precision soma inteiros escalados: com 8 casas, <code>1.23</code> vira <code>123000000</code>. O resultado é o número que você escreveu.</p>
+          </div>
+          <div class="why-i">
+            <h3 data-i18n="why.i2.h3">contexto <em>explícito</em></h3>
+            <p data-i18n="why.i2.p">Casas e modo de arredondamento fazem parte do valor. <code>create({ places: 2 })</code> congela um contexto imutável. A API de classes recusa misturar precisões; a funcional resolve pelo maior <code>places</code>.</p>
+          </div>
+          <div class="why-i">
+            <h3 data-i18n="why.i3.h3">um núcleo, <em>duas APIs</em></h3>
+            <p data-i18n="why.i3.p"><code>fixed-precision</code> para encadeamento e classes. <code>fixed-precision-fns</code> para funções puras, com um subcaminho por operação. As duas usam o mesmo código de valor.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 steps -->
+  <section class="sec steps" id="passos">
+    <div class="wrap">
+      <div class="shead rv">
+        <p class="slabel" data-i18n="steps.label"><b>§ 02</b> — primeiros passos</p>
+        <h2 data-i18n="steps.h2">Três passos até a <em class="serif">conta fechar.</em></h2>
+      </div>
+      <div class="step rv">
+        <span class="n">01</span>
+        <div><h3 data-i18n="step1.h3">Instale</h3><p data-i18n="step1.p">Um pacote, sem dependências de runtime. A API funcional é um segundo pacote, opcional.</p></div>
+        <code><span class="ps1">$ </span>npm install fixed-precision</code>
+      </div>
+      <div class="step rv">
+        <span class="n">02</span>
+        <div><h3 data-i18n="step2.h3">Congele um contexto</h3><p data-i18n="step2.p">Para dinheiro, uma factory imutável: duas casas e o modo que você escolher. O padrão é <code>places: 8</code> e <code>HALF_UP</code>.</p></div>
+        <code>const Money = FixedPrecision.create({ places: 2 });</code>
+      </div>
+      <div class="step rv">
+        <span class="n">03</span>
+        <div><h3 data-i18n="step3.h3">Opere</h3><p data-i18n="step3.p">Métodos aceitam <code>string</code>, <code>number</code>, <code>bigint</code> ou outra instância. Encadeie sem instanciar cada operando.</p></div>
+        <code>Money("19.99").mul("3").toString() <span class="cm">// "59.97"</span></code>
+      </div>
+    </div>
+  </section>
+
+  <!-- 03 features -->
+  <section class="sec" id="recursos">
+    <div class="wrap">
+      <div class="man-top rv">
+        <div>
+          <p class="slabel" data-i18n="features.label"><b>§ 03</b> — recursos</p>
+          <h2 data-i18n="features.h2">Construído como ferramenta de <em class="serif">precisão.</em></h2>
+        </div>
+        <p class="mini">FIXED(1) · Manual</p>
+      </div>
+
+      <div class="feat rv"><span class="i">01</span><span class="f" data-i18n="f1.k">places 0–20</span><p class="d" data-i18n="f1">A escala é explícita e limitada. <code>new FixedPrecision("1.23")</code> guarda <code>123000000</code> com 8 casas; <code>create({ places: 2 })</code> guarda <code>123</code>.</p></div>
+      <div class="feat rv"><span class="i">02</span><span class="f" data-i18n="f2.k">9 modos</span><p class="d" data-i18n="f2"><code>ROUND_UP</code>, <code>ROUND_DOWN</code>, <code>ROUND_CEIL</code>, <code>ROUND_FLOOR</code>, <code>ROUND_HALF_UP</code>, <code>ROUND_HALF_DOWN</code>, <code>ROUND_HALF_EVEN</code>, <code>ROUND_HALF_CEIL</code> e <code>ROUND_HALF_FLOOR</code>. O padrão é <code>HALF_UP</code> (4).</p></div>
+      <div class="feat rv"><span class="i">03</span><span class="f">create()</span><p class="d" data-i18n="f3">Factories imutáveis: <code>create({ places: 2, roundingMode: 6 })</code> congela o contexto. Mudar o padrão global depois não altera a factory.</p></div>
+      <div class="feat rv"><span class="i">04</span><span class="f">/minimal</span><p class="d" data-i18n="f4">A entrada enxuta: criação, aritmética, comparação, arredondamento, <code>sqrt</code>, estatística básica e formatação comum. Fora ficam trigonometria, logs, matrizes, frações, bitwise e combinatória.</p></div>
+      <div class="feat rv"><span class="i">05</span><span class="f">fns/add</span><p class="d" data-i18n="f5">Um subcaminho por operação em <code>fixed-precision-fns</code>. <code>import { add } from "fixed-precision-fns/add"</code> puxa só o grafo de <code>add</code>: 3,06 kB minificados e 1,24 kB gzip.</p></div>
+      <div class="feat rv"><span class="i">06</span><span class="f">pipe()</span><p class="d" data-i18n="f6"><code>pipe</code>, <code>compose</code> e <code>partial</code> compõem estágios tipados de ponta a ponta. As variantes <code>*By</code> fazem o mesmo bind com nome próprio.</p></div>
+      <div class="feat rv"><span class="i">07</span><span class="f">raw()</span><p class="d" data-i18n="f7">Operações escaladas (<code>add</code>, <code>mul</code>) validam o contexto. As raw (<code>plus</code>, <code>times</code>) operam direto no bigint. Use raw quando a escala já é conhecida.</p></div>
+      <div class="feat rv"><span class="i">08</span><span class="f">bigint</span><p class="d" data-i18n="f8">O valor interno é um bigint. <code>raw()</code> devolve o inteiro escalado. Um bigint na entrada é tratado como já escalado — veja o aviso no § 06.</p></div>
+      <div class="feat rv"><span class="i">09</span><span class="f">25 trig</span><p class="d" data-i18n="f9"><code>sin</code>, <code>cos</code>, <code>tan</code>, <code>sec</code>, <code>csc</code>, <code>cot</code>, as inversas, as hiperbólicas e as inversas hiperbólicas, com <code>atan2</code>. A precisão é medida contra referências de 45 dígitos.</p></div>
+      <div class="feat rv"><span class="i">10</span><span class="f">0 deps</span><p class="d" data-i18n="f10">Nenhuma dependência de runtime. ESM + CJS + tipos TypeScript, <code>sideEffects: false</code> e builds minificados.</p></div>
+      <div class="feat rv"><span class="i">11</span><span class="f" data-i18n="f11.k">imutável</span><p class="d" data-i18n="f11">Toda operação devolve um valor novo. Instâncias não mudam; contexto e escala fazem parte do valor.</p></div>
+      <div class="feat rv"><span class="i">12</span><span class="f">MIT</span><p class="d" data-i18n="f12">Licença MIT nos dois pacotes. Embuta em produto fechado, sem taxa e sem pegadinha.</p></div>
+    </div>
+  </section>
+
+  <!-- 04 lab -->
+  <section class="sec" id="lab">
+    <div class="wrap">
+      <div class="shead rv">
+        <p class="slabel" data-i18n="lab.label"><b>§ 04</b> — laboratório</p>
+        <h2 data-i18n="lab.h2">Nove modos, <em class="serif">um resultado.</em></h2>
+        <p class="lead" data-i18n="lab.lead">Digite um valor e escolha as casas. A tabela roda o build real do <code>fixed-precision</code> nesta aba, com bigint e nenhuma chamada de rede.</p>
+      </div>
+
+      <div class="lab rv">
+        <div class="lab-hd">
+          <span class="ti" data-i18n="lab.title">arredondamento ao vivo</span>
+          <span data-i18n="lab.status">local · bigint</span>
+        </div>
+        <div class="lab-ctl">
+          <div class="field">
+            <label for="lab-value" data-i18n="lab.value">valor</label>
+            <input id="lab-value" type="text" inputmode="decimal" spellcheck="false" autocomplete="off" value="2.675">
+          </div>
+          <div class="field">
+            <label for="lab-places" data-i18n="lab.places">casas</label>
+            <input id="lab-places" type="number" min="0" max="20" step="1" value="2">
+          </div>
+          <div class="presets" role="group" aria-label="valores de exemplo" data-i18n-aria="lab.presets">
+            <button class="chip" type="button" data-set="2.675">2.675</button>
+            <button class="chip" type="button" data-set="1.005">1.005</button>
+            <button class="chip" type="button" data-set="-2.675">-2.675</button>
+            <button class="chip" type="button" data-set="0.125">0.125</button>
+            <button class="chip" type="button" data-set="1234.5678">1234.5678</button>
+          </div>
+        </div>
+        <div class="lab-grid">
+          <div class="lab-table-wrap">
+            <table class="lab-table" id="lab-table" aria-describedby="lab-note">
+              <caption class="sr-only" data-i18n="lab.caption">Resultado de cada modo de arredondamento para o valor e as casas escolhidos.</caption>
+              <thead>
+                <tr>
+                  <th scope="col" data-i18n="lab.mode">modo</th>
+                  <th scope="col" data-i18n="lab.code">código</th>
+                  <th scope="col" data-i18n="lab.result">resultado</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr data-mode="0"><td><span class="mode-name">ROUND_UP</span><span class="mode-desc" data-i18n="mode.up">afasta do zero</span></td><td class="mode-code">0</td><td class="mode-res" data-res="0">—</td></tr>
+                <tr data-mode="1"><td><span class="mode-name">ROUND_DOWN</span><span class="mode-desc" data-i18n="mode.down">em direção ao zero</span></td><td class="mode-code">1</td><td class="mode-res" data-res="1">—</td></tr>
+                <tr data-mode="2"><td><span class="mode-name">ROUND_CEIL</span><span class="mode-desc" data-i18n="mode.ceil">em direção a +∞</span></td><td class="mode-code">2</td><td class="mode-res" data-res="2">—</td></tr>
+                <tr data-mode="3"><td><span class="mode-name">ROUND_FLOOR</span><span class="mode-desc" data-i18n="mode.floor">em direção a −∞</span></td><td class="mode-code">3</td><td class="mode-res" data-res="3">—</td></tr>
+                <tr data-mode="4" class="on"><td><span class="mode-name">ROUND_HALF_UP</span><span class="mode-desc" data-i18n="mode.halfup">metade para longe do zero</span></td><td class="mode-code">4</td><td class="mode-res" data-res="4">—</td></tr>
+                <tr data-mode="5"><td><span class="mode-name">ROUND_HALF_DOWN</span><span class="mode-desc" data-i18n="mode.halfdown">metade para o zero</span></td><td class="mode-code">5</td><td class="mode-res" data-res="5">—</td></tr>
+                <tr data-mode="6"><td><span class="mode-name">ROUND_HALF_EVEN</span><span class="mode-desc" data-i18n="mode.halfeven">metade para o par</span></td><td class="mode-code">6</td><td class="mode-res" data-res="6">—</td></tr>
+                <tr data-mode="7"><td><span class="mode-name">ROUND_HALF_CEIL</span><span class="mode-desc" data-i18n="mode.halfceil">metade para +∞</span></td><td class="mode-code">7</td><td class="mode-res" data-res="7">—</td></tr>
+                <tr data-mode="8"><td><span class="mode-name">ROUND_HALF_FLOOR</span><span class="mode-desc" data-i18n="mode.halffloor">metade para −∞</span></td><td class="mode-code">8</td><td class="mode-res" data-res="8">—</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <aside class="lab-side">
+            <h4 data-i18n="lab.inside">por dentro</h4>
+            <dl class="lab-kv">
+              <div><dt data-i18n="lab.raw">bigint (20 casas)</dt><dd id="lab-raw">267500000000000000000</dd></div>
+              <div><dt data-i18n="lab.scale">escala</dt><dd id="lab-scale">10² = 100</dd></div>
+            </dl>
+            <div class="lab-float">
+              <span class="k" id="lab-float-key">Number.toFixed(2)</span>
+              <span class="v" id="lab-float">2.67</span>
+              <span class="n" data-i18n="lab.floatnote">O <code>Number</code> decide no binário antes de arredondar. O binário não guarda a maioria dos decimais exatamente, então o resultado pode ser outro. A biblioteca decide no decimal.</span>
+            </div>
+            <p class="lab-error" id="lab-error" hidden data-i18n="lab.invalid">Valor inválido. Use um decimal como <code>2.675</code> (sem expoente).</p>
+          </aside>
+        </div>
+        <div class="lab-code"><code id="lab-code">P20("2.675").scale(2, 4).toFixed(2) // "2.68"</code></div>
+        <p class="lab-note" id="lab-note" data-i18n="lab.note">O bigint mostrado usa 20 casas para não perder dígitos antes do arredondamento (<code>P20</code>). O resultado da tabela é <code>scale(places, modo)</code> seguido de <code>toFixed(places)</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 functional -->
+  <section class="sec" id="fns">
+    <div class="wrap">
+      <div class="shead rv">
+        <p class="slabel" data-i18n="fns.label"><b>§ 05</b> — funcional</p>
+        <h2 data-i18n="fns.h2">Uma função, <em class="serif">um subcaminho.</em></h2>
+      </div>
+      <div class="inst">
+        <div class="inst-cmd rv">
+          <div class="cmd">
+            <span class="ps1">$</span>
+            <code>npm install fixed-precision-fns</code>
+            <button class="copy" type="button" data-copy="npm install fixed-precision-fns" data-i18n-aria="ui.copycmd" aria-label="copiar comando">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>
+              <span data-i18n="ui.copy">copiar</span>
+            </button>
+          </div>
+          <p class="inst-alt" data-i18n="fns.alt">ou <code>npm add fixed-precision-fns</code> — a camada funcional é um pacote separado, sem dependências de runtime.</p>
+
+          <div class="term">
+            <div class="term-bar">
+              <span class="ti">money.ts</span>
+              <button class="copy" type="button" data-copy-target="#code-fns-a" data-i18n-aria="ui.copycode" aria-label="copiar código">
+                <span data-i18n="ui.copy">copiar</span>
+              </button>
+            </div>
+            <div class="term-body"><pre class="code" id="code-fns-a"><span class="k">import</span> { createFactory } <span class="k">from</span> <span class="s">"fixed-precision-fns/createFactory"</span>;
+<span class="k">import</span> { multiply } <span class="k">from</span> <span class="s">"fixed-precision-fns/multiply"</span>;
+<span class="k">import</span> { stringify } <span class="k">from</span> <span class="s">"fixed-precision-fns/stringify"</span>;
+
+<span class="k">const</span> Money = <span class="f">createFactory</span>({ places: 2 });
+<span class="f">stringify</span>(<span class="f">multiply</span>(<span class="f">Money</span>(<span class="s">"19.99"</span>), <span class="s">"3"</span>)); <span class="c">// "59.97"</span></pre></div>
+          </div>
+
+          <div class="term">
+            <div class="term-bar">
+              <span class="ti">pipe.ts</span>
+              <button class="copy" type="button" data-copy-target="#code-fns-b" data-i18n-aria="ui.copycode" aria-label="copiar código">
+                <span data-i18n="ui.copy">copiar</span>
+              </button>
+            </div>
+            <div class="term-body"><pre class="code" id="code-fns-b"><span class="k">import</span> { addBy } <span class="k">from</span> <span class="s">"fixed-precision-fns/add"</span>;
+<span class="k">import</span> { multiplyBy } <span class="k">from</span> <span class="s">"fixed-precision-fns/multiply"</span>;
+<span class="k">import</span> { stringify } <span class="k">from</span> <span class="s">"fixed-precision-fns/stringify"</span>;
+<span class="k">import</span> { pipe } <span class="k">from</span> <span class="s">"fixed-precision-fns/pipe"</span>;
+
+<span class="f">pipe</span>(<span class="f">addBy</span>(<span class="s">"2"</span>), <span class="f">multiplyBy</span>(<span class="s">"3"</span>), stringify)(<span class="s">"1"</span>); <span class="c">// "9"</span></pre></div>
+          </div>
+
+          <div class="reqs" style="margin-top:18px">
+            <b data-i18n="fns.groups.h">119 subcaminhos</b>
+            <p class="groups" data-i18n="fns.groups"><code>aritmética</code> · <code>relação</code> · <code>trigonometria</code> · <code>strings</code> · <code>lógica</code> · <code>combinatória</code> · <code>estatística</code> · <code>matrizes</code> · <code>frações</code> · <code>bitwise</code> · <code>constantes</code> · <code>composição</code></p>
+          </div>
+        </div>
+
+        <div class="why-side rv" style="transition-delay:.1s">
+          <div class="why-i">
+            <h3 data-i18n="fns.k1.h3">sem configure()</h3>
+            <p data-i18n="fns.k1.p">A API funcional não tem estado global mutável. O contexto padrão é congelado em 8 casas e HALF_UP; o contexto vem dos operandos, não do ambiente.</p>
+          </div>
+          <div class="why-i">
+            <h3 data-i18n="fns.k2.h3">dados, não classes</h3>
+            <p data-i18n="fns.k2.p">As operações de valor devolvem dados simples — <code>{ ctx, value }</code> ou um primitivo. Nada de protótipo, cache global ou ordem de import. A ponte com a API de classes é <code>dataOf</code>.</p>
+          </div>
+          <div class="why-i">
+            <h3 data-i18n="fns.k3.h3">tree-shaking medido</h3>
+            <p data-i18n="fns.k3.p">Um entry por operação e <code>sideEffects: false</code>. O barrel também poda: <code>import { add }</code> fica em 3,06 kB min / 1,24 kB gzip. O orçamento é um teste em CI.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 06 core -->
+  <section class="sec" id="nucleo">
+    <div class="wrap">
+      <div class="shead rv">
+        <p class="slabel" data-i18n="core.label"><b>§ 06</b> — núcleo</p>
+        <h2 data-i18n="core.h2">O valor é um <em class="serif">inteiro.</em></h2>
+        <p class="lead" data-i18n="core.lead">Com 8 casas, <code>1.23</code> é <code>123000000n</code>. Somar é somar inteiros; dividir escala de volta. Nada de mantissa binária.</p>
+      </div>
+      <div class="inst">
+        <div class="inst-cmd rv">
+          <div class="term">
+            <div class="term-bar">
+              <span class="ti">inside.ts</span>
+              <button class="copy" type="button" data-copy-target="#code-core" data-i18n-aria="ui.copycode" aria-label="copiar código">
+                <span data-i18n="ui.copy">copiar</span>
+              </button>
+            </div>
+            <div class="term-body"><pre class="code" id="code-core"><span class="k">const</span> FP2 = FixedPrecision.<span class="f">create</span>({ places: 2 });
+
+FP2(<span class="s">"1.23"</span>).raw();              <span class="c">// 123n</span>
+FP2(<span class="s">"1.23"</span>).<span class="f">plus</span>(<span class="s">"2.00"</span>).raw(); <span class="c">// 323n</span>
+FP2(<span class="s">"0.1"</span>).<span class="f">add</span>(<span class="s">"0.2"</span>).toString(); <span class="c">// "0.3"</span>
+FP2(<span class="s">"1"</span>).<span class="f">div</span>(<span class="s">"3"</span>).toString();     <span class="c">// "0.33"</span></pre></div>
+          </div>
+          <div class="warnbox">
+            <h4 data-i18n="core.warn.h">bigint é pré-escalado</h4>
+            <p data-i18n="core.warn.p"><code>new FixedPrecision(123n)</code> não é <code>123</code>. Com 8 casas, é <code>0.00000123</code>. Use <code>string</code> ou <code>number</code> para valores literais; reserve bigint para valores já escalados.</p>
+            <p><a href="https://github.com/naoeosavio/fixed-precision/blob/main/packages/core/docs/bigint-warning.md" target="_blank" rel="noopener" data-i18n="core.warn.link">leia o aviso completo ↗</a></p>
+          </div>
+        </div>
+        <div class="why-side rv" style="transition-delay:.1s">
+          <div class="why-i">
+            <h3 data-i18n="core.card1.h3">escala</h3>
+            <p data-i18n="core.card1.p"><code>places</code> define a escala, de 0 a 20. <code>SCALE = 10^places</code>. O valor bruto é sempre bigint.</p>
+          </div>
+          <div class="why-i">
+            <h3 data-i18n="core.card2.h3">contexto</h3>
+            <p data-i18n="core.card2.p"><code>{ places, roundingMode, SCALE, SCALENUMBER }</code>. O contexto acompanha o valor; factories o congelam.</p>
+          </div>
+          <div class="why-i">
+            <h3 data-i18n="core.card3.h3">escalado × raw</h3>
+            <p data-i18n="core.card3.p"><code>add</code>/<code>mul</code> validam e escalam. <code>plus</code>/<code>times</code> pulam a validação e operam no inteiro. Escolha raw só quando souber a escala.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 07 precision -->
+  <section class="sec" id="precisao">
+    <div class="wrap">
+      <div class="shead rv">
+        <p class="slabel" data-i18n="precision.label"><b>§ 07</b> — precisão</p>
+        <h2 data-i18n="precision.h2">Medida, não <em class="serif">prometida.</em></h2>
+      </div>
+      <div class="why">
+        <div class="rv">
+          <table class="vt">
+            <thead>
+              <tr>
+                <th scope="col" data-i18n="precision.th1">cenário</th>
+                <th scope="col" data-i18n="precision.th2">medida</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td data-i18n="precision.r1.k">trigonometria · ângulos genéricos</td><td data-i18n="precision.r1.v">≤ 2 ULP · 7/16/18 casas</td></tr>
+              <tr><td data-i18n="precision.r2.k">tan/cot/sec/csc · quadrantes reflexos</td><td data-i18n="precision.r2.v">≤ 15 ULP</td></tr>
+              <tr><td data-i18n="precision.r3.k">referência de comparação</td><td data-i18n="precision.r3.v">45 dígitos · Python Decimal</td></tr>
+              <tr><td data-i18n="precision.r4.k">add via barrel · esbuild min</td><td data-i18n="precision.r4.v">3,06 kB</td></tr>
+              <tr><td data-i18n="precision.r5.k">add via barrel · gzip</td><td data-i18n="precision.r5.v">1,24 kB</td></tr>
+              <tr><td data-i18n="precision.r6.k">dependências de runtime</td><td data-i18n="precision.r6.v">0</td></tr>
+            </tbody>
+          </table>
+          <p class="vend" data-i18n="precision.note">Fonte: <code>packages/core/docs/precision.md</code> · orçamento de tamanho em <code>test/tree-shaking.test.ts</code>.</p>
+        </div>
+        <div class="rv" style="transition-delay:.1s">
+          <div class="note-box">
+            <b data-i18n="precision.ulp.h">o que é ULP</b>
+            <p data-i18n="precision.ulp.p">ULP aqui é uma unidade na última casa decimal (<code>10^-places</code>), não um bit. Em ângulos genéricos, a trigonometria fica a duas unidades da referência.</p>
+          </div>
+          <div class="note-box" style="margin-top:14px">
+            <b data-i18n="precision.ci.h">fixado no CI</b>
+            <p data-i18n="precision.ci.p">O teste de tree-shaking falha se o grafo de <code>add</code> passar do orçamento. O CI roda lint, formato, testes, build e a checagem de exports.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 08 install -->
+  <section class="sec" id="instalar">
+    <div class="wrap">
+      <div class="shead rv">
+        <p class="slabel" data-i18n="install.label"><b>§ 08</b> — instalar</p>
+        <h2 data-i18n="install.h2">Uma linha e <em class="serif">exata.</em></h2>
+      </div>
+      <div class="inst">
+        <div class="inst-cmd rv">
+          <div class="cmd">
+            <span class="ps1">$</span>
+            <code>npm install fixed-precision</code>
+            <button class="copy" type="button" data-copy="npm install fixed-precision" data-i18n-aria="ui.copycmd" aria-label="copiar comando">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><rect x="5.5" y="5.5" width="8" height="8" rx="1"/><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2"/></svg>
+              <span data-i18n="ui.copy">copiar</span>
+            </button>
+          </div>
+          <p class="inst-alt" data-i18n="install.alt">ou <code>npm add fixed-precision</code> — e <code>npm install fixed-precision-fns</code> para a camada funcional.</p>
+          <div class="reqs" style="margin-top:18px">
+            <b data-i18n="install.pkgs.h">dois pacotes</b>
+            <table class="vt pkgs">
+              <tbody>
+                <tr><td>fixed-precision</td><td data-i18n="install.pkg1">classes, ./minimal, tipos</td></tr>
+                <tr><td>fixed-precision-fns</td><td data-i18n="install.pkg2">funcional, 119 subcaminhos, zero deps</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="inst-side rv" style="transition-delay:.1s">
+          <div class="reqs">
+            <b data-i18n="install.req.h">roda em</b>
+            <p data-i18n="install.req.p">Node, Bun e navegadores modernos. <code>BigInt</code> é nativo; não há polyfill.</p>
+            <p data-i18n="install.req.p2">Sem chave, sem serviço, sem chamada de rede. O laboratório desta página roda o mesmo build local.</p>
+          </div>
+          <div class="reqs">
+            <b data-i18n="install.doc.h">documentação</b>
+            <p data-i18n="install.doc.p"><a href="https://github.com/naoeosavio/fixed-precision/blob/main/packages/core/README.md" target="_blank" rel="noopener">core README</a> · <a href="https://github.com/naoeosavio/fixed-precision/blob/main/packages/fp/README.md" target="_blank" rel="noopener">fns README</a> · <a href="https://github.com/naoeosavio/fixed-precision/blob/main/packages/core/MIGRATION.md" target="_blank" rel="noopener">migração</a></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta rv">
+    <h2 data-i18n="cta.h2">A próxima conta <em class="serif">fecha.</em></h2>
+    <p data-i18n="cta.p">Dois pacotes MIT, zero dependências de runtime e 119 subcaminhos. Para dinheiro, imposto, desconto e qualquer número que não pode errar no centavo.</p>
+    <a class="gh-big" href="https://github.com/naoeosavio/fixed-precision" target="_blank" rel="noopener">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27s1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/></svg>
+      github.com/naoeosavio/fixed-precision
+    </a>
+    <p class="inst-alt" style="margin-top:16px"><a href="https://www.npmjs.com/package/fixed-precision" target="_blank" rel="noopener">npm ↗</a> · <a href="https://www.npmjs.com/package/fixed-precision-fns" target="_blank" rel="noopener">fns ↗</a></p>
+  </section>
+
+  <div class="wrap">
+    <footer>
+      <span>© <span id="year">2025</span> <span data-i18n="foot.l">naoeosavio — fixed-precision é MIT; esta página é a vitrine.</span></span>
+      <span data-i18n="foot.r"><a href="https://github.com/naoeosavio/fixed-precision" target="_blank" rel="noopener">repo</a> · <a href="https://github.com/naoeosavio/fixed-precision/issues" target="_blank" rel="noopener">issues</a> · <a href="https://www.npmjs.com/package/fixed-precision" target="_blank" rel="noopener">npm</a> · <a href="https://github.com/naoeosavio/fixed-precision/tree/main/packages/core/docs" target="_blank" rel="noopener">docs</a> · MIT</span>
+    </footer>
+  </div>
+</main>
+
+<div class="sb" aria-hidden="true">
+  <span><span class="dot"></span>fixed-precision/lab · <span data-i18n="sb.mode">modo</span> <span class="md" id="sb-mode">EXATO</span></span>
+  <span>↕ <span id="sb-scroll">0%</span><span class="sb-clock-wrap"> · <span id="sb-clock">--:--:--</span></span> · bigint</span>
+</div>
+
+<script src="./assets/fixed-precision.js" defer></script>
+<script src="./assets/i18n.pt.js" defer></script>
+<script src="./assets/i18n.en.js" defer></script>
+<script src="./assets/app.js" defer></script>
+</body>
+</html>

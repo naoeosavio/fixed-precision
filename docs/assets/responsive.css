@@ -1,0 +1,204 @@
+/* ---------- responsive ---------- */
+@media (max-width: 1000px) {
+  .hero-in {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+    padding: 68px 0 60px;
+  }
+
+  .why,
+  .inst {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .step {
+    grid-template-columns: 84px minmax(0, 1fr);
+    gap: 20px;
+  }
+
+  .step > code {
+    grid-column: 2;
+    font-size: 12px;
+    padding: 12px 14px;
+  }
+
+  .term-body {
+    padding: 14px;
+  }
+
+  .term-body .code,
+  .step > code {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+
+  .term-body .code {
+    font-size: 11.5px;
+  }
+
+  .feat {
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 8px 16px;
+  }
+
+  .feat .d {
+    grid-column: 2;
+  }
+
+  .lab-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .lab-side {
+    border-left: none;
+    border-top: 1px solid var(--line);
+  }
+
+  nav a:not(.ghbtn) {
+    display: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .sec {
+    padding: 74px 0;
+  }
+
+  .hero-h {
+    font-size: clamp(2.5rem, 10vw, 4rem);
+  }
+
+  .step .n {
+    font-size: 44px;
+  }
+
+  .cmd {
+    flex-wrap: wrap;
+  }
+
+  .why-i p,
+  .step p {
+    max-width: none;
+  }
+
+  .lab-ctl {
+    align-items: stretch;
+  }
+
+  .presets {
+    min-width: 100%;
+  }
+
+  .lab-table th,
+  .lab-table td {
+    padding: 9px 10px;
+  }
+
+  .vt td:first-child {
+    white-space: normal;
+  }
+
+  .vt.pkgs {
+    display: block;
+    font-size: 12px;
+  }
+
+  .vt.pkgs tbody,
+  .vt.pkgs tr,
+  .vt.pkgs td {
+    display: block;
+  }
+
+  .vt.pkgs tr {
+    padding: 9px 12px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .vt.pkgs tr:last-child {
+    border-bottom: none;
+  }
+
+  .vt.pkgs td {
+    padding: 0;
+    border: none;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .vt.pkgs td:last-child {
+    margin-top: 2px;
+    color: var(--mut);
+    text-align: left;
+  }
+
+  .lab-table .mode-desc {
+    display: none;
+  }
+
+  .cta {
+    padding: 96px 24px;
+  }
+
+  .sb {
+    font-size: 10.5px;
+    padding: 0 12px;
+  }
+}
+
+@media (max-width: 460px) {
+  .wrap {
+    padding: 0 18px;
+  }
+
+  .cmd code {
+    font-size: 12.5px;
+  }
+
+  .cmd .copy {
+    padding: 6px 9px;
+  }
+
+  .cmd .copy [data-i18n="ui.copy"] {
+    display: none;
+  }
+
+  .top-in {
+    padding: 12px 18px;
+    gap: 10px;
+  }
+
+  .top-in nav {
+    gap: 8px;
+  }
+
+  .hero-meta {
+    gap: 6px 14px;
+  }
+
+  .sb-clock-wrap {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .mq-track,
+  .cur,
+  .hero-meta .dot,
+  .sb .dot {
+    animation: none;
+  }
+
+  .hero-h .l > span {
+    animation: none;
+    transform: none;
+  }
+
+  html.js .rv.on {
+    animation: none;
+  }
+}
