@@ -8,11 +8,8 @@
   "sideEffects": false,
   "files": [
     "dist",
-    "src",
     "README.md",
-    "CHANGELOG.md",
-    "LICENSE",
-    "MIGRATION.md"
+    "LICENSE"
   ],
   "exports": {
     "./package.json": "./package.json",
